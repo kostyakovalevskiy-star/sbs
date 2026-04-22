@@ -54,9 +54,7 @@ export default function CameraPage() {
   // Camera adjustments
   const [zoomCap, setZoomCap] = useState<{ min: number; max: number; step: number } | null>(null);
   const [zoomValue, setZoomValue] = useState(1);
-  const [exposureCap, setExposureCap] = useState<{ min: number; max: number; step: number } | null>(null);
-  const [exposureValue, setExposureValue] = useState(0);
-  const [brightnessFilter, setBrightnessFilter] = useState(1); // CSS fallback multiplier
+  const [brightnessAdjust, setBrightnessAdjust] = useState(0); // -5..+5 slider value, maps to CSS filter
 
   function showToast(msg: string) {
     setToast(msg);
@@ -88,13 +86,6 @@ export default function CameraPage() {
         const caps = track.getCapabilities?.() as ExtendedCapabilities | undefined;
         if (caps?.zoom) {
           setZoomCap({ min: caps.zoom.min, max: caps.zoom.max, step: caps.zoom.step || 0.1 });
-        }
-        if (caps?.exposureCompensation) {
-          setExposureCap({
-            min: caps.exposureCompensation.min,
-            max: caps.exposureCompensation.max,
-            step: caps.exposureCompensation.step || 0.1,
-          });
         }
 
         // Check if iOS needs explicit permission for DeviceOrientation
@@ -168,21 +159,8 @@ export default function CameraPage() {
     }
   }
 
-  // Apply exposure if supported; otherwise use CSS brightness filter fallback
-  async function applyExposure(value: number) {
-    setExposureValue(value);
-    const track = trackRef.current;
-    if (!track) return;
-    try {
-      await track.applyConstraints({ advanced: [{ exposureCompensation: value } as unknown as MediaTrackConstraintSet] });
-      setBrightnessFilter(1);
-    } catch {
-      // Fallback: CSS filter on video — normalize to 0.5…1.8
-      const range = exposureCap ? exposureCap.max - exposureCap.min : 4;
-      const norm = 1 + (value / range) * 0.8;
-      setBrightnessFilter(Math.max(0.5, Math.min(1.8, norm)));
-    }
-  }
+  // Brightness: CSS filter multiplier, -5…+5 slider → 0.5…1.8 multiplier
+  const brightnessMultiplier = 1 + (brightnessAdjust / 5) * 0.8;
 
   function saveDraft(updated: PhotoItem[]) {
     const raw = localStorage.getItem("claim_draft");
@@ -290,7 +268,7 @@ export default function CameraPage() {
               playsInline
               muted
               className="w-full h-full object-cover"
-              style={{ filter: `brightness(${brightnessFilter})` }}
+              style={{ filter: `brightness(${brightnessMultiplier})` }}
             />
             {/* Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-between py-6 pointer-events-none">
@@ -348,8 +326,8 @@ export default function CameraPage() {
         </div>
       )}
 
-      {/* Zoom & Exposure sliders */}
-      {(zoomCap || exposureCap) && !cameraError && (
+      {/* Sliders: zoom (if hardware supported) + brightness (always available via CSS filter) */}
+      {!cameraError && (
         <div className="bg-black/90 px-4 py-2 space-y-2">
           {zoomCap && (
             <div className="flex items-center gap-2">
@@ -370,15 +348,15 @@ export default function CameraPage() {
             <Sun className="w-4 h-4 text-white/70 shrink-0" />
             <input
               type="range"
-              min={exposureCap ? exposureCap.min : -2}
-              max={exposureCap ? exposureCap.max : 2}
-              step={exposureCap ? exposureCap.step : 0.1}
-              value={exposureValue}
-              onChange={(e) => applyExposure(parseFloat(e.target.value))}
+              min={-5}
+              max={5}
+              step={1}
+              value={brightnessAdjust}
+              onChange={(e) => setBrightnessAdjust(parseInt(e.target.value))}
               className="flex-1 accent-[#21A038]"
             />
             <span className="text-xs text-white/70 w-10 text-right">
-              {exposureValue > 0 ? `+${exposureValue.toFixed(1)}` : exposureValue.toFixed(1)}
+              {brightnessAdjust > 0 ? `+${brightnessAdjust}` : brightnessAdjust}
             </span>
           </div>
         </div>
