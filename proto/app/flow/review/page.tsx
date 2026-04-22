@@ -119,7 +119,7 @@ export default function ReviewPage() {
           <p className="text-xs text-gray-500">Шаг 4 из 5 — Проверка</p>
         </div>
         <button
-          onClick={() => router.push("/thank-you")}
+          onClick={() => router.push("/thank-you?abandoned=1")}
           className="text-xs text-[#21A038] font-medium whitespace-nowrap"
         >
           Завершить

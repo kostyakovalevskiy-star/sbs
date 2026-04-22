@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, FileText } from "lucide-react";
+import { CheckCircle, FileText, XCircle, ArrowLeft, Phone } from "lucide-react";
 import type { DraftState } from "@/types";
 import { generateId } from "@/lib/utils";
 
@@ -13,8 +13,11 @@ const EVENT_LABELS: Record<string, string> = {
   natural: "Стихийное бедствие",
 };
 
-export default function ThankYouPage() {
+function ThankYouContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const abandoned = searchParams.get("abandoned") === "1";
+
   const [draft, setDraft] = useState<DraftState | null>(null);
 
   useEffect(() => {
@@ -22,10 +25,11 @@ export default function ThankYouPage() {
     if (raw) {
       const d = JSON.parse(raw) as DraftState;
       setDraft(d);
-      // Save case to API
-      saveCaseToKV(d);
+      // Only persist the case when submission is completed (non-flood flow).
+      // Abandoned drafts stay in localStorage so user can return to them.
+      if (!abandoned) saveCaseToKV(d);
     }
-  }, []);
+  }, [abandoned]);
 
   async function saveCaseToKV(d: DraftState) {
     try {
@@ -55,8 +59,72 @@ export default function ThankYouPage() {
     URL.revokeObjectURL(url);
   }
 
+  function handleReturnToDraft() {
+    if (!draft) {
+      router.push("/");
+      return;
+    }
+    const stepRoutes: Record<string, string> = {
+      intro: "/flow/intro",
+      flood: "/flow/flood",
+      camera: "/flow/camera",
+      review: "/flow/review",
+      result: `/result/${draft.result?.id ?? ""}`,
+    };
+    router.push(stepRoutes[draft.current_step] ?? "/flow/intro");
+  }
+
+  // Abandoned flow — user hit "Завершить" before finishing
+  if (abandoned) {
+    return (
+      <main
+        className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white pt-safe"
+        style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}
+      >
+        <div className="w-full max-w-sm space-y-6 text-center">
+          <div className="flex justify-center">
+            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center">
+              <XCircle className="w-10 h-10 text-amber-500" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Заявка не завершена</h1>
+            <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+              Сожалеем, что вам не удалось оформить заявление об убытке. Вы всегда сможете вернуться к заявке или связаться с нами по номеру <strong>900</strong>.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Button onClick={handleReturnToDraft} className="w-full gap-2">
+              <ArrowLeft className="w-4 h-4" /> Вернуться к заявке
+            </Button>
+            <Button asChild variant="outline" className="w-full gap-2">
+              <a href="tel:900">
+                <Phone className="w-4 h-4" /> Позвонить 900
+              </a>
+            </Button>
+            <Button
+              onClick={() => {
+                localStorage.removeItem("claim_draft");
+                router.push("/");
+              }}
+              variant="ghost"
+              className="w-full text-gray-500"
+            >
+              На главную
+            </Button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Normal completion (non-flood submission → expert review)
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white">
+    <main
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white pt-safe"
+      style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}
+    >
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="flex justify-center">
           <div className="w-20 h-20 bg-[#e8f5ea] rounded-full flex items-center justify-center">
@@ -108,5 +176,13 @@ export default function ThankYouPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ThankYouPage() {
+  return (
+    <Suspense fallback={null}>
+      <ThankYouContent />
+    </Suspense>
   );
 }

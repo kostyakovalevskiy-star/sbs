@@ -1,12 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const { password } = await req.json();
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-
+// TEMP: passwordless admin access for prototype/demo. Re-enable password check when env var is stable.
+export async function POST() {
   const response = NextResponse.json({ ok: true });
   response.cookies.set("admin_session", "1", {
     httpOnly: true,

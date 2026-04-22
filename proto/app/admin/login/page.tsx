@@ -3,32 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ShieldCheck, Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleEnter() {
     setLoading(true);
     setError(null);
-
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({}),
       });
-
       if (res.ok) {
         router.push("/admin");
       } else {
-        setError("Неверный пароль");
+        setError("Не удалось войти");
       }
     } catch {
       setError("Ошибка соединения");
@@ -50,24 +44,15 @@ export default function AdminLoginPage() {
           <p className="text-sm text-gray-500 mt-1">Claim Assistant</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-2xl p-6 shadow-sm border">
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Пароль</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className={error ? "border-red-400" : ""}
-              autoFocus
-            />
-            {error && <p className="text-xs text-red-500">{error}</p>}
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+        <div className="space-y-4 bg-white rounded-2xl p-6 shadow-sm border">
+          <p className="text-sm text-gray-600 text-center">
+            Демо-режим: вход без пароля
+          </p>
+          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+          <Button onClick={handleEnter} className="w-full" disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Войти"}
           </Button>
-        </form>
+        </div>
       </div>
     </main>
   );

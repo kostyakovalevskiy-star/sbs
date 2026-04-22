@@ -252,7 +252,7 @@ export default function CameraPage() {
           {photos.length} / {MAX_PHOTOS} фото
         </span>
         <button
-          onClick={() => router.push("/thank-you")}
+          onClick={() => router.push("/thank-you?abandoned=1")}
           className="text-xs text-[#21A038] font-medium whitespace-nowrap"
         >
           Завершить
