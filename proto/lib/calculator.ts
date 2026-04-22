@@ -26,61 +26,33 @@ function getFinishFactor(finishLevel: string | undefined, calibration: Calibrati
   }
 }
 
-// Compute volume of a work item based on code and context geometry
-function computeVolume(
-  code: string,
-  S: number,
-  S_walls: number,
-  P: number,
-  h: number,
-  claudeOutput: ClaudeOutput
-): number {
+// Compute volume of a work item. `A` = damaged area (user-declared), `P` = approx perimeter.
+// Area-based works (paint, level, wallpaper, floor) use A directly.
+// Linear works (plinths, door/window casings) use P. Doors use count.
+function computeVolume(code: string, A: number, P: number): number {
   const category = code.split("-")[0];
 
   switch (category) {
     case "DEM":
-      // Demolition - mostly wall/floor area
-      if (code === "DEM-001" || code === "DEM-002") return P; // linear meters
-      if (code === "DEM-003") return Math.max(1, Math.round(P / 6)); // doors count
-      return S_walls; // m2
+      if (code === "DEM-001" || code === "DEM-002") return P;
+      if (code === "DEM-003") return Math.max(1, Math.round(P / 6));
+      return A;
 
     case "PREP":
-      // Preparation - surface area
-      if (code.includes("CEIL") || code.includes("POT")) return S; // ceiling
-      return S_walls; // walls
-
     case "LEVEL":
-      // Leveling - walls or ceiling
-      if (code.includes("POT") || code.includes("CEIL")) return S;
-      return S_walls;
-
     case "PAINT":
-      // Painting
-      if (code.includes("POT") || code.includes("CEIL")) return S;
-      return S_walls;
-
     case "WALL":
-      // Wallpaper
-      return S_walls;
-
     case "FLOOR":
-      // Floor works
-      return S;
+      return A;
 
     case "DOOR":
       return Math.max(1, Math.round(P / 6));
 
     case "TRIM":
-      // TRIM-001 (floor), TRIM-002 (ceiling), TRIM-003 (door casing)
       return code === "TRIM-003" ? Math.max(1, Math.round(P / 6)) : P;
 
-    default: {
-      // Fallback: use average area estimate from Claude photos
-      const avgArea = claudeOutput.photos.reduce(
-        (acc, p) => acc + (p.area_estimate_m2 || 0), 0
-      ) / Math.max(1, claudeOutput.photos.length);
-      return Math.max(1, avgArea || S);
-    }
+    default:
+      return A;
   }
 }
 
@@ -116,9 +88,10 @@ export function calculate(
       : calibration.default_ceiling_height_m
     : calibration.default_ceiling_height_m;
 
-  // Approximate perimeter and wall area
-  const P = 2 * Math.sqrt(S * 1.2);
-  const S_walls = Math.max(0, P * h - 2.0); // subtract one 2m² doorway
+  // Approximate perimeter (for linear works: plinths, casings)
+  // S here is the user-declared damaged area — we only need P for non-area works.
+  const P = 2 * Math.sqrt(Math.max(S, 4) * 1.2);
+  void h;
 
   const regionKey = context.region || "moscow";
   const regionData = catalogs.regions.regions[regionKey] ?? catalogs.regions.regions["moscow"];
@@ -135,7 +108,7 @@ export function calculate(
     const catalogEntry = catalogs.works.find((w) => w.code === code);
     if (!catalogEntry) continue;
 
-    const volume = computeVolume(code, S, S_walls, P, h, claudeOutput);
+    const volume = computeVolume(code, S, P);
     const unitPrice = Math.round(catalogEntry.base_price_rub * worksCoef * finishFactor);
     const total = Math.round(volume * unitPrice);
 

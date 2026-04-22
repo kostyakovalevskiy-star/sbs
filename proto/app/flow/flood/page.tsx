@@ -100,11 +100,19 @@ export default function FloodPage() {
       <div className="bg-[#21A038] h-1.5">
         <div className="bg-white/40 h-full" style={{ width: "0%" }} />
       </div>
-      <div className="px-4 py-3 border-b flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600">
-          <ChevronLeft className="w-5 h-5" />
+      <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <p className="text-xs text-gray-500">Шаг 2 из 5 — Детали залива</p>
+        </div>
+        <button
+          onClick={() => router.push("/thank-you")}
+          className="text-xs text-[#21A038] font-medium whitespace-nowrap"
+        >
+          Завершить
         </button>
-        <p className="text-xs text-gray-500">Шаг 2 из 5 — Детали залива</p>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-5">

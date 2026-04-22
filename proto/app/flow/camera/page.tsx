@@ -237,19 +237,25 @@ export default function CameraPage() {
     : "📱 Проверка…";
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main className="bg-black flex flex-col overflow-hidden" style={{ height: '100dvh', maxHeight: '100dvh' }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 pb-3 bg-black/80 z-10"
         style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top, 0px))' }}
       >
-        <button onClick={() => router.back()} className="text-white/70 p-1">
-          <ChevronLeft className="w-6 h-6" />
+        <button onClick={() => router.back()} className="text-white/70 p-1 flex items-center gap-0.5">
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-xs">Назад</span>
         </button>
         <span className="text-white text-sm font-medium">
           {photos.length} / {MAX_PHOTOS} фото
         </span>
-        <div className="w-8" />
+        <button
+          onClick={() => router.push("/thank-you")}
+          className="text-xs text-[#21A038] font-medium whitespace-nowrap"
+        >
+          Завершить
+        </button>
       </div>
 
       {/* Camera view */}
