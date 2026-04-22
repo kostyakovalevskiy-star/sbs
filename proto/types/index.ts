@@ -58,12 +58,20 @@ export interface ClaudePhotoAnalysis {
   sub_findings: string[];
 }
 
+export interface AreaEstimate {
+  value: number;
+  source: string;
+}
+
 export interface ClaudeOutput {
   photos: ClaudePhotoAnalysis[];
   recommended_works: string[];
   summary: string;
   average_confidence: number;
-  total_damaged_area_m2: number;
+  // Four possible sources, priority-ordered: measure > reference > declared > visual
+  area_from_measure: AreaEstimate | null;     // measurements read from Measure-app screenshot
+  area_from_reference: AreaEstimate | null;   // scaled via bank card / coin / known object in frame
+  area_visual: AreaEstimate;                  // rough visual estimate (always populated)
 }
 
 export interface WorkItem {
@@ -95,6 +103,11 @@ export interface Report {
   materials: MaterialItem[];
   routed_to_expert: boolean;
   claude_output: ClaudeOutput;
+  area_pick?: {
+    value: number;
+    source: string;
+    candidates: Array<AreaEstimate & { priority: number; used: boolean }>;
+  };
 }
 
 export interface CaseRecord {

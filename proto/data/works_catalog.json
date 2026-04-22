@@ -4,6 +4,11 @@
   "currency": "RUB",
   "region_baseline": "moscow",
   "description": "Справочник цен на отделочные и ремонтные работы. Цены — средние арифметические по 3+ источникам в Москве на апрель 2026. Для регионов применяется коэффициент region_coefficient (см. region_coefficients.json).",
+  "notes": {
+    "LOG-001": "Мусорный контейнер 8 м³ — применяется ТОЛЬКО для кейсов с площадью ущерба ≥ 20 м² (крупные демонтажи). Для мелких кейсов выносим мусор в мешках (LOG-002) или вообще не учитываем.",
+    "LOG-002": "Вынос мусора в мешках — применяется ТОЛЬКО для кейсов с площадью ущерба ≥ 20 м². На малой площади мусор обычно выносит бригада в рамках работ без отдельной строки.",
+    "threshold_comment": "Фильтр на стороне сервера (calculator.ts): при S < 20 м² — LOG-* коды исключаются из сметы автоматически, даже если AI их рекомендовал."
+  },
   "sources_aggregated": [
     {"name": "Профи Ремонтник", "url": "https://profiremontnik.ru/tseny/shtukaturno-malyarnye-raboty/"},
     {"name": "Домашний Мастерок", "url": "https://domashniy-masterok.ru/price/prays-na-otdelochnye-raboty/"},
@@ -299,6 +304,16 @@
       "min_price_rub": 320,
       "max_price_rub": 580,
       "samples": [360, 420, 500]
+    },
+    {
+      "code": "FLOOR-005",
+      "name": "Укладка ковролина (рулонного / модульного)",
+      "category": "flooring",
+      "unit": "м²",
+      "base_price_rub": 280,
+      "min_price_rub": 200,
+      "max_price_rub": 400,
+      "samples": [220, 280, 350]
     },
     {
       "code": "DOOR-001",

@@ -8,7 +8,46 @@ import type {
   Report,
   WorkItem,
   MaterialItem,
+  AreaEstimate,
 } from "@/types";
+
+// Authoritative area source, priority-ordered: measure > reference > declared > visual
+// Returns the picked value + the full list of candidates for the UI to display.
+export interface AreaPick {
+  value: number;
+  source: string;
+  candidates: Array<AreaEstimate & { priority: number; used: boolean }>;
+}
+
+export function pickAuthoritativeArea(
+  claude: ClaudeOutput,
+  declaredAreaM2: number | undefined
+): AreaPick {
+  const candidates: Array<AreaEstimate & { priority: number; used: boolean }> = [];
+
+  if (claude.area_from_measure && claude.area_from_measure.value > 0) {
+    candidates.push({ ...claude.area_from_measure, priority: 1, used: false });
+  }
+  if (claude.area_from_reference && claude.area_from_reference.value > 0) {
+    candidates.push({ ...claude.area_from_reference, priority: 2, used: false });
+  }
+  if (declaredAreaM2 && declaredAreaM2 > 0) {
+    candidates.push({ value: declaredAreaM2, source: "заявлено клиентом", priority: 3, used: false });
+  }
+  if (claude.area_visual && claude.area_visual.value > 0) {
+    candidates.push({ ...claude.area_visual, priority: 4, used: false });
+  }
+
+  // Sort by priority ascending (1 wins)
+  candidates.sort((a, b) => a.priority - b.priority);
+  if (candidates.length === 0) {
+    return { value: 1, source: "нет данных (fallback 1 м²)", candidates: [] };
+  }
+
+  const winner = candidates[0];
+  winner.used = true;
+  return { value: winner.value, source: winner.source, candidates };
+}
 
 interface Catalogs {
   works: WorkCatalogEntry[];
@@ -70,6 +109,10 @@ const WORK_TO_MATERIALS: Record<string, string[]> = {
   "WALL-001":  ["MAT-WALL-01"],
   "WALL-002":  ["MAT-WALL-01"],
   "FLOOR-001": ["MAT-LAM-01", "MAT-UNDER-01"],
+  "FLOOR-002": ["MAT-LINO-01"],
+  "FLOOR-003": ["MAT-TILE-01", "MAT-TILE-GLUE-01"],
+  "FLOOR-004": ["MAT-HEAT-FLOOR-01"],
+  "FLOOR-005": ["MAT-CARPET-01"],
   "DOOR-001":  ["MAT-DOOR-01"],
   "TRIM-001":  ["MAT-PLINTH-01"],
   "TRIM-002":  ["MAT-PLINTH-02"],
@@ -81,7 +124,8 @@ export function calculate(
   calibration: CalibrationValues,
   catalogs: Catalogs
 ): Report {
-  const S = context.affected_area_m2 ?? 10;
+  const areaPick = pickAuthoritativeArea(claudeOutput, context.affected_area_m2);
+  const S = areaPick.value;
   const h = context.ceiling_height
     ? typeof context.ceiling_height === "number"
       ? context.ceiling_height
@@ -102,9 +146,16 @@ export function calculate(
   const currentYear = new Date().getFullYear();
   const renovationAge = currentYear - (context.last_renovation_year ?? currentYear - 10);
 
+  // Filter out LOG (мусорный контейнер / вынос мусора) for small damage — not economical under 20 m²
+  const SMALL_AREA_THRESHOLD_M2 = 20;
+  const effectiveWorks = claudeOutput.recommended_works.filter((code) => {
+    if (S < SMALL_AREA_THRESHOLD_M2 && (code === "LOG-001" || code === "LOG-002")) return false;
+    return true;
+  });
+
   // Build work items
   const workItems: WorkItem[] = [];
-  for (const code of claudeOutput.recommended_works) {
+  for (const code of effectiveWorks) {
     const catalogEntry = catalogs.works.find((w) => w.code === code);
     if (!catalogEntry) continue;
 
@@ -183,5 +234,6 @@ export function calculate(
     materials: materialItems,
     routed_to_expert: base > calibration.stp_threshold_rub,
     claude_output: claudeOutput,
+    area_pick: areaPick,
   };
 }

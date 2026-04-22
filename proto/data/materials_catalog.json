@@ -235,6 +235,71 @@
         {"brand": "Profil Doors серия М"},
         {"brand": "Status Бавария"}
       ]
+    },
+    {
+      "code": "MAT-LINO-01",
+      "name": "Линолеум бытовой (класс 22, ширина 3 м)",
+      "category": "flooring",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 420,
+      "samples_rub": [350, 420, 520],
+      "service_life_years": 10,
+      "finish_class": "econom"
+    },
+    {
+      "code": "MAT-TILE-01",
+      "name": "Плитка керамическая напольная (30×30 / 30×60 см)",
+      "category": "flooring",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 850,
+      "samples_rub": [600, 850, 1200],
+      "service_life_years": 25,
+      "finish_class": "standard"
+    },
+    {
+      "code": "MAT-TILE-GLUE-01",
+      "name": "Клей плиточный универсальный",
+      "category": "flooring",
+      "package_unit": "уп. 25 кг",
+      "package_amount": 25,
+      "package_unit_label": "кг",
+      "consumption_m2_per_package": 5,
+      "base_price_rub": 450,
+      "samples_rub": [380, 450, 550],
+      "service_life_years": 25,
+      "finish_class": "standard"
+    },
+    {
+      "code": "MAT-CARPET-01",
+      "name": "Ковролин модульный (плитка 50×50 см, коммерческий)",
+      "category": "flooring",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 780,
+      "samples_rub": [550, 780, 1100],
+      "service_life_years": 8,
+      "finish_class": "standard"
+    },
+    {
+      "code": "MAT-HEAT-FLOOR-01",
+      "name": "Электрический тёплый пол (нагревательный мат, 150 Вт/м²)",
+      "category": "flooring",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 1400,
+      "samples_rub": [1100, 1400, 1800],
+      "service_life_years": 15,
+      "finish_class": "comfort"
     }
   ]
 }

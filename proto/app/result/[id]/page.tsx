@@ -143,39 +143,46 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {/* Damage area comparison */}
-        {(() => {
-          const declared = caseRecord.context.affected_area_m2 ?? 0;
-          const ai = report.claude_output.total_damaged_area_m2 ?? 0;
-          if (declared === 0 && ai === 0) return null;
-          const ratio = declared > 0 ? ai / declared : 0;
-          const hasDiscrepancy = declared > 0 && ai > 0 && (ratio > 1.4 || ratio < 0.6);
-          return (
-            <div className={`rounded-xl p-4 border ${hasDiscrepancy ? "bg-amber-50 border-amber-200" : "bg-blue-50 border-blue-200"}`}>
-              <h2 className="text-sm font-semibold text-gray-700 mb-3">Площадь повреждений</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs text-gray-500">Заявлено клиентом</p>
-                  <p className="text-xl font-bold text-gray-900">{declared} м²</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Оценка AI по фото</p>
-                  <p className="text-xl font-bold text-gray-900">{ai} м²</p>
-                </div>
-              </div>
-              {hasDiscrepancy && (
-                <p className="text-xs text-amber-700 mt-3">
-                  ⚠️ Расхождение более 40%. Кейс будет проверен экспертом.
-                </p>
-              )}
-              {!hasDiscrepancy && declared > 0 && ai > 0 && (
-                <p className="text-xs text-gray-500 mt-3">
-                  Оценки согласованы. В расчёте использована заявленная площадь.
-                </p>
-              )}
+        {/* Damage area — four estimates with priority */}
+        {report.area_pick && report.area_pick.candidates.length > 0 && (
+          <div className="rounded-xl p-4 border bg-blue-50 border-blue-200">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-700">Площадь повреждений</h2>
+              <span className="text-xs text-gray-500">в расчёте: <strong className="text-gray-900">{report.area_pick.value} м²</strong></span>
             </div>
-          );
-        })()}
+            <div className="space-y-2">
+              {report.area_pick.candidates.map((c, i) => {
+                const label =
+                  c.priority === 1 ? "📐 Measure-скриншот"
+                  : c.priority === 2 ? "💳 Масштаб (карта/монета)"
+                  : c.priority === 3 ? "📝 Заявлено клиентом"
+                  : "👁 AI визуальная оценка";
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-center justify-between p-2 rounded-lg text-sm ${
+                      c.used ? "bg-white border-2 border-[#21A038]" : "bg-gray-50 border border-gray-200"
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-700">{label}</p>
+                      <p className="text-xs text-gray-500 truncate">{c.source}</p>
+                    </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <p className={`font-bold ${c.used ? "text-[#21A038]" : "text-gray-600"}`}>{c.value} м²</p>
+                      {c.used && <p className="text-xs text-[#21A038]">в расчёте</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-3">
+              Приоритет: Measure &gt; масштабный объект &gt; клиент &gt; AI. Диапазон оценок ущерба:
+              от {Math.min(...report.area_pick.candidates.map((c) => c.value))} до
+              {" "}{Math.max(...report.area_pick.candidates.map((c) => c.value))} м².
+            </p>
+          </div>
+        )}
 
         {/* Works table */}
         {report.works.length > 0 && (
