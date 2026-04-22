@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2, ChevronLeft } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -32,7 +33,15 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4 pt-safe relative">
+      <Link
+        href="/"
+        className="absolute left-4 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+        style={{ top: 'max(1rem, env(safe-area-inset-top, 1rem))' }}
+      >
+        <ChevronLeft className="w-4 h-4" />
+        На главную
+      </Link>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
