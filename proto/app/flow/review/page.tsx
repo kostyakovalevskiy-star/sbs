@@ -98,7 +98,7 @@ export default function ReviewPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white pt-safe">
       {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 bg-white/95 flex flex-col items-center justify-center z-50 gap-4">
@@ -182,7 +182,7 @@ export default function ReviewPage() {
           </div>
         )}
 
-        <div className="pt-4 pb-8 flex gap-3">
+        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 2.5rem))' }}>
           <Button variant="outline" onClick={() => router.back()} className="flex-1">
             Назад
           </Button>

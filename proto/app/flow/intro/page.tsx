@@ -254,7 +254,7 @@ export default function IntroPage() {
           )}
         </div>
 
-        <div className="pt-4 pb-8">
+        <div className="pt-4" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 2.5rem))' }}>
           <Button onClick={handleNext} size="lg" className="w-full">
             Далее
           </Button>

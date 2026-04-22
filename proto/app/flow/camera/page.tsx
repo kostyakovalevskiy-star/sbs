@@ -167,7 +167,7 @@ export default function CameraPage() {
   return (
     <main className="min-h-screen bg-black flex flex-col">
       {/* Header — safe area top so Dynamic Island doesn't cover it */}
-      <div className="flex items-center justify-between px-4 py-3 bg-black/80 z-10 pt-safe">
+      <div className="flex items-center justify-between px-4 pb-3 bg-black/80 z-10" style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top, 0px))' }}>
         <button onClick={() => router.back()} className="text-white/70 p-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -268,7 +268,7 @@ export default function CameraPage() {
       )}
 
       {/* Controls — safe area bottom so home indicator doesn't cover buttons */}
-      <div className="bg-black px-6 pt-4 pb-safe flex items-center justify-between gap-4" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))' }}>
+      <div className="bg-black px-6 flex items-center justify-between gap-4" style={{ paddingTop: '1.25rem', paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}>
         {/* Upload from gallery */}
         <label className="flex flex-col items-center gap-1 cursor-pointer">
           <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center">
