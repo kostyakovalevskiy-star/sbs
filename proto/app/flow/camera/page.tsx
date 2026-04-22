@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Upload, X, Zap, Sun, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, X, Zap, Sun, ZoomIn, Ruler } from "lucide-react";
 import type { DraftState } from "@/types";
 import {
   startCamera,
@@ -55,6 +55,7 @@ export default function CameraPage() {
   const [zoomCap, setZoomCap] = useState<{ min: number; max: number; step: number } | null>(null);
   const [zoomValue, setZoomValue] = useState(1);
   const [brightnessAdjust, setBrightnessAdjust] = useState(0); // -5..+5 slider value, maps to CSS filter
+  const [showMeasureHelp, setShowMeasureHelp] = useState(false);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -295,8 +296,17 @@ export default function CameraPage() {
               {/* Indicators */}
               <div className="space-y-1.5 w-full px-6">
                 {photos.length < 3 && (
-                  <div className="bg-black/60 text-white text-xs rounded-full px-3 py-1.5 w-fit mx-auto">
-                    💳 Положите банковскую карту для масштаба
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="bg-black/60 text-white text-xs rounded-full px-3 py-1.5">
+                      💳 Положите банковскую карту для масштаба
+                    </div>
+                    <button
+                      onClick={() => setShowMeasureHelp(true)}
+                      className="bg-black/60 text-white text-xs rounded-full px-3 py-1.5 flex items-center gap-1 pointer-events-auto hover:bg-black/80"
+                    >
+                      <Ruler className="w-3 h-3" />
+                      Нужны точные размеры? →
+                    </button>
                   </div>
                 )}
                 <div className="flex justify-center gap-2 flex-wrap">
@@ -430,6 +440,74 @@ export default function CameraPage() {
           <span className="text-xs text-white/50">Далее</span>
         </button>
       </div>
+
+      {/* Measure app help modal */}
+      {showMeasureHelp && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-4"
+          onClick={() => setShowMeasureHelp(false)}
+        >
+          <div
+            className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-sm p-5 space-y-4"
+            style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom, 1.25rem))' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                <Ruler className="w-5 h-5 text-[#21A038]" />
+                Точные размеры
+              </h3>
+              <button onClick={() => setShowMeasureHelp(false)} className="text-gray-400 p-1 -mr-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Чтобы AI использовал точные размеры вместо визуальной оценки, добавьте скриншот из стандартного приложения Apple <strong>«Рулетка»</strong>.
+            </p>
+
+            <ol className="space-y-2 text-sm text-gray-700">
+              <li className="flex gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-[#e8f5ea] text-[#21A038] text-xs font-bold flex items-center justify-center">1</span>
+                <span>Откройте приложение <strong>«Рулетка»</strong> (Measure) на iPhone</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-[#e8f5ea] text-[#21A038] text-xs font-bold flex items-center justify-center">2</span>
+                <span>Замерьте повреждённую область — приложение покажет размеры в см/м</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-[#e8f5ea] text-[#21A038] text-xs font-bold flex items-center justify-center">3</span>
+                <span>Сделайте скриншот (<em>кнопка сна + громкость вверх</em>)</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-[#e8f5ea] text-[#21A038] text-xs font-bold flex items-center justify-center">4</span>
+                <span>Вернитесь сюда и нажмите «Галерея» — выберите скриншот из фото</span>
+              </li>
+            </ol>
+
+            <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              💡 AI распознает цифры со скриншота и использует их как приоритетные при расчёте.
+            </p>
+
+            <label className="block">
+              <span className="w-full bg-[#21A038] text-white rounded-md py-3 text-sm font-medium cursor-pointer flex items-center justify-center gap-2 hover:bg-[#1c8a30] active:scale-[0.98] transition">
+                <Upload className="w-4 h-4" />
+                Загрузить скриншот из Рулетки
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  handleFileUpload(e);
+                  setShowMeasureHelp(false);
+                }}
+              />
+            </label>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
