@@ -100,7 +100,7 @@ export default function FloodPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white pt-safe">
       <div className="bg-[#21A038] h-1.5">
         <div className="bg-white/40 h-full" style={{ width: "0%" }} />
       </div>

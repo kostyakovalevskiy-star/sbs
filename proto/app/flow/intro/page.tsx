@@ -119,7 +119,7 @@ export default function IntroPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white pt-safe">
       {/* Progress bar */}
       <div className="bg-[#21A038] h-1.5">
         <div className="bg-white/40 h-full" style={{ width: "28%" }} />

@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Camera, Upload, X, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, X, Zap } from "lucide-react";
 import type { DraftState } from "@/types";
 import {
   startCamera,
@@ -13,7 +13,8 @@ import {
   captureSnapshot,
 } from "@/lib/camera";
 
-const BLUR_THRESHOLD = 80;
+const BLUR_BLOCK = 10;   // only block completely solid/black frames
+const BLUR_WARN  = 40;   // warn but allow
 const MAX_PHOTOS = 10;
 
 interface PhotoItem {
@@ -36,7 +37,6 @@ export default function CameraPage() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
 
-  // Show toast
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 2500);
@@ -59,17 +59,13 @@ export default function CameraPage() {
     if (!video) return;
 
     startCamera(video)
-      .then((stream) => {
-        streamRef.current = stream;
-      })
+      .then((stream) => { streamRef.current = stream; })
       .catch((err) => {
         setCameraError("Нет доступа к камере. Проверьте разрешения браузера.");
         console.error(err);
       });
 
-    return () => {
-      if (streamRef.current) stopCamera(streamRef.current);
-    };
+    return () => { if (streamRef.current) stopCamera(streamRef.current); };
   }, []);
 
   // Brightness update loop
@@ -86,7 +82,7 @@ export default function CameraPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Gyroscope
+  // Gyroscope — beta=90 when phone held upright (portrait)
   useEffect(() => {
     function handleOrientation(e: DeviceOrientationEvent) {
       if (e.beta !== null) {
@@ -94,7 +90,6 @@ export default function CameraPage() {
         setGyroAvailable(true);
       }
     }
-
     if (typeof DeviceOrientationEvent !== "undefined") {
       window.addEventListener("deviceorientation", handleOrientation);
       return () => window.removeEventListener("deviceorientation", handleOrientation);
@@ -118,9 +113,12 @@ export default function CameraPage() {
     setCapturing(true);
     try {
       const { base64, laplacianVariance: variance } = await captureAndProcess(video, canvas);
-      if (variance < BLUR_THRESHOLD) {
-        showToast("Фото нерезкое — сделайте ещё раз");
+      if (variance < BLUR_BLOCK) {
+        showToast("Не удалось сделать фото — наведите камеру");
         return;
+      }
+      if (variance < BLUR_WARN) {
+        showToast("Фото немного размыто, но сохранено");
       }
       const updated = [...photos, { base64, variance }];
       setPhotos(updated);
@@ -141,8 +139,8 @@ export default function CameraPage() {
     for (const file of toProcess) {
       try {
         const { base64, laplacianVariance: variance } = await processFileToPhoto(file);
-        if (variance < BLUR_THRESHOLD) {
-          showToast(`${file.name}: нерезкое фото пропущено`);
+        if (variance < BLUR_BLOCK) {
+          showToast(`${file.name}: не удалось обработать`);
           continue;
         }
         setPhotos((prev) => {
@@ -164,19 +162,19 @@ export default function CameraPage() {
   }
 
   const brightnessGood = brightness >= 60;
-  const tiltGood = tilt === null || tilt <= 20;
+  const tiltGood = tilt === null || tilt <= 25;
 
   return (
     <main className="min-h-screen bg-black flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-black/80 z-10">
-        <button onClick={() => router.back()} className="text-white/70">
+      {/* Header — safe area top so Dynamic Island doesn't cover it */}
+      <div className="flex items-center justify-between px-4 py-3 bg-black/80 z-10 pt-safe">
+        <button onClick={() => router.back()} className="text-white/70 p-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
         <span className="text-white text-sm font-medium">
           {photos.length} / {MAX_PHOTOS} фото
         </span>
-        <div className="w-6" />
+        <div className="w-8" />
       </div>
 
       {/* Camera view */}
@@ -204,27 +202,27 @@ export default function CameraPage() {
               </div>
 
               {/* Indicators */}
-              <div className="space-y-1 w-full px-6">
+              <div className="space-y-1.5 w-full px-6">
                 {photos.length < 3 && (
-                  <div className="bg-black/60 text-white text-xs rounded-full px-3 py-1 w-fit mx-auto">
-                    📏 Положите монету 10₽ для масштаба
+                  <div className="bg-black/60 text-white text-xs rounded-full px-3 py-1.5 w-fit mx-auto">
+                    💳 Положите банковскую карту для масштаба
                   </div>
                 )}
-                <div className="flex justify-center gap-3">
-                  <span className={`text-xs rounded-full px-2 py-0.5 ${
-                    brightnessGood ? "bg-green-500/80 text-white" : "bg-red-500/80 text-white"
+                <div className="flex justify-center gap-2 flex-wrap">
+                  <span className={`text-xs rounded-full px-2.5 py-1 ${
+                    brightnessGood ? "bg-green-600/80 text-white" : "bg-red-600/80 text-white"
                   }`}>
-                    {brightnessGood ? "☀️ Освещение хорошее" : "🌑 Освещение плохое"}
+                    {brightnessGood ? "☀️ Свет OK" : "🌑 Темно"}
                   </span>
                   {gyroAvailable ? (
-                    <span className={`text-xs rounded-full px-2 py-0.5 ${
-                      tiltGood ? "bg-green-500/80 text-white" : "bg-yellow-500/80 text-white"
+                    <span className={`text-xs rounded-full px-2.5 py-1 ${
+                      tiltGood ? "bg-green-600/80 text-white" : "bg-yellow-500/80 text-white"
                     }`}>
-                      📐 {tiltGood ? "Держите ровно" : "Наклоните камеру"}
+                      {tiltGood ? "📱 Вертикально ✓" : `📱 Наклон ${Math.round(tilt ?? 0)}°`}
                     </span>
                   ) : (
-                    <span className="text-xs rounded-full px-2 py-0.5 bg-black/60 text-white/80">
-                      📐 Держите телефон ровно
+                    <span className="text-xs rounded-full px-2.5 py-1 bg-black/60 text-white/80">
+                      📱 Держите вертикально
                     </span>
                   )}
                 </div>
@@ -240,7 +238,7 @@ export default function CameraPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/80 text-white text-sm px-4 py-2 rounded-full z-50">
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 bg-black/80 text-white text-sm px-4 py-2 rounded-full z-50 whitespace-nowrap">
           {toast}
         </div>
       )}
@@ -251,6 +249,7 @@ export default function CameraPage() {
           <div className="flex gap-2 overflow-x-auto pb-1">
             {photos.map((p, i) => (
               <div key={i} className="relative shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`data:image/jpeg;base64,${p.base64}`}
                   alt={`Фото ${i + 1}`}
@@ -268,9 +267,9 @@ export default function CameraPage() {
         </div>
       )}
 
-      {/* Controls */}
-      <div className="bg-black px-6 py-4 flex items-center justify-between gap-4">
-        {/* Upload */}
+      {/* Controls — safe area bottom so home indicator doesn't cover buttons */}
+      <div className="bg-black px-6 pt-4 pb-safe flex items-center justify-between gap-4" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))' }}>
+        {/* Upload from gallery */}
         <label className="flex flex-col items-center gap-1 cursor-pointer">
           <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center">
             <Upload className="w-5 h-5 text-white" />
@@ -298,7 +297,7 @@ export default function CameraPage() {
           )}
         </button>
 
-        {/* Next */}
+        {/* Next — arrow right, enabled when ≥1 photo */}
         <button
           onClick={() => router.push("/flow/review")}
           disabled={photos.length === 0}
@@ -307,7 +306,7 @@ export default function CameraPage() {
           <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
             photos.length > 0 ? "bg-[#21A038]" : "border border-white/30"
           }`}>
-            <Camera className="w-5 h-5 text-white" />
+            <ChevronRight className="w-6 h-6 text-white" />
           </div>
           <span className="text-xs text-white/50">Далее</span>
         </button>
