@@ -63,6 +63,7 @@ export interface ClaudeOutput {
   recommended_works: string[];
   summary: string;
   average_confidence: number;
+  total_damaged_area_m2: number;
 }
 
 export interface WorkItem {

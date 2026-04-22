@@ -143,6 +143,40 @@ export default function ResultPage() {
           </div>
         </div>
 
+        {/* Damage area comparison */}
+        {(() => {
+          const declared = caseRecord.context.affected_area_m2 ?? 0;
+          const ai = report.claude_output.total_damaged_area_m2 ?? 0;
+          if (declared === 0 && ai === 0) return null;
+          const ratio = declared > 0 ? ai / declared : 0;
+          const hasDiscrepancy = declared > 0 && ai > 0 && (ratio > 1.4 || ratio < 0.6);
+          return (
+            <div className={`rounded-xl p-4 border ${hasDiscrepancy ? "bg-amber-50 border-amber-200" : "bg-blue-50 border-blue-200"}`}>
+              <h2 className="text-sm font-semibold text-gray-700 mb-3">Площадь повреждений</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-gray-500">Заявлено клиентом</p>
+                  <p className="text-xl font-bold text-gray-900">{declared} м²</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Оценка AI по фото</p>
+                  <p className="text-xl font-bold text-gray-900">{ai} м²</p>
+                </div>
+              </div>
+              {hasDiscrepancy && (
+                <p className="text-xs text-amber-700 mt-3">
+                  ⚠️ Расхождение более 40%. Кейс будет проверен экспертом.
+                </p>
+              )}
+              {!hasDiscrepancy && declared > 0 && ai > 0 && (
+                <p className="text-xs text-gray-500 mt-3">
+                  Оценки согласованы. В расчёте использована заявленная площадь.
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Works table */}
         {report.works.length > 0 && (
           <div>

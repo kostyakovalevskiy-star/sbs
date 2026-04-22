@@ -118,7 +118,8 @@ function buildHTML(report: Report, context: IncidentContext, photos: string[]): 
   <span class="info-label">Адрес</span><span>${context.address || "—"}</span>
   <span class="info-label">Регион</span><span>${context.region || "—"}</span>
   <span class="info-label">Площадь квартиры</span><span>${context.apartment_area_m2} м²</span>
-  <span class="info-label">Площадь ущерба</span><span>${context.affected_area_m2 ?? "—"} м²</span>
+  <span class="info-label">Площадь ущерба (заявлено)</span><span>${context.affected_area_m2 ?? "—"} м²</span>
+  <span class="info-label">Площадь ущерба (AI по фото)</span><span>${report.claude_output.total_damaged_area_m2 ?? "—"} м²</span>
   <span class="info-label">Год ремонта</span><span>${context.last_renovation_year}</span>
   <span class="info-label">Уровень отделки</span><span>${context.finish_level ?? "—"}</span>
   ${context.event_date ? `<span class="info-label">Дата события</span><span>${context.event_date}</span>` : ""}
