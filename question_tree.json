@@ -1,0 +1,469 @@
+{
+  "version": "1.0.0",
+  "description": "Дерево вопросов для real-time guide клиента СберСтрахования при фиксации страхового события",
+  "locale": "ru-RU",
+  "common_intro": {
+    "id": "intro",
+    "questions": [
+      {
+        "id": "address",
+        "text": "Укажите адрес пострадавшего объекта",
+        "type": "address_autocomplete",
+        "required": true,
+        "dadata_integration": true,
+        "maps_to": "incident.address"
+      },
+      {
+        "id": "property_type",
+        "text": "Тип пострадавшей недвижимости",
+        "type": "single_choice",
+        "required": true,
+        "options": ["Квартира", "Частный дом", "Апартаменты", "Дача/СНТ", "Коммерческое помещение"],
+        "maps_to": "property.type"
+      },
+      {
+        "id": "building_material",
+        "text": "Материал несущих конструкций здания",
+        "type": "single_choice",
+        "required": true,
+        "options": ["Кирпич", "Монолит", "Панель", "Блок (газо-/пенобетон)", "Дерево/брус", "Не знаю"],
+        "maps_to": "property.building_material"
+      },
+      {
+        "id": "finish_level",
+        "text": "Уровень отделки помещения до события",
+        "type": "single_choice",
+        "required": true,
+        "options": [
+          "Без отделки (черновая)",
+          "Эконом (базовая: обои, линолеум, водоэмульсионная краска)",
+          "Стандарт (ламинат, обои/покраска, натяжные потолки)",
+          "Комфорт (паркет, декоративная штукатурка, потолок с подсветкой)",
+          "Премиум (дизайнерский ремонт, натуральные материалы)"
+        ],
+        "maps_to": "property.finish_level",
+        "hint": "От этого зависит расчёт стоимости восстановления"
+      },
+      {
+        "id": "total_area",
+        "text": "Общая площадь квартиры/дома, кв. м.",
+        "type": "number",
+        "required": true,
+        "min": 5,
+        "max": 2000,
+        "maps_to": "property.total_area"
+      },
+      {
+        "id": "incident_datetime",
+        "text": "Когда произошло событие? (дата и время)",
+        "type": "datetime",
+        "required": true,
+        "maps_to": "incident.datetime"
+      },
+      {
+        "id": "incident_type",
+        "text": "Тип страхового события",
+        "type": "single_choice",
+        "required": true,
+        "options": ["flood", "fire", "explosion", "natural_disaster", "theft_robbery"],
+        "option_labels": ["Залив", "Пожар", "Взрыв", "Стихийное бедствие", "Кража / Грабёж"],
+        "maps_to": "incident.type",
+        "branch": true
+      }
+    ]
+  },
+  "branches": {
+    "flood": {
+      "title": "Залив",
+      "questions": [
+        {
+          "id": "flood_source",
+          "text": "Откуда произошёл залив?",
+          "type": "single_choice",
+          "required": true,
+          "options": [
+            "Соседи сверху",
+            "Протечка кровли",
+            "Прорыв стояка / общедомовой коммуникации",
+            "Собственная сантехника (смеситель, шланг, посудомойка и т.п.)",
+            "Неизвестно / уточняется"
+          ],
+          "maps_to": "flood.source"
+        },
+        {
+          "id": "flood_water_type",
+          "text": "Какая вода попала в помещение?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Холодная (питьевая)", "Горячая (ГВС)", "Канализационные стоки", "Отопление (с присадками)", "Не знаю"],
+          "maps_to": "flood.water_type",
+          "hint": "Канализация и отопление требуют более дорогостоящей обработки"
+        },
+        {
+          "id": "flood_duration",
+          "text": "Как долго шло залитие?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Менее 30 минут", "30 минут – 2 часа", "2–8 часов", "Более 8 часов", "Неизвестно"],
+          "maps_to": "flood.duration"
+        },
+        {
+          "id": "flood_rooms_affected",
+          "text": "Какие помещения пострадали? (можно выбрать несколько)",
+          "type": "multi_choice",
+          "required": true,
+          "options": ["Прихожая", "Коридор", "Гостиная", "Спальня", "Детская", "Кухня", "Ванная/санузел", "Кладовая", "Балкон/лоджия"],
+          "maps_to": "flood.rooms_affected"
+        },
+        {
+          "id": "flood_surfaces",
+          "text": "Какие поверхности пострадали?",
+          "type": "multi_choice",
+          "required": true,
+          "options": ["Потолок", "Стены", "Пол", "Межкомнатные двери", "Встроенная мебель", "Электрика", "Сантехника"],
+          "maps_to": "flood.surfaces"
+        },
+        {
+          "id": "flood_affected_area",
+          "text": "Приблизительная площадь залива, кв. м. (пол + 50% стен)",
+          "type": "number",
+          "required": true,
+          "min": 0.5,
+          "max": 500,
+          "maps_to": "flood.affected_area",
+          "hint": "Если затрудняетесь — укажите примерно, позже система уточнит по фото"
+        },
+        {
+          "id": "flood_act",
+          "text": "Составлен ли акт УК/ТСЖ о заливе?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Да, есть на руках", "Заявка подана, акт готовится", "Нет"],
+          "maps_to": "flood.act_status"
+        },
+        {
+          "id": "flood_photo_instruction",
+          "text": "Сделайте фото каждой пострадавшей поверхности. Рекомендуется: общий план комнаты + крупный план повреждения + фото с линейкой/монетой для масштаба.",
+          "type": "photo_upload",
+          "max_photos": 10,
+          "camera_hints": ["lighting", "distance", "hold_steady", "include_scale"],
+          "maps_to": "evidence.photos"
+        }
+      ]
+    },
+    "fire": {
+      "title": "Пожар",
+      "questions": [
+        {
+          "id": "fire_cause",
+          "text": "Предполагаемая причина возгорания",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Короткое замыкание/электропроводка", "Бытовой прибор", "Неосторожное обращение с огнём", "Поджог", "Газ", "Неизвестно / устанавливается"],
+          "maps_to": "fire.cause"
+        },
+        {
+          "id": "fire_fd_report",
+          "text": "Есть ли справка / постановление МЧС?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Да, есть", "Запрошена, ожидается", "Нет"],
+          "maps_to": "fire.fd_report_status",
+          "hint": "Обязательный документ для выплаты — загрузите, когда будет готов"
+        },
+        {
+          "id": "fire_scale",
+          "text": "Масштаб повреждений",
+          "type": "single_choice",
+          "required": true,
+          "options": [
+            "Локальный — обгорел отдельный предмет/участок",
+            "Одна комната пострадала полностью",
+            "Несколько комнат пострадали",
+            "Пострадало всё помещение",
+            "Разрушение конструкций"
+          ],
+          "maps_to": "fire.scale"
+        },
+        {
+          "id": "fire_damage_types",
+          "text": "Типы повреждений (можно выбрать несколько)",
+          "type": "multi_choice",
+          "required": true,
+          "options": ["Обугливание/горение", "Копоть и сажа", "Залив при тушении", "Оплавление", "Разрушение конструкций", "Повреждение остекления"],
+          "maps_to": "fire.damage_types"
+        },
+        {
+          "id": "fire_affected_area",
+          "text": "Площадь пострадавшего помещения, кв. м.",
+          "type": "number",
+          "required": true,
+          "min": 0.5,
+          "max": 1000,
+          "maps_to": "fire.affected_area"
+        },
+        {
+          "id": "fire_structural",
+          "text": "Пострадали ли несущие конструкции (стены, перекрытия)?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Нет", "Визуально есть трещины/прогибы", "Да, явное разрушение", "Нужна экспертиза"],
+          "maps_to": "fire.structural_damage",
+          "expert_trigger_if": ["Да, явное разрушение", "Нужна экспертиза"]
+        },
+        {
+          "id": "fire_property_loss",
+          "text": "Уничтожено ли имущество (мебель, техника)?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Нет", "Частично", "Полностью"],
+          "maps_to": "fire.property_loss"
+        },
+        {
+          "id": "fire_photo_instruction",
+          "text": "Сделайте фото: общий план → каждая стена → потолок → пол → отдельно сильно повреждённые участки и уничтоженное имущество.",
+          "type": "photo_upload",
+          "max_photos": 10,
+          "camera_hints": ["wide_angle", "lighting", "safety_first"],
+          "maps_to": "evidence.photos"
+        }
+      ]
+    },
+    "explosion": {
+      "title": "Взрыв",
+      "questions": [
+        {
+          "id": "explosion_source",
+          "text": "Источник взрыва",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Бытовой газ", "Газовый баллон", "Взрывное устройство", "Бытовой прибор (котёл и т.п.)", "Иное / устанавливается"],
+          "maps_to": "explosion.source"
+        },
+        {
+          "id": "explosion_official_report",
+          "text": "Есть ли документ от МЧС/полиции/газовой службы?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Да", "Запрошен", "Нет"],
+          "maps_to": "explosion.report_status"
+        },
+        {
+          "id": "explosion_structural_damage",
+          "text": "Повреждены ли несущие конструкции?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Нет", "Частично (трещины)", "Да, разрушения", "Проведена эвакуация"],
+          "maps_to": "explosion.structural_damage",
+          "expert_trigger_if": ["Да, разрушения", "Проведена эвакуация"]
+        },
+        {
+          "id": "explosion_glazing",
+          "text": "Выбиты ли окна/остекление?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Нет", "Частично", "Полностью во всей квартире"],
+          "maps_to": "explosion.glazing_damage"
+        },
+        {
+          "id": "explosion_utilities",
+          "text": "Отключены ли коммуникации?",
+          "type": "multi_choice",
+          "required": false,
+          "options": ["Электричество", "Газ", "Вода", "Отопление", "Всё работает"],
+          "maps_to": "explosion.utilities_disabled"
+        },
+        {
+          "id": "explosion_affected_area",
+          "text": "Приблизительная площадь пострадавшей зоны, кв. м.",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "max": 1000,
+          "maps_to": "explosion.affected_area"
+        },
+        {
+          "id": "explosion_photo_instruction",
+          "text": "Фотографируйте только если безопасно. Общий план → все стены → потолок → пол → окна → места с трещинами.",
+          "type": "photo_upload",
+          "max_photos": 10,
+          "camera_hints": ["safety_first", "lighting", "wide_angle"],
+          "maps_to": "evidence.photos"
+        }
+      ]
+    },
+    "natural_disaster": {
+      "title": "Стихийное бедствие",
+      "questions": [
+        {
+          "id": "disaster_type",
+          "text": "Тип стихийного явления",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Ураган / сильный ветер", "Град", "Ливень / подтопление", "Наводнение (паводок)", "Землетрясение", "Оползень / обвал", "Удар молнии", "Снеговая нагрузка", "Иное"],
+          "maps_to": "disaster.type"
+        },
+        {
+          "id": "disaster_hydromet_confirmation",
+          "text": "Подтверждено ли событие Росгидрометом / МЧС?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Да, есть справка", "Запрошено", "Нет"],
+          "maps_to": "disaster.confirmation_status",
+          "hint": "Справка Росгидромета обязательна для стихийных бедствий"
+        },
+        {
+          "id": "disaster_affected_parts",
+          "text": "Какие части объекта пострадали? (можно выбрать несколько)",
+          "type": "multi_choice",
+          "required": true,
+          "options": ["Кровля", "Фасад", "Окна/остекление", "Внутренние помещения", "Придомовая территория", "Хозпостройки", "Инженерные сети"],
+          "maps_to": "disaster.affected_parts"
+        },
+        {
+          "id": "disaster_water_ingress",
+          "text": "Попала ли вода/осадки внутрь помещения?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Нет", "Да, незначительно", "Да, существенно", "Полное подтопление"],
+          "maps_to": "disaster.water_ingress"
+        },
+        {
+          "id": "disaster_roof_integrity",
+          "text": "Состояние кровли",
+          "type": "single_choice",
+          "required": false,
+          "options": ["Целая", "Повреждена локально", "Частично снесена", "Полностью разрушена", "Не применимо (квартира)"],
+          "maps_to": "disaster.roof_status"
+        },
+        {
+          "id": "disaster_affected_area",
+          "text": "Общая площадь повреждений, кв. м.",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "max": 2000,
+          "maps_to": "disaster.affected_area"
+        },
+        {
+          "id": "disaster_photo_instruction",
+          "text": "Фото: общий вид объекта снаружи → повреждённая кровля/фасад → внутренние следы → придомовая территория. Соблюдайте безопасность!",
+          "type": "photo_upload",
+          "max_photos": 10,
+          "camera_hints": ["safety_first", "wide_angle", "include_context"],
+          "maps_to": "evidence.photos"
+        }
+      ]
+    },
+    "theft_robbery": {
+      "title": "Кража / Грабёж",
+      "questions": [
+        {
+          "id": "crime_type",
+          "text": "Характер события",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Кража со взломом", "Кража без следов взлома", "Грабёж (с применением силы)", "Разбой", "Уточняется"],
+          "maps_to": "crime.type"
+        },
+        {
+          "id": "crime_police_report",
+          "text": "Обратились ли в полицию?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Да, есть талон-уведомление (КУСП)", "Да, возбуждено дело", "Заявление подано, документы ожидаются", "Нет"],
+          "maps_to": "crime.police_report_status",
+          "hint": "КУСП или постановление — обязательный документ"
+        },
+        {
+          "id": "crime_entry_point",
+          "text": "Как злоумышленник проник внутрь?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Взлом двери", "Взлом окна/балкона", "Подбор ключа", "Обман (вошёл с согласия)", "Неизвестно"],
+          "maps_to": "crime.entry_point"
+        },
+        {
+          "id": "crime_damage_to_property",
+          "text": "Есть ли повреждения конструкций/отделки (двери, окна, замки)?",
+          "type": "single_choice",
+          "required": true,
+          "options": ["Да, существенные", "Да, незначительные", "Нет"],
+          "maps_to": "crime.property_damage"
+        },
+        {
+          "id": "crime_stolen_categories",
+          "text": "Что похищено? (можно выбрать несколько)",
+          "type": "multi_choice",
+          "required": true,
+          "options": ["Деньги/ценности", "Электроника", "Бытовая техника", "Ювелирные изделия", "Одежда/обувь", "Документы", "Инструменты", "Иное"],
+          "maps_to": "crime.stolen_categories"
+        },
+        {
+          "id": "crime_stolen_list",
+          "text": "Список похищенного имущества (название, марка, приблизительная стоимость, наличие чека/фото)",
+          "type": "structured_list",
+          "item_fields": ["name", "brand_model", "purchase_date", "estimated_value", "receipt_available"],
+          "required": true,
+          "maps_to": "crime.stolen_items"
+        },
+        {
+          "id": "crime_alarm",
+          "text": "Была ли охранная система / сигнализация?",
+          "type": "single_choice",
+          "required": false,
+          "options": ["Да, сработала", "Да, но не сработала", "Нет"],
+          "maps_to": "crime.alarm_status"
+        },
+        {
+          "id": "crime_photo_instruction",
+          "text": "Фото: повреждённые двери/окна/замки → места, где лежали похищенные предметы → общий вид квартиры после события.",
+          "type": "photo_upload",
+          "max_photos": 10,
+          "camera_hints": ["lighting", "close_up_for_damage"],
+          "maps_to": "evidence.photos"
+        }
+      ]
+    }
+  },
+  "closing_section": {
+    "id": "closing",
+    "questions": [
+      {
+        "id": "contact_phone",
+        "text": "Контактный телефон (для связи эксперта)",
+        "type": "phone",
+        "required": true,
+        "maps_to": "contact.phone"
+      },
+      {
+        "id": "preferred_communication",
+        "text": "Удобный способ связи",
+        "type": "single_choice",
+        "options": ["Звонок", "SMS", "Push", "Мессенджер"],
+        "maps_to": "contact.preferred_channel"
+      },
+      {
+        "id": "additional_comments",
+        "text": "Что-то ещё, что важно знать эксперту?",
+        "type": "text_long",
+        "required": false,
+        "maps_to": "incident.additional_comments"
+      }
+    ]
+  },
+  "critical_checklist_signals": {
+    "description": "Критичные признаки, при срабатывании которых диалог передаётся эксперту",
+    "rules": [
+      {"id": "CR-1", "condition": "crack_diagonal_from_corner AND width_mm > 3", "action": "route_to_human_expert", "reason": "Признак повреждения несущей конструкции"},
+      {"id": "CR-2", "condition": "fire.structural_damage IN ['Да, явное разрушение', 'Нужна экспертиза']", "action": "route_to_human_expert"},
+      {"id": "CR-3", "condition": "explosion.structural_damage IN ['Да, разрушения', 'Проведена эвакуация']", "action": "route_to_human_expert"},
+      {"id": "CR-4", "condition": "stain_has_yellow_border AND area_m2 > 2", "action": "attention_mold", "reason": "Признак длительного замачивания / плесени — требует антигрибковой обработки"},
+      {"id": "CR-5", "condition": "estimated_damage_rub > 500000", "action": "route_to_human_expert", "reason": "Превышен лимит автоматической оценки"},
+      {"id": "CR-6", "condition": "finish_level == 'Премиум' OR 'Комфорт'", "action": "route_to_human_expert", "reason": "Высокий уровень отделки — требуется индивидуальная оценка"},
+      {"id": "CR-7", "condition": "photo_metadata.original_flag == false", "action": "request_rephoto", "reason": "Подозрение на редактирование фото"},
+      {"id": "CR-8", "condition": "photo_metadata.gps_distance_from_address > 1000m", "action": "flag_for_review", "reason": "GPS фото не соответствует адресу объекта"},
+      {"id": "CR-9", "condition": "incident.type == 'theft_robbery' AND crime.stolen_items.total_value > 300000", "action": "route_to_human_expert"}
+    ]
+  }
+}

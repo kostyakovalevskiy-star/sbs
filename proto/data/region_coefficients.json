@@ -1,0 +1,17 @@
+{
+  "version": "2026.04.1",
+  "updated_at": "2026-04-22",
+  "description": "Региональные коэффициенты к базовым (московским) ценам работ. Для материалов используется коэффициент 1.0 в большинстве регионов (логистические сети одинаковы). Регулируется в админ-панели прототипа.",
+  "baseline_region": "moscow",
+  "regions": {
+    "moscow": { "name": "Москва", "works_coefficient": 1.00, "materials_coefficient": 1.00 },
+    "spb": { "name": "Санкт-Петербург", "works_coefficient": 0.95, "materials_coefficient": 1.00 },
+    "ekb": { "name": "Екатеринбург", "works_coefficient": 0.75, "materials_coefficient": 1.05 },
+    "nsk": { "name": "Новосибирск", "works_coefficient": 0.72, "materials_coefficient": 1.08 },
+    "kazan": { "name": "Казань", "works_coefficient": 0.78, "materials_coefficient": 1.02 },
+    "voronezh": { "name": "Воронеж", "works_coefficient": 0.65, "materials_coefficient": 1.05 },
+    "krasnodar": { "name": "Краснодар", "works_coefficient": 0.80, "materials_coefficient": 1.03 },
+    "other_central": { "name": "Регионы (ЦФО)", "works_coefficient": 0.65, "materials_coefficient": 1.05 },
+    "other_far": { "name": "Регионы (ДВФО, СФО)", "works_coefficient": 0.70, "materials_coefficient": 1.15 }
+  }
+}

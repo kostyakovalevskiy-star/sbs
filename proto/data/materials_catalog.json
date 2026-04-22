@@ -1,0 +1,240 @@
+{
+  "version": "2026.04.1",
+  "updated_at": "2026-04-22",
+  "currency": "RUB",
+  "region_baseline": "moscow",
+  "description": "Справочник цен на отделочные материалы. Цены — средние арифметические по 3+ источникам в Москве на апрель 2026. Срок службы (service_life_years) используется для расчёта физического износа по ВСН 53-86(р).",
+  "sources_aggregated": [
+    {"name": "Лемана ПРО (Леруа Мерлен)", "url": "https://lemanapro.ru/"},
+    {"name": "Петрович", "url": "https://petrovich.ru/"},
+    {"name": "ВсеИнструменты.ру", "url": "https://www.vseinstrumenti.ru/"},
+    {"name": "Сатурн", "url": "https://msk.saturn.net/"},
+    {"name": "Озон", "url": "https://www.ozon.ru/"}
+  ],
+  "finish_classes": ["econom", "standard", "comfort", "premium"],
+  "materials": [
+    {
+      "code": "MAT-PRIMER-01",
+      "name": "Грунтовка глубокого проникновения универсальная",
+      "category": "preparation",
+      "package_unit": "уп. 10 л",
+      "package_amount": 10,
+      "package_unit_label": "л",
+      "consumption_m2_per_package": 50,
+      "base_price_rub": 850,
+      "samples_rub": [502, 1011, 1040],
+      "service_life_years": 10,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Rocks 10л", "price_rub": 502, "url": "https://lemanapro.ru/product/gruntovka-glubokogo-proniknoveniya-rocks-10-l-83670364/"},
+        {"brand": "Unis 10л", "price_rub": 1011, "url": "https://lemanapro.ru/product/gruntovka-glubokogo-proniknoveniya-unis-10-l-82120300/"},
+        {"brand": "Bergauf TiefGrunt 10л", "price_rub": 1040, "url": "https://kazan.leroymerlin.ru/product/gruntovka-glubokogo-proniknoveniya-bergauf-tiefgrunt-10-l-82001566/"}
+      ]
+    },
+    {
+      "code": "MAT-ANTI-01",
+      "name": "Средство против плесени и грибка (концентрат)",
+      "category": "preparation",
+      "package_unit": "уп. 5 л",
+      "package_amount": 5,
+      "package_unit_label": "л",
+      "consumption_m2_per_package": 25,
+      "base_price_rub": 1100,
+      "samples_rub": [358, 1450, 1500],
+      "service_life_years": 5,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Боларс Антиплесень 5л", "price_rub": 358, "url": "https://lemanapro.ru/product/gruntovka-bolars-antiplesen-5-l-18540048/"},
+        {"brand": "Dali антисептик 5л", "price_rub": 1450, "url": "https://www.vseinstrumenti.ru/"},
+        {"brand": "Tefleks антиплесень 5л", "price_rub": 1500, "url": "https://www.vseinstrumenti.ru/"}
+      ]
+    },
+    {
+      "code": "MAT-PLAST-01",
+      "name": "Штукатурка гипсовая универсальная",
+      "category": "leveling",
+      "package_unit": "уп. 30 кг",
+      "package_amount": 30,
+      "package_unit_label": "кг",
+      "consumption_m2_per_package": 3.75,
+      "base_price_rub": 620,
+      "samples_rub": [545, 620, 700],
+      "service_life_years": 25,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Knauf Ротбанд 30кг"},
+        {"brand": "Volma Слой 30кг"},
+        {"brand": "Unis Теплон 30кг"}
+      ]
+    },
+    {
+      "code": "MAT-FILL-01",
+      "name": "Шпаклёвка финишная гипсовая",
+      "category": "leveling",
+      "package_unit": "уп. 25 кг",
+      "package_amount": 25,
+      "package_unit_label": "кг",
+      "consumption_m2_per_package": 20,
+      "base_price_rub": 880,
+      "samples_rub": [744, 920, 970],
+      "service_life_years": 15,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Knauf Fugen 25кг", "price_rub": 744, "url": "https://krd.saturn.net/product/shpaklevka-gipsovaya-fugen-universalnaya-25-kg/"},
+        {"brand": "Knauf Fugen Hydro 25кг", "price_rub": 972, "url": "https://www.brickpark.ru/shpatlevka/shpatlevka-gipsovaya-vlagostoykaya-knauf-fugen-gidro-belaya-25-kg/"}
+      ]
+    },
+    {
+      "code": "MAT-PAINT-01",
+      "name": "Краска водоэмульсионная для стен и потолков (белая)",
+      "category": "painting",
+      "package_unit": "уп. 10 л",
+      "package_amount": 10,
+      "package_unit_label": "л",
+      "consumption_m2_per_package": 80,
+      "base_price_rub": 4200,
+      "samples_rub": [3580, 4500, 4900],
+      "service_life_years": 8,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Dufa Superweiss 10л", "price_rub": 3580, "url": "https://www.lux-stroi.ru/"},
+        {"brand": "Dulux 3D White 10л", "price_rub": 4500, "url": "https://lemanapro.ru/catalogue/kraski-dlya-sten-i-potolkov/dulux/"},
+        {"brand": "Tikkurila Joker 9л", "price_rub": 4900, "url": "https://lemanapro.ru/"}
+      ]
+    },
+    {
+      "code": "MAT-PAINT-02",
+      "name": "Краска водоэмульсионная (эконом, белая)",
+      "category": "painting",
+      "package_unit": "уп. 14 кг",
+      "package_amount": 14,
+      "package_unit_label": "кг",
+      "consumption_m2_per_package": 90,
+      "base_price_rub": 1850,
+      "samples_rub": [1600, 1900, 2050],
+      "service_life_years": 6,
+      "finish_class": "econom",
+      "examples": [
+        {"brand": "Снежка 14кг"},
+        {"brand": "Dali интерьерная 14кг"}
+      ]
+    },
+    {
+      "code": "MAT-LAM-01",
+      "name": "Ламинат 33 класс, 8 мм (стандарт)",
+      "category": "flooring",
+      "package_unit": "уп. ~2.13 м²",
+      "package_amount": 2.13,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 2.13,
+      "base_price_rub": 2900,
+      "samples_rub": [2400, 2900, 3400],
+      "service_life_years": 12,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Egger Home, дуб патока"},
+        {"brand": "Kastamonu Blue 33 класс"}
+      ]
+    },
+    {
+      "code": "MAT-LAM-02",
+      "name": "Ламинат 33 класс, 12 мм (комфорт)",
+      "category": "flooring",
+      "package_unit": "уп. ~1.99 м²",
+      "package_amount": 1.99,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1.99,
+      "base_price_rub": 4900,
+      "samples_rub": [4257, 4640, 5400],
+      "service_life_years": 15,
+      "finish_class": "comfort",
+      "examples": [
+        {"brand": "Kronotex Robusto D2800", "price_rub": 4640, "url": "https://lemanapro.ru/"},
+        {"brand": "Kronotex Mammut 12мм", "price_rub": 5400, "url": "https://parketsolo.ru/"}
+      ]
+    },
+    {
+      "code": "MAT-UNDER-01",
+      "name": "Подложка под ламинат, рулонная",
+      "category": "flooring",
+      "package_unit": "уп. 12 м²",
+      "package_amount": 12,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 12,
+      "base_price_rub": 3200,
+      "samples_rub": [2869, 3200, 3500],
+      "service_life_years": 15,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Pavitec Select 2 мм / 12 м²", "price_rub": 3079, "url": "https://www.vseinstrumenti.ru/"}
+      ]
+    },
+    {
+      "code": "MAT-WALL-01",
+      "name": "Обои флизелиновые под покраску",
+      "category": "wallpaper",
+      "package_unit": "рулон 10.05 м (~5.3 м²)",
+      "package_amount": 5.3,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 5.3,
+      "base_price_rub": 1850,
+      "samples_rub": [1500, 1850, 2200],
+      "service_life_years": 10,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Erismann Bestseller"},
+        {"brand": "Marburg Patent Decor"}
+      ]
+    },
+    {
+      "code": "MAT-PLINTH-01",
+      "name": "Плинтус напольный ПВХ с кабель-каналом",
+      "category": "trim",
+      "package_unit": "штука 2.5 п.м.",
+      "package_amount": 2.5,
+      "package_unit_label": "п.м.",
+      "consumption_m2_per_package": 2.5,
+      "base_price_rub": 320,
+      "samples_rub": [260, 320, 400],
+      "service_life_years": 20,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Идеал Комфорт 2.5 м"},
+        {"brand": "Cezar Premium 2.5 м"}
+      ]
+    },
+    {
+      "code": "MAT-PLINTH-02",
+      "name": "Плинтус потолочный полиуретановый",
+      "category": "trim",
+      "package_unit": "штука 2.0 п.м.",
+      "package_amount": 2.0,
+      "package_unit_label": "п.м.",
+      "consumption_m2_per_package": 2.0,
+      "base_price_rub": 1850,
+      "samples_rub": [1782, 1850, 1980],
+      "service_life_years": 25,
+      "finish_class": "comfort",
+      "examples": [
+        {"brand": "Orac C200 2 м", "price_rub": 1782, "url": "https://lemanapro.ru/"}
+      ]
+    },
+    {
+      "code": "MAT-DOOR-01",
+      "name": "Дверь межкомнатная (стандарт, ПВХ-покрытие)",
+      "category": "doors",
+      "package_unit": "комплект",
+      "package_amount": 1,
+      "package_unit_label": "шт.",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 9800,
+      "samples_rub": [7500, 9800, 12500],
+      "service_life_years": 30,
+      "finish_class": "standard",
+      "examples": [
+        {"brand": "Profil Doors серия М"},
+        {"brand": "Status Бавария"}
+      ]
+    }
+  ]
+}

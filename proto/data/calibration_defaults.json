@@ -1,0 +1,94 @@
+{
+  "version": "2026.04.1",
+  "updated_at": "2026-04-22",
+  "description": "Дефолтные калибровочные веса прототипа. Изменяются в /admin (страница «Калибровка»). Сохраняются в localStorage браузера администратора.",
+  "weights": {
+    "range_sigma": {
+      "label": "Ширина диапазона оценки (σ)",
+      "type": "multiplier",
+      "default": 0.15,
+      "min": 0.05,
+      "max": 0.35,
+      "step": 0.01,
+      "description": "Min = base × (1 − σ), Max = base × (1 + σ)"
+    },
+    "finish_econom_factor": {
+      "label": "Множитель отделки «Эконом»",
+      "type": "multiplier",
+      "default": 0.85,
+      "min": 0.5,
+      "max": 1.0,
+      "step": 0.05
+    },
+    "finish_standard_factor": {
+      "label": "Множитель отделки «Стандарт»",
+      "type": "multiplier",
+      "default": 1.00,
+      "min": 0.8,
+      "max": 1.4,
+      "step": 0.05
+    },
+    "finish_comfort_factor": {
+      "label": "Множитель отделки «Комфорт»",
+      "type": "multiplier",
+      "default": 1.45,
+      "min": 1.0,
+      "max": 2.5,
+      "step": 0.05
+    },
+    "finish_premium_factor": {
+      "label": "Множитель отделки «Премиум»",
+      "type": "multiplier",
+      "default": 2.20,
+      "min": 1.2,
+      "max": 4.0,
+      "step": 0.1
+    },
+    "vision_low_confidence_discount": {
+      "label": "Скидка при confidence Vision < 0.6",
+      "type": "multiplier",
+      "default": 0.85,
+      "min": 0.5,
+      "max": 1.0,
+      "step": 0.05
+    },
+    "stp_threshold_rub": {
+      "label": "Порог STP (автозакрытия), ₽",
+      "type": "currency",
+      "default": 500000,
+      "min": 50000,
+      "max": 1500000,
+      "step": 50000,
+      "description": "Кейсы свыше этого порога — на эксперта"
+    },
+    "critical_crack_mm": {
+      "label": "Порог критической трещины, мм",
+      "type": "number",
+      "default": 3,
+      "min": 1,
+      "max": 10,
+      "step": 1
+    },
+    "mold_area_threshold_m2": {
+      "label": "Порог площади плесени для эксперта, м²",
+      "type": "number",
+      "default": 2.0,
+      "min": 0.5,
+      "max": 10,
+      "step": 0.5
+    },
+    "wear_apply": {
+      "label": "Применять физический износ к материалам",
+      "type": "boolean",
+      "default": true
+    },
+    "default_ceiling_height_m": {
+      "label": "Высота потолков по умолчанию, м",
+      "type": "number",
+      "default": 2.7,
+      "min": 2.2,
+      "max": 4.5,
+      "step": 0.1
+    }
+  }
+}

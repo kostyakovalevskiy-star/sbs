@@ -1,0 +1,394 @@
+{
+  "version": "2026.04.1",
+  "updated_at": "2026-04-22",
+  "currency": "RUB",
+  "region_baseline": "moscow",
+  "description": "Справочник цен на отделочные и ремонтные работы. Цены — средние арифметические по 3+ источникам в Москве на апрель 2026. Для регионов применяется коэффициент region_coefficient (см. region_coefficients.json).",
+  "sources_aggregated": [
+    {"name": "Профи Ремонтник", "url": "https://profiremontnik.ru/tseny/shtukaturno-malyarnye-raboty/"},
+    {"name": "Домашний Мастерок", "url": "https://domashniy-masterok.ru/price/prays-na-otdelochnye-raboty/"},
+    {"name": "СтройРемДизайн", "url": "https://stroyremdizayn.ru/rascenki-na-otdelochnye-raboty"},
+    {"name": "Remont DMB", "url": "https://remont-dmb.ru/price/prajs-list-na-uslugi-3/"},
+    {"name": "RemontProfi", "url": "https://www.remontprofi.ru/ceny-na-uslugi/ceny-na-uslugi/"}
+  ],
+  "categories": {
+    "demolition": "Демонтажные работы",
+    "preparation": "Подготовка поверхности",
+    "leveling": "Выравнивание (штукатурка, шпаклёвка)",
+    "painting": "Окраска и грунтовка",
+    "wallpaper": "Обойные работы",
+    "flooring": "Напольные работы",
+    "ceiling": "Потолочные работы",
+    "doors": "Двери и проёмы",
+    "trim": "Плинтуса и наличники",
+    "electrical_minor": "Мелкие электромонтажные",
+    "logistics": "Логистика и мусор"
+  },
+  "works": [
+    {
+      "code": "DEM-001",
+      "name": "Демонтаж плинтуса напольного (любой)",
+      "category": "demolition",
+      "unit": "п.м.",
+      "base_price_rub": 80,
+      "min_price_rub": 60,
+      "max_price_rub": 110,
+      "samples": [70, 80, 95]
+    },
+    {
+      "code": "DEM-002",
+      "name": "Демонтаж наличников дверного проёма",
+      "category": "demolition",
+      "unit": "п.м.",
+      "base_price_rub": 90,
+      "min_price_rub": 70,
+      "max_price_rub": 130,
+      "samples": [75, 90, 105]
+    },
+    {
+      "code": "DEM-003",
+      "name": "Демонтаж межкомнатной двери в сборе",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 950,
+      "min_price_rub": 800,
+      "max_price_rub": 1200,
+      "samples": [850, 950, 1100]
+    },
+    {
+      "code": "DEM-004",
+      "name": "Демонтаж ламината / паркетной доски",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 180,
+      "min_price_rub": 130,
+      "max_price_rub": 250,
+      "samples": [160, 180, 220]
+    },
+    {
+      "code": "DEM-005",
+      "name": "Демонтаж керамической плитки со стен",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 480,
+      "min_price_rub": 350,
+      "max_price_rub": 650,
+      "samples": [400, 480, 580]
+    },
+    {
+      "code": "DEM-006",
+      "name": "Демонтаж тёплого пола электрического",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 200,
+      "min_price_rub": 150,
+      "max_price_rub": 280,
+      "samples": [170, 200, 240]
+    },
+    {
+      "code": "DEM-007",
+      "name": "Снятие старых обоев",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 130,
+      "min_price_rub": 90,
+      "max_price_rub": 180,
+      "samples": [110, 130, 160]
+    },
+    {
+      "code": "DEM-008",
+      "name": "Очистка стен от старой краски / штукатурки до основания",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 520,
+      "min_price_rub": 380,
+      "max_price_rub": 720,
+      "samples": [450, 520, 620]
+    },
+    {
+      "code": "DEM-009",
+      "name": "Очистка потолка от краски / штукатурки",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 540,
+      "min_price_rub": 400,
+      "max_price_rub": 740,
+      "samples": [470, 540, 640]
+    },
+    {
+      "code": "PREP-001",
+      "name": "Антигрибковая обработка поверхности",
+      "category": "preparation",
+      "unit": "м²",
+      "base_price_rub": 165,
+      "min_price_rub": 130,
+      "max_price_rub": 220,
+      "samples": [140, 165, 190],
+      "notes": "Стандартно — 2 слоя в 2 цикла (после демонтажа и перед финишем)"
+    },
+    {
+      "code": "PREP-002",
+      "name": "Грунтовка поверхности (1 слой)",
+      "category": "preparation",
+      "unit": "м²",
+      "base_price_rub": 155,
+      "min_price_rub": 120,
+      "max_price_rub": 200,
+      "samples": [130, 155, 180],
+      "notes": "Применяется после каждого цикла выравнивающих работ"
+    },
+    {
+      "code": "PREP-003",
+      "name": "Армирование стеклохолстом / серпянкой",
+      "category": "preparation",
+      "unit": "м²",
+      "base_price_rub": 210,
+      "min_price_rub": 160,
+      "max_price_rub": 280,
+      "samples": [180, 210, 240]
+    },
+    {
+      "code": "LEVEL-001",
+      "name": "Оштукатуривание стен (1 слой, до 10 мм)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 480,
+      "min_price_rub": 380,
+      "max_price_rub": 620,
+      "samples": [420, 480, 560],
+      "notes": "Цена за один слой; обычно требуется 2-3 слоя"
+    },
+    {
+      "code": "LEVEL-002",
+      "name": "Оштукатуривание стен по маякам (комплекс, 3 слоя)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 850,
+      "min_price_rub": 700,
+      "max_price_rub": 1100,
+      "samples": [780, 850, 980]
+    },
+    {
+      "code": "LEVEL-003",
+      "name": "Оштукатуривание потолка (1 слой)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 950,
+      "min_price_rub": 780,
+      "max_price_rub": 1200,
+      "samples": [860, 950, 1080]
+    },
+    {
+      "code": "LEVEL-004",
+      "name": "Шпаклёвка стен (1 слой)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 200,
+      "min_price_rub": 150,
+      "max_price_rub": 270,
+      "samples": [170, 200, 230],
+      "notes": "Стандартно — 4 слоя для подготовки под покраску, 2 слоя под обои"
+    },
+    {
+      "code": "LEVEL-005",
+      "name": "Шпаклёвка потолка (1 слой)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 240,
+      "min_price_rub": 180,
+      "max_price_rub": 320,
+      "samples": [200, 240, 280]
+    },
+    {
+      "code": "LEVEL-006",
+      "name": "Шлифовка стен после шпаклёвки",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 145,
+      "min_price_rub": 110,
+      "max_price_rub": 200,
+      "samples": [120, 145, 170]
+    },
+    {
+      "code": "LEVEL-007",
+      "name": "Шлифовка потолка после шпаклёвки",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 175,
+      "min_price_rub": 130,
+      "max_price_rub": 240,
+      "samples": [150, 175, 200]
+    },
+    {
+      "code": "PAINT-001",
+      "name": "Покраска стен водоэмульсионной краской (1 слой)",
+      "category": "painting",
+      "unit": "м²",
+      "base_price_rub": 180,
+      "min_price_rub": 140,
+      "max_price_rub": 240,
+      "samples": [150, 180, 210],
+      "notes": "Стандартно — 2 слоя"
+    },
+    {
+      "code": "PAINT-002",
+      "name": "Покраска потолка водоэмульсионной краской (1 слой)",
+      "category": "painting",
+      "unit": "м²",
+      "base_price_rub": 210,
+      "min_price_rub": 160,
+      "max_price_rub": 280,
+      "samples": [180, 210, 240]
+    },
+    {
+      "code": "WALL-001",
+      "name": "Поклейка обоев флизелиновых / виниловых (без подбора рисунка)",
+      "category": "wallpaper",
+      "unit": "м²",
+      "base_price_rub": 360,
+      "min_price_rub": 280,
+      "max_price_rub": 480,
+      "samples": [320, 360, 420]
+    },
+    {
+      "code": "WALL-002",
+      "name": "Поклейка обоев с подбором рисунка",
+      "category": "wallpaper",
+      "unit": "м²",
+      "base_price_rub": 480,
+      "min_price_rub": 380,
+      "max_price_rub": 620,
+      "samples": [420, 480, 560]
+    },
+    {
+      "code": "FLOOR-001",
+      "name": "Укладка ламината с подложкой",
+      "category": "flooring",
+      "unit": "м²",
+      "base_price_rub": 620,
+      "min_price_rub": 480,
+      "max_price_rub": 850,
+      "samples": [550, 620, 720]
+    },
+    {
+      "code": "FLOOR-002",
+      "name": "Укладка линолеума на готовое основание",
+      "category": "flooring",
+      "unit": "м²",
+      "base_price_rub": 380,
+      "min_price_rub": 280,
+      "max_price_rub": 520,
+      "samples": [320, 380, 460]
+    },
+    {
+      "code": "FLOOR-003",
+      "name": "Укладка плитки керамической напольной",
+      "category": "flooring",
+      "unit": "м²",
+      "base_price_rub": 1450,
+      "min_price_rub": 1100,
+      "max_price_rub": 1900,
+      "samples": [1280, 1450, 1680]
+    },
+    {
+      "code": "FLOOR-004",
+      "name": "Монтаж тёплого электрического пола",
+      "category": "flooring",
+      "unit": "м²",
+      "base_price_rub": 420,
+      "min_price_rub": 320,
+      "max_price_rub": 580,
+      "samples": [360, 420, 500]
+    },
+    {
+      "code": "DOOR-001",
+      "name": "Установка межкомнатной двери в сборе с фурнитурой",
+      "category": "doors",
+      "unit": "шт.",
+      "base_price_rub": 5400,
+      "min_price_rub": 4200,
+      "max_price_rub": 7500,
+      "samples": [4800, 5400, 6300]
+    },
+    {
+      "code": "TRIM-001",
+      "name": "Монтаж напольного плинтуса (ПВХ, МДФ)",
+      "category": "trim",
+      "unit": "п.м.",
+      "base_price_rub": 320,
+      "min_price_rub": 240,
+      "max_price_rub": 450,
+      "samples": [280, 320, 380]
+    },
+    {
+      "code": "TRIM-002",
+      "name": "Монтаж потолочного плинтуса / багета (полиуретан)",
+      "category": "trim",
+      "unit": "п.м.",
+      "base_price_rub": 380,
+      "min_price_rub": 290,
+      "max_price_rub": 520,
+      "samples": [320, 380, 450]
+    },
+    {
+      "code": "TRIM-003",
+      "name": "Установка наличников дверного проёма",
+      "category": "trim",
+      "unit": "п.м.",
+      "base_price_rub": 160,
+      "min_price_rub": 120,
+      "max_price_rub": 220,
+      "samples": [130, 160, 190]
+    },
+    {
+      "code": "ELEC-001",
+      "name": "Демонтаж/установка розетки или выключателя",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 1100,
+      "min_price_rub": 800,
+      "max_price_rub": 1500,
+      "samples": [950, 1100, 1280]
+    },
+    {
+      "code": "ELEC-002",
+      "name": "Демонтаж/установка люстры (без подключения сложной автоматики)",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 1450,
+      "min_price_rub": 1100,
+      "max_price_rub": 2000,
+      "samples": [1250, 1450, 1700]
+    },
+    {
+      "code": "LOG-001",
+      "name": "Заказ мусорного контейнера 8 м³ (вывоз)",
+      "category": "logistics",
+      "unit": "шт.",
+      "base_price_rub": 7800,
+      "min_price_rub": 6500,
+      "max_price_rub": 9500,
+      "samples": [7000, 7800, 8800]
+    },
+    {
+      "code": "LOG-002",
+      "name": "Вынос строительного мусора (до 20 мешков)",
+      "category": "logistics",
+      "unit": "ед.",
+      "base_price_rub": 2100,
+      "min_price_rub": 1500,
+      "max_price_rub": 3000,
+      "samples": [1800, 2100, 2500]
+    },
+    {
+      "code": "LOG-003",
+      "name": "Вынос/занос мебели для производства работ",
+      "category": "logistics",
+      "unit": "ед.",
+      "base_price_rub": 2600,
+      "min_price_rub": 2000,
+      "max_price_rub": 3500,
+      "samples": [2200, 2600, 3000]
+    }
+  ]
+}
