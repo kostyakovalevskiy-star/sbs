@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Upload, X, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, X, Zap, Sun, ZoomIn } from "lucide-react";
 import type { DraftState } from "@/types";
 import {
   startCamera,
@@ -13,36 +13,57 @@ import {
   captureSnapshot,
 } from "@/lib/camera";
 
-const BLUR_BLOCK = 10;   // only block completely solid/black frames
-const BLUR_WARN  = 40;   // warn but allow
+const BLUR_BLOCK = 10;
+const BLUR_WARN  = 40;
 const MAX_PHOTOS = 10;
 
-interface PhotoItem {
-  base64: string;
-  variance: number;
+interface PhotoItem { base64: string; variance: number; }
+
+type IndicatorState = "good" | "bad" | "unknown";
+
+// Hysteresis: only flip state when value crosses threshold with buffer
+function hysteresis(value: number, goodThreshold: number, buffer: number, prev: IndicatorState): IndicatorState {
+  if (prev === "good" && value < goodThreshold - buffer) return "bad";
+  if (prev !== "good" && value >= goodThreshold + buffer) return "good";
+  return prev === "unknown" ? (value >= goodThreshold ? "good" : "bad") : prev;
 }
 
+// Extended constraint types for MediaStreamTrack capabilities — not in lib.dom.d.ts
+interface ExtendedCapabilities extends MediaTrackCapabilities {
+  zoom?: { min: number; max: number; step: number };
+  exposureCompensation?: { min: number; max: number; step: number };
+  torch?: boolean;
+}
 export default function CameraPage() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const overlayRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
 
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [toast, setToast] = useState<string | null>(null);
-  const [brightness, setBrightness] = useState(128);
-  const [tilt, setTilt] = useState<number | null>(null);
-  const [gyroAvailable, setGyroAvailable] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
+
+  const [brightnessState, setBrightnessState] = useState<IndicatorState>("unknown");
+  const [tiltState, setTiltState] = useState<IndicatorState>("unknown");
+  const [gyroAvailable, setGyroAvailable] = useState(false);
+  const [gyroNeedsPermission, setGyroNeedsPermission] = useState(false);
+
+  // Camera adjustments
+  const [zoomCap, setZoomCap] = useState<{ min: number; max: number; step: number } | null>(null);
+  const [zoomValue, setZoomValue] = useState(1);
+  const [exposureCap, setExposureCap] = useState<{ min: number; max: number; step: number } | null>(null);
+  const [exposureValue, setExposureValue] = useState(0);
+  const [brightnessFilter, setBrightnessFilter] = useState(1); // CSS fallback multiplier
 
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 2500);
   }
 
-  // Load saved photos from draft
+  // Load saved photos
   useEffect(() => {
     const raw = localStorage.getItem("claim_draft");
     if (raw) {
@@ -53,22 +74,48 @@ export default function CameraPage() {
     }
   }, []);
 
-  // Camera init
+  // Camera init + probe for zoom / exposure capabilities
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     startCamera(video)
-      .then((stream) => { streamRef.current = stream; })
+      .then((stream) => {
+        streamRef.current = stream;
+        const track = stream.getVideoTracks()[0];
+        trackRef.current = track;
+
+        const caps = track.getCapabilities?.() as ExtendedCapabilities | undefined;
+        if (caps?.zoom) {
+          setZoomCap({ min: caps.zoom.min, max: caps.zoom.max, step: caps.zoom.step || 0.1 });
+        }
+        if (caps?.exposureCompensation) {
+          setExposureCap({
+            min: caps.exposureCompensation.min,
+            max: caps.exposureCompensation.max,
+            step: caps.exposureCompensation.step || 0.1,
+          });
+        }
+
+        // Check if iOS needs explicit permission for DeviceOrientation
+        type IOSDeviceOrientationEvent = { requestPermission?: () => Promise<"granted" | "denied"> };
+        const IOSDOEvent = DeviceOrientationEvent as unknown as IOSDeviceOrientationEvent;
+        if (typeof IOSDOEvent.requestPermission === "function") {
+          setGyroNeedsPermission(true);
+        } else {
+          attachGyroListener();
+        }
+      })
       .catch((err) => {
         setCameraError("Нет доступа к камере. Проверьте разрешения браузера.");
         console.error(err);
       });
 
     return () => { if (streamRef.current) stopCamera(streamRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Brightness update loop
+  // Brightness sampling — sparse, avoid flicker via hysteresis
   useEffect(() => {
     const interval = setInterval(() => {
       const video = videoRef.current;
@@ -76,25 +123,66 @@ export default function CameraPage() {
       if (!video || !canvas || !streamRef.current) return;
       try {
         const imageData = captureSnapshot(video, canvas);
-        setBrightness(getBrightness(imageData));
+        const b = getBrightness(imageData);
+        setBrightnessState((prev) => hysteresis(b, 60, 15, prev));
       } catch {}
-    }, 500);
+    }, 800);
     return () => clearInterval(interval);
   }, []);
 
-  // Gyroscope — beta=90 when phone held upright (portrait)
-  useEffect(() => {
-    function handleOrientation(e: DeviceOrientationEvent) {
-      if (e.beta !== null) {
-        setTilt(Math.abs(e.beta - 90));
-        setGyroAvailable(true);
+  function attachGyroListener() {
+    function onOrientation(e: DeviceOrientationEvent) {
+      if (e.beta === null) return;
+      setGyroAvailable(true);
+      const tilt = Math.abs(e.beta - 90);
+      setTiltState((prev) => hysteresis(-tilt, -25, 5, prev)); // "good" when tilt small
+    }
+    window.addEventListener("deviceorientation", onOrientation);
+  }
+
+  async function requestGyroPermission() {
+    try {
+      type IOSDeviceOrientationEvent = { requestPermission?: () => Promise<"granted" | "denied"> };
+      const IOSDOEvent = DeviceOrientationEvent as unknown as IOSDeviceOrientationEvent;
+      if (IOSDOEvent.requestPermission) {
+        const result = await IOSDOEvent.requestPermission();
+        if (result === "granted") {
+          attachGyroListener();
+          setGyroNeedsPermission(false);
+        }
       }
+    } catch {
+      setGyroNeedsPermission(false);
     }
-    if (typeof DeviceOrientationEvent !== "undefined") {
-      window.addEventListener("deviceorientation", handleOrientation);
-      return () => window.removeEventListener("deviceorientation", handleOrientation);
+  }
+
+  // Apply zoom to camera track
+  async function applyZoom(value: number) {
+    setZoomValue(value);
+    const track = trackRef.current;
+    if (!track) return;
+    try {
+      await track.applyConstraints({ advanced: [{ zoom: value } as unknown as MediaTrackConstraintSet] });
+    } catch (err) {
+      console.warn("Zoom not applied:", err);
     }
-  }, []);
+  }
+
+  // Apply exposure if supported; otherwise use CSS brightness filter fallback
+  async function applyExposure(value: number) {
+    setExposureValue(value);
+    const track = trackRef.current;
+    if (!track) return;
+    try {
+      await track.applyConstraints({ advanced: [{ exposureCompensation: value } as unknown as MediaTrackConstraintSet] });
+      setBrightnessFilter(1);
+    } catch {
+      // Fallback: CSS filter on video — normalize to 0.5…1.8
+      const range = exposureCap ? exposureCap.max - exposureCap.min : 4;
+      const norm = 1 + (value / range) * 0.8;
+      setBrightnessFilter(Math.max(0.5, Math.min(1.8, norm)));
+    }
+  }
 
   function saveDraft(updated: PhotoItem[]) {
     const raw = localStorage.getItem("claim_draft");
@@ -161,13 +249,22 @@ export default function CameraPage() {
     saveDraft(updated);
   }
 
-  const brightnessGood = brightness >= 60;
-  const tiltGood = tilt === null || tilt <= 25;
+  const brightnessLabel =
+    brightnessState === "good" ? "☀️ Свет OK"
+    : brightnessState === "bad" ? "🌑 Темно"
+    : "☀️ Оценка…";
+  const tiltLabel =
+    tiltState === "good" ? "📱 Ровно ✓"
+    : tiltState === "bad" ? "📱 Наклон"
+    : "📱 Проверка…";
 
   return (
     <main className="min-h-screen bg-black flex flex-col">
-      {/* Header — safe area top so Dynamic Island doesn't cover it */}
-      <div className="flex items-center justify-between px-4 pb-3 bg-black/80 z-10" style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top, 0px))' }}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-4 pb-3 bg-black/80 z-10"
+        style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top, 0px))' }}
+      >
         <button onClick={() => router.back()} className="text-white/70 p-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -193,6 +290,7 @@ export default function CameraPage() {
               playsInline
               muted
               className="w-full h-full object-cover"
+              style={{ filter: `brightness(${brightnessFilter})` }}
             />
             {/* Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-between py-6 pointer-events-none">
@@ -200,6 +298,15 @@ export default function CameraPage() {
               <div className="flex-1 flex items-center justify-center w-full">
                 <div className="border-2 border-white/60 rounded-lg w-4/5 aspect-video" />
               </div>
+
+              {/* Gyro permission prompt */}
+              {gyroNeedsPermission && (
+                <div className="bg-black/70 text-white text-xs rounded-full px-3 py-1.5 pointer-events-auto">
+                  <button onClick={requestGyroPermission}>
+                    📱 Включить индикатор наклона
+                  </button>
+                </div>
+              )}
 
               {/* Indicators */}
               <div className="space-y-1.5 w-full px-6">
@@ -209,20 +316,20 @@ export default function CameraPage() {
                   </div>
                 )}
                 <div className="flex justify-center gap-2 flex-wrap">
-                  <span className={`text-xs rounded-full px-2.5 py-1 ${
-                    brightnessGood ? "bg-green-600/80 text-white" : "bg-red-600/80 text-white"
+                  <span className={`text-xs rounded-full px-2.5 py-1 transition-colors ${
+                    brightnessState === "good" ? "bg-green-600/80 text-white"
+                    : brightnessState === "bad" ? "bg-red-600/80 text-white"
+                    : "bg-black/50 text-white/80"
                   }`}>
-                    {brightnessGood ? "☀️ Свет OK" : "🌑 Темно"}
+                    {brightnessLabel}
                   </span>
-                  {gyroAvailable ? (
-                    <span className={`text-xs rounded-full px-2.5 py-1 ${
-                      tiltGood ? "bg-green-600/80 text-white" : "bg-yellow-500/80 text-white"
+                  {gyroAvailable && (
+                    <span className={`text-xs rounded-full px-2.5 py-1 transition-colors ${
+                      tiltState === "good" ? "bg-green-600/80 text-white"
+                      : tiltState === "bad" ? "bg-yellow-500/80 text-white"
+                      : "bg-black/50 text-white/80"
                     }`}>
-                      {tiltGood ? "📱 Вертикально ✓" : `📱 Наклон ${Math.round(tilt ?? 0)}°`}
-                    </span>
-                  ) : (
-                    <span className="text-xs rounded-full px-2.5 py-1 bg-black/60 text-white/80">
-                      📱 Держите вертикально
+                      {tiltLabel}
                     </span>
                   )}
                 </div>
@@ -231,15 +338,49 @@ export default function CameraPage() {
           </>
         )}
 
-        {/* Hidden canvases */}
         <canvas ref={canvasRef} className="hidden" />
-        <canvas ref={overlayRef} className="hidden" />
       </div>
 
       {/* Toast */}
       {toast && (
         <div className="absolute top-24 left-1/2 -translate-x-1/2 bg-black/80 text-white text-sm px-4 py-2 rounded-full z-50 whitespace-nowrap">
           {toast}
+        </div>
+      )}
+
+      {/* Zoom & Exposure sliders */}
+      {(zoomCap || exposureCap) && !cameraError && (
+        <div className="bg-black/90 px-4 py-2 space-y-2">
+          {zoomCap && (
+            <div className="flex items-center gap-2">
+              <ZoomIn className="w-4 h-4 text-white/70 shrink-0" />
+              <input
+                type="range"
+                min={zoomCap.min}
+                max={zoomCap.max}
+                step={zoomCap.step}
+                value={zoomValue}
+                onChange={(e) => applyZoom(parseFloat(e.target.value))}
+                className="flex-1 accent-[#21A038]"
+              />
+              <span className="text-xs text-white/70 w-10 text-right">{zoomValue.toFixed(1)}x</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Sun className="w-4 h-4 text-white/70 shrink-0" />
+            <input
+              type="range"
+              min={exposureCap ? exposureCap.min : -2}
+              max={exposureCap ? exposureCap.max : 2}
+              step={exposureCap ? exposureCap.step : 0.1}
+              value={exposureValue}
+              onChange={(e) => applyExposure(parseFloat(e.target.value))}
+              className="flex-1 accent-[#21A038]"
+            />
+            <span className="text-xs text-white/70 w-10 text-right">
+              {exposureValue > 0 ? `+${exposureValue.toFixed(1)}` : exposureValue.toFixed(1)}
+            </span>
+          </div>
         </div>
       )}
 
@@ -267,24 +408,19 @@ export default function CameraPage() {
         </div>
       )}
 
-      {/* Controls — safe area bottom so home indicator doesn't cover buttons */}
-      <div className="bg-black px-6 flex items-center justify-between gap-4" style={{ paddingTop: '1.25rem', paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}>
-        {/* Upload from gallery */}
+      {/* Controls */}
+      <div
+        className="bg-black px-6 flex items-center justify-between gap-4"
+        style={{ paddingTop: '1.25rem', paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 2.5rem))' }}
+      >
         <label className="flex flex-col items-center gap-1 cursor-pointer">
           <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center">
             <Upload className="w-5 h-5 text-white" />
           </div>
           <span className="text-xs text-white/50">Галерея</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleFileUpload}
-          />
+          <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileUpload} />
         </label>
 
-        {/* Shutter */}
         <button
           onClick={handleCapture}
           disabled={capturing || photos.length >= MAX_PHOTOS || !!cameraError}
@@ -297,7 +433,6 @@ export default function CameraPage() {
           )}
         </button>
 
-        {/* Next — arrow right, enabled when ≥1 photo */}
         <button
           onClick={() => router.push("/flow/review")}
           disabled={photos.length === 0}

@@ -21,7 +21,6 @@ export default function FloodPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     floor: "",
-    source_floor: "",
     event_date: "",
     affected_area_m2: "",
     ceiling_height: "2.7",
@@ -39,7 +38,6 @@ export default function FloodPage() {
         setForm((prev) => ({
           ...prev,
           floor: String(f.floor ?? ""),
-          source_floor: String(f.source_floor ?? ""),
           event_date: f.event_date ?? "",
           affected_area_m2: String(f.affected_area_m2 ?? ""),
           ceiling_height: String(f.ceiling_height ?? "2.7"),
@@ -61,7 +59,6 @@ export default function FloodPage() {
     draft.flood = {
       ...draft.flood,
       floor: parseInt(updated.floor) || undefined,
-      source_floor: parseInt(updated.source_floor) || undefined,
       event_date: updated.event_date || undefined,
       affected_area_m2: parseFloat(updated.affected_area_m2) || undefined,
       ceiling_height: h,
@@ -81,7 +78,6 @@ export default function FloodPage() {
   function validate() {
     const errs: Record<string, string> = {};
     if (!form.floor) errs.floor = "Укажите этаж";
-    if (!form.source_floor) errs.source_floor = "Укажите этаж источника";
     if (!form.event_date) errs.event_date = "Укажите дату события";
     if (!form.affected_area_m2 || parseFloat(form.affected_area_m2) <= 0)
       errs.affected_area_m2 = "Укажите площадь повреждений";
@@ -128,22 +124,6 @@ export default function FloodPage() {
             className={errors.floor ? "border-red-400" : ""}
           />
           {errors.floor && <p className="text-xs text-red-500">{errors.floor}</p>}
-        </div>
-
-        {/* Source floor */}
-        <div className="space-y-1.5">
-          <Label htmlFor="source_floor">Этаж, с которого пришла вода *</Label>
-          <Input
-            id="source_floor"
-            type="number"
-            placeholder="6"
-            min={1}
-            max={100}
-            value={form.source_floor}
-            onChange={(e) => update("source_floor", e.target.value)}
-            className={errors.source_floor ? "border-red-400" : ""}
-          />
-          {errors.source_floor && <p className="text-xs text-red-500">{errors.source_floor}</p>}
         </div>
 
         {/* Event date */}
@@ -240,7 +220,7 @@ export default function FloodPage() {
           </div>
         </div>
 
-        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 2.5rem))' }}>
+        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
           <Button variant="outline" onClick={() => router.back()} className="flex-1">
             Назад
           </Button>

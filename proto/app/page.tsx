@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generateId } from "@/lib/utils";
 import type { DraftState } from "@/types";
-import { ShieldCheck, AlertTriangle } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Settings } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -48,7 +49,17 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white">
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white pt-safe relative">
+      {/* Admin link */}
+      <Link
+        href="/admin"
+        className="absolute right-4 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        style={{ top: 'max(1rem, env(safe-area-inset-top, 1rem))' }}
+      >
+        <Settings className="w-3.5 h-3.5" />
+        Админка
+      </Link>
+
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="text-center">

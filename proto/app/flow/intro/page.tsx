@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { DraftState, EventType } from "@/types";
 import regionData from "@/data/region_coefficients.json";
+import { formatPhone, normalizePhoneDigits } from "@/lib/utils";
 
 const REGIONS = Object.entries(regionData.regions).map(([key, val]) => ({
   key,
@@ -40,7 +41,13 @@ export default function IntroPage() {
     last_renovation_year: String(new Date().getFullYear() - 5),
     event_type: "" as EventType | "",
     finish_level: "standard",
+    incident_description: "",
   });
+
+  // Address autocomplete
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("claim_draft");
@@ -50,13 +57,14 @@ export default function IntroPage() {
         setForm((prev) => ({
           ...prev,
           name: draft.intro?.name ?? "",
-          phone: draft.intro?.phone ?? "",
+          phone: draft.intro?.phone ? formatPhone(draft.intro.phone) : "",
           region: draft.intro?.region ?? "moscow",
           address: draft.intro?.address ?? "",
           apartment_area_m2: String(draft.intro?.apartment_area_m2 ?? ""),
           last_renovation_year: String(draft.intro?.last_renovation_year ?? prev.last_renovation_year),
           event_type: (draft.intro?.event_type as EventType) ?? "",
           finish_level: draft.intro?.finish_level ?? "standard",
+          incident_description: draft.intro?.incident_description ?? "",
         }));
       }
     }
@@ -69,34 +77,65 @@ export default function IntroPage() {
     draft.intro = {
       ...draft.intro,
       name: updated.name,
-      phone: updated.phone,
+      phone: normalizePhoneDigits(updated.phone), // store raw digits
       region: updated.region,
       address: updated.address,
       apartment_area_m2: parseFloat(updated.apartment_area_m2) || undefined,
       last_renovation_year: parseInt(updated.last_renovation_year) || undefined,
       event_type: updated.event_type as EventType || undefined,
       finish_level: updated.finish_level as "econom" | "standard" | "comfort" | "premium",
+      incident_description: updated.incident_description || undefined,
     };
     localStorage.setItem("claim_draft", JSON.stringify(draft));
   }
 
   function update(field: string, value: string) {
-    const updated = { ...form, [field]: value };
+    let v = value;
+    if (field === "phone") v = formatPhone(value);
+    const updated = { ...form, [field]: v };
     setForm(updated);
     saveDraft(updated);
     if (errors[field]) setErrors((e) => ({ ...e, [field]: "" }));
   }
 
+  // Fetch DaData suggestions (debounced)
+  function handleAddressChange(value: string) {
+    update("address", value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (value.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/suggest-address?q=${encodeURIComponent(value)}`);
+        const data = await res.json();
+        const items = ((data.suggestions as { value: string }[] | undefined) ?? []).map((s) => s.value);
+        setSuggestions(items);
+        setShowSuggestions(items.length > 0);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 250);
+  }
+
+  function pickSuggestion(s: string) {
+    update("address", s);
+    setShowSuggestions(false);
+  }
+
   function validate() {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = "Укажите ФИО";
-    if (!form.phone.trim()) errs.phone = "Укажите телефон";
+    if (normalizePhoneDigits(form.phone).length !== 10) errs.phone = "Телефон должен содержать 10 цифр";
     if (!form.address.trim()) errs.address = "Укажите адрес";
     if (!form.apartment_area_m2 || parseFloat(form.apartment_area_m2) <= 0)
       errs.apartment_area_m2 = "Укажите площадь";
     if (!form.last_renovation_year || parseInt(form.last_renovation_year) < 1950)
       errs.last_renovation_year = "Укажите год ремонта";
     if (!form.event_type) errs.event_type = "Выберите тип события";
+    if (!form.incident_description.trim()) errs.incident_description = "Опишите, что произошло";
     return errs;
   }
 
@@ -109,7 +148,6 @@ export default function IntroPage() {
     if (form.event_type === "flood") {
       router.push("/flow/flood");
     } else {
-      // Save non-flood case and go to thank-you
       const raw = localStorage.getItem("claim_draft");
       const draft: DraftState = raw ? JSON.parse(raw) : { id: "", created_at: "", current_step: "intro" };
       draft.current_step = "result";
@@ -120,7 +158,6 @@ export default function IntroPage() {
 
   return (
     <main className="min-h-screen bg-white pt-safe">
-      {/* Progress bar */}
       <div className="bg-[#21A038] h-1.5">
         <div className="bg-white/40 h-full" style={{ width: "28%" }} />
       </div>
@@ -144,15 +181,17 @@ export default function IntroPage() {
           {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
         </div>
 
-        {/* Phone */}
+        {/* Phone — auto-formats, +7 prepended automatically */}
         <div className="space-y-1.5">
           <Label htmlFor="phone">Телефон *</Label>
           <Input
             id="phone"
             type="tel"
+            inputMode="tel"
             placeholder="+7 (999) 123-45-67"
             value={form.phone}
             onChange={(e) => update("phone", e.target.value)}
+            maxLength={18}
             className={errors.phone ? "border-red-400" : ""}
           />
           {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
@@ -173,16 +212,32 @@ export default function IntroPage() {
           </Select>
         </div>
 
-        {/* Address */}
-        <div className="space-y-1.5">
+        {/* Address with DaData autocomplete */}
+        <div className="space-y-1.5 relative">
           <Label htmlFor="address">Адрес пострадавшего объекта *</Label>
           <Input
             id="address"
-            placeholder="ул. Ленина, д. 1, кв. 23"
+            placeholder="Начните вводить: Москва, ул. Ленина…"
             value={form.address}
-            onChange={(e) => update("address", e.target.value)}
+            onChange={(e) => handleAddressChange(e.target.value)}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             className={errors.address ? "border-red-400" : ""}
+            autoComplete="off"
           />
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {suggestions.map((s, i) => (
+                <li
+                  key={i}
+                  onMouseDown={() => pickSuggestion(s)}
+                  className="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                >
+                  {s}
+                </li>
+              ))}
+            </ul>
+          )}
           {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
         </div>
 
@@ -192,6 +247,7 @@ export default function IntroPage() {
           <Input
             id="area"
             type="number"
+            inputMode="numeric"
             placeholder="54"
             min={5}
             max={2000}
@@ -208,6 +264,7 @@ export default function IntroPage() {
           <Input
             id="renovation"
             type="number"
+            inputMode="numeric"
             placeholder="2018"
             min={1950}
             max={new Date().getFullYear()}
@@ -254,7 +311,23 @@ export default function IntroPage() {
           )}
         </div>
 
-        <div className="pt-4" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 2.5rem))' }}>
+        {/* Description — free text context from the client */}
+        <div className="space-y-1.5">
+          <Label htmlFor="desc">Что произошло? *</Label>
+          <textarea
+            id="desc"
+            placeholder="Опишите событие: когда произошло, что пострадало, откуда вода / что повреждено…"
+            value={form.incident_description}
+            onChange={(e) => update("incident_description", e.target.value)}
+            rows={4}
+            className={`flex w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none ${
+              errors.incident_description ? "border-red-400" : "border-input"
+            }`}
+          />
+          {errors.incident_description && <p className="text-xs text-red-500">{errors.incident_description}</p>}
+        </div>
+
+        <div className="pt-4" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
           <Button onClick={handleNext} size="lg" className="w-full">
             Далее
           </Button>

@@ -59,7 +59,7 @@ function computeVolume(
       if (code.includes("POT") || code.includes("CEIL")) return S;
       return S_walls;
 
-    case "WALLP":
+    case "WALL":
       // Wallpaper
       return S_walls;
 
@@ -67,15 +67,12 @@ function computeVolume(
       // Floor works
       return S;
 
-    case "CEIL":
-      // Ceiling works
-      return S;
-
     case "DOOR":
       return Math.max(1, Math.round(P / 6));
 
     case "TRIM":
-      return P;
+      // TRIM-001 (floor), TRIM-002 (ceiling), TRIM-003 (door casing)
+      return code === "TRIM-003" ? Math.max(1, Math.round(P / 6)) : P;
 
     default: {
       // Fallback: use average area estimate from Claude photos
@@ -87,21 +84,23 @@ function computeVolume(
   }
 }
 
-// Map work codes to material codes
+// Map work codes (from works_catalog.json) to material codes (from materials_catalog.json)
 const WORK_TO_MATERIALS: Record<string, string[]> = {
-  "PREP-001": ["MAT-ANT", "MAT-PRIMER"],
-  "PREP-002": ["MAT-PRIMER"],
-  "LEVEL-001": ["MAT-PLASTER"],
-  "LEVEL-002": ["MAT-PUTTY"],
-  "LEVEL-003": ["MAT-PUTTY"],
-  "LEVEL-004": ["MAT-PLASTER", "MAT-PUTTY"],
-  "PAINT-001": ["MAT-PAINT"],
-  "PAINT-002": ["MAT-PAINT"],
-  "PAINT-003": ["MAT-PAINT"],
-  "WALLP-001": ["MAT-WALLPAPER", "MAT-GLUE"],
-  "FLOOR-001": ["MAT-LAMINATE", "MAT-UNDERLAY"],
-  "FLOOR-002": ["MAT-SCREED"],
-  "TRIM-001": ["MAT-BASEBOARD"],
+  "PREP-001": ["MAT-ANTI-01", "MAT-PRIMER-01"],
+  "PREP-002": ["MAT-PRIMER-01"],
+  "LEVEL-001": ["MAT-PLAST-01"],
+  "LEVEL-002": ["MAT-PLAST-01"],
+  "LEVEL-003": ["MAT-PLAST-01"],
+  "LEVEL-004": ["MAT-FILL-01"],
+  "LEVEL-005": ["MAT-FILL-01"],
+  "PAINT-001": ["MAT-PAINT-01"],
+  "PAINT-002": ["MAT-PAINT-01"],
+  "WALL-001":  ["MAT-WALL-01"],
+  "WALL-002":  ["MAT-WALL-01"],
+  "FLOOR-001": ["MAT-LAM-01", "MAT-UNDER-01"],
+  "DOOR-001":  ["MAT-DOOR-01"],
+  "TRIM-001":  ["MAT-PLINTH-01"],
+  "TRIM-002":  ["MAT-PLINTH-02"],
 };
 
 export function calculate(
@@ -150,12 +149,12 @@ export function calculate(
     });
   }
 
-  // Build material items
+  // Build material items — volume derived from each linked work's computed volume
   const materialItems: MaterialItem[] = [];
   const usedMaterialCodes = new Set<string>();
 
-  for (const workCode of claudeOutput.recommended_works) {
-    const matCodes = WORK_TO_MATERIALS[workCode] ?? [];
+  for (const work of workItems) {
+    const matCodes = WORK_TO_MATERIALS[work.code] ?? [];
     for (const matCode of matCodes) {
       if (usedMaterialCodes.has(matCode)) continue;
       usedMaterialCodes.add(matCode);
@@ -163,10 +162,10 @@ export function calculate(
       const matEntry = catalogs.materials.find((m) => m.code === matCode);
       if (!matEntry) continue;
 
-      // consumption_m2_per_package: how many m² does one package cover
+      // consumption_m2_per_package: coverage per 1 package
+      // (field name is historical — also means "п.м. на упаковку" for плинтус, "шт" for двери)
       const coveredPerPackage = matEntry.consumption_m2_per_package ?? 1;
-      const area = S_walls; // default to wall area; adjust per code if needed
-      const packages = Math.ceil(area / coveredPerPackage);
+      const packages = Math.max(1, Math.ceil(work.volume / coveredPerPackage));
       const volume = packages;
       let unitPrice = Math.round(matEntry.base_price_rub * materialsCoef);
       let total = Math.round(volume * unitPrice);

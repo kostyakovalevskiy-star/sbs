@@ -182,7 +182,7 @@ export default function ReviewPage() {
           </div>
         )}
 
-        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 2.5rem))' }}>
+        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
           <Button variant="outline" onClick={() => router.back()} className="flex-1">
             Назад
           </Button>

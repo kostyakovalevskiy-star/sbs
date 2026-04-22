@@ -35,6 +35,7 @@ export interface IncidentContext {
   apartment_area_m2: number;
   last_renovation_year: number;
   event_type: EventType;
+  incident_description?: string;
   // flood specific
   floor?: number;
   source_floor?: number;
