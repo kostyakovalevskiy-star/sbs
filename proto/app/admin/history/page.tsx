@@ -21,6 +21,13 @@ export default function HistoryPage() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [selectedCase, setSelectedCase] = useState<CaseRecord | null>(null);
+  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
+
+  function showTooltip(e: React.MouseEvent<HTMLElement>, text: string) {
+    if (!text) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    setTooltip({ text, x: r.left, y: r.bottom + 4 });
+  }
 
   useEffect(() => {
     fetch("/api/admin/cases")
@@ -65,6 +72,19 @@ export default function HistoryPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
+      {/* Summary tooltip — fixed-positioned so it's not clipped by table overflow */}
+      {tooltip && (
+        <div
+          role="tooltip"
+          className="fixed z-50 w-80 max-w-[90vw] rounded-lg border border-gray-200 bg-white p-3 text-xs leading-relaxed text-gray-700 shadow-lg pointer-events-none"
+          style={{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }}
+        >
+          <p className="mb-1 text-[10px] uppercase tracking-wide font-semibold text-gray-400">
+            AI-заключение
+          </p>
+          <p className="whitespace-pre-wrap">{tooltip.text}</p>
+        </div>
+      )}
       <header className="bg-white border-b px-4 py-4">
         <span className="font-semibold text-gray-900">Claim Assistant Admin</span>
       </header>
@@ -192,8 +212,18 @@ export default function HistoryPage() {
                     <tr key={c.id} className="border-b last:border-0 hover:bg-gray-50">
                       <td className="px-4 py-3 text-gray-600">{formatDate(c.created_at)}</td>
                       <td className="px-4 py-3">{EVENT_LABELS[c.context.event_type] ?? c.context.event_type}</td>
-                      <td className="px-4 py-3 text-gray-600 max-w-[240px] truncate" title={summary}>
-                        {short || "—"}
+                      <td className="px-4 py-3 text-gray-600 max-w-[240px]">
+                        {summary ? (
+                          <span
+                            className="block truncate cursor-help"
+                            onMouseEnter={(e) => showTooltip(e, summary)}
+                            onMouseLeave={() => setTooltip(null)}
+                          >
+                            {short}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right font-medium">
                         {c.report ? formatRub(c.report.range.base) : "—"}
