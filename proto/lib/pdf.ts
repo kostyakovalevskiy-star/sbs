@@ -142,8 +142,10 @@ function buildHTML(report: Report, context: IncidentContext, photos: string[]): 
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 12px;
-    align-items: start;
+    align-items: stretch;
   }
+  .two-col > .card { height: 100%; display: flex; flex-direction: column; }
+  .two-col > .card > *:last-child { margin-top: auto; }
   .info-grid { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; font-size: 11px; line-height: 1.5; }
   .info-label { color: #8a8a8a; }
   .info-value { color: #1a1a1a; }
