@@ -66,112 +66,250 @@ function buildHTML(report: Report, context: IncidentContext, photos: string[]): 
 <head>
 <meta charset="UTF-8">
 <title>Отчёт об оценке ущерба — ${caseId}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 12px; color: #111; padding: 24px; max-width: 800px; margin: 0 auto; }
-  .header { background: #21A038; color: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
-  .header-left h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .amount { font-size: 30px; font-weight: 800; }
-  .range { font-size: 12px; opacity: 0.85; margin-top: 2px; }
-  .header-right { text-align: right; font-size: 11px; opacity: 0.85; }
-  .disclaimer { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #7b5e00; margin-bottom: 16px; }
-  h2 { font-size: 13px; font-weight: 700; color: #21A038; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; margin: 16px 0 8px; }
-  .info-grid { display: grid; grid-template-columns: 130px 1fr; gap: 4px 10px; font-size: 11px; }
-  .info-label { color: #666; }
+  html, body { background: #f5f6f7; }
+  body {
+    font-family: "Golos Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 12px;
+    color: #1a1a1a;
+    padding: 24px;
+    max-width: 860px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hero */
+  .hero {
+    background: #21A038;
+    color: #fff;
+    border-radius: 24px;
+    padding: 28px 32px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-weight: 700; font-size: 13px; letter-spacing: 0.02em; opacity: 0.9; }
+  .hero-logo { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; }
+  .hero-label { font-size: 13px; opacity: 0.85; margin-bottom: 6px; font-weight: 500; }
+  .hero-amount { font-size: 42px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .hero-range { font-size: 12px; opacity: 0.85; margin-top: 8px; }
+  .hero-meta { text-align: right; font-size: 11px; opacity: 0.9; line-height: 1.6; }
+  .hero-meta strong { font-weight: 600; font-size: 12px; display: block; }
+
+  /* Generic card */
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .card-sm { padding: 14px 18px; }
+
+  /* Disclaimer */
+  .disclaimer {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-size: 11px;
+    color: #7b5e00;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .disclaimer-icon { width: 32px; height: 32px; background: #fff8e1; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .disclaimer-text strong { color: #1a1a1a; font-size: 12px; display: block; margin-bottom: 2px; }
+
+  /* Two-column grid */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: start;
+  }
+  .info-grid { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; font-size: 11px; line-height: 1.5; }
+  .info-label { color: #8a8a8a; }
+  .info-value { color: #1a1a1a; }
   .info-value-block { white-space: pre-wrap; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; align-items: start; }
-  .two-col h2 { margin-top: 0; }
-  .summary-box { background: #f5faf6; border-radius: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.5; color: #333; margin-bottom: 6px; }
-  .confidence { font-size: 11px; color: #666; }
-  .photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
-  .photos img { width: 100%; height: 450px; border-radius: 4px; object-fit: cover; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 4px; }
-  th { background: #f0f0f0; text-align: left; padding: 5px 8px; border-bottom: 2px solid #ccc; font-size: 10px; text-transform: uppercase; color: #555; }
-  td { padding: 5px 8px; border-bottom: 1px solid #eee; }
-  .total-row td { background: #f0f8f1; font-weight: 700; }
-  .mono { font-family: monospace; color: #888; font-size: 10px; }
+
+  /* AI Summary */
+  .summary-text { font-size: 12px; line-height: 1.55; color: #333; margin-bottom: 10px; }
+  .source-line { font-size: 11px; color: #666; line-height: 1.5; padding-top: 8px; border-top: 1px solid #eceef0; }
+  .source-line strong { color: #1a1a1a; font-weight: 600; }
+  .confidence-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #e8f5ea; color: #21A038;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    margin-top: 10px;
+  }
+
+  /* Photos */
+  .photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .photos img { width: 100%; height: 320px; border-radius: 14px; object-fit: cover; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th {
+    text-align: left;
+    padding: 10px 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8a8a8a;
+    font-weight: 600;
+    border-bottom: 1px solid #eceef0;
+  }
+  td { padding: 10px 10px; border-bottom: 1px solid #f3f4f5; color: #1a1a1a; }
+  tr:last-child td { border-bottom: none; }
+  .total-row td { background: #f5f6f7; font-weight: 700; border-bottom: none; }
+  .total-row td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+  .total-row td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+  .mono { font-family: "SFMono-Regular", Menlo, Consolas, monospace; color: #a0a0a0; font-size: 10px; }
   .right { text-align: right; }
   .center { text-align: center; }
   .bold { font-weight: 700; }
-  .total-box { background: #21A038; color: #fff; border-radius: 8px; padding: 14px 20px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-  .total-box .label { font-size: 12px; opacity: 0.85; }
-  .total-box .value { font-size: 22px; font-weight: 800; }
-  .total-box .sub { font-size: 11px; opacity: 0.75; margin-top: 2px; }
-  .expert-warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #856404; margin-top: 12px; }
-  .footer { font-size: 10px; color: #aaa; margin-top: 16px; text-align: center; }
+
+  /* Total box */
+  .total-box {
+    background: #21A038;
+    color: #fff;
+    border-radius: 24px;
+    padding: 24px 28px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  .total-box .label { font-size: 12px; opacity: 0.85; margin-bottom: 4px; font-weight: 500; }
+  .total-box .value { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .total-box .sub { font-size: 11px; opacity: 0.8; margin-top: 6px; }
+  .total-box .breakdown { text-align: right; font-size: 12px; opacity: 0.9; }
+  .total-box .breakdown strong { font-size: 14px; font-weight: 700; opacity: 1; }
+
+  /* Expert warning */
+  .expert-warning {
+    background: #fff3cd;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-size: 11px;
+    color: #856404;
+    margin-top: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .expert-warning-icon { width: 32px; height: 32px; background: #fff8e1; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+
+  .footer { font-size: 10px; color: #a0a0a0; margin-top: 18px; text-align: center; letter-spacing: 0.02em; }
+
   @media print {
-    body { padding: 12px; }
-    .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .total-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { padding: 12px; background: #f5f6f7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .hero, .total-box, .card, .disclaimer, .expert-warning { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .photos img { height: 260px; }
+    .two-col { gap: 10px; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <h1>Claim Assistant</h1>
-    <div class="amount">${rub(report.range.base)}</div>
-    <div class="range">Диапазон: ${rub(report.range.min)} — ${rub(report.range.max)} (±${Math.round(report.sigma * 100)}%)</div>
+<div class="hero">
+  <div>
+    <div class="hero-brand"><span class="hero-logo">S</span> Claim Assistant · Отчёт</div>
+    <div class="hero-label">Предварительная оценка ущерба</div>
+    <div class="hero-amount">${rub(report.range.base)}</div>
+    <div class="hero-range">Диапазон: ${rub(report.range.min)} — ${rub(report.range.max)} · ±${Math.round(report.sigma * 100)}%</div>
   </div>
-  <div class="header-right">
-    Кейс&nbsp;${caseId}<br>${date}
+  <div class="hero-meta">
+    <strong>Кейс ${caseId}</strong>
+    ${date}
   </div>
 </div>
 
 <div class="disclaimer">
-  ⚠ Прототип — данные не передаются в страховую компанию. Используется для UX-тестирования.
+  <span class="disclaimer-icon">⚠</span>
+  <div class="disclaimer-text">
+    <strong>Прототип</strong>
+    Данные не передаются в страховую компанию. Используется для UX-тестирования и демонстрации.
+  </div>
 </div>
 
 <div class="two-col">
-  <div>
+  <div class="card">
     <h2>Данные клиента и инцидента</h2>
     <div class="info-grid">
-      <span class="info-label">ФИО</span><span>${context.name || "—"}</span>
-      <span class="info-label">Телефон</span><span>${context.phone || "—"}</span>
-      <span class="info-label">Адрес</span><span>${context.address || "—"}</span>
-      <span class="info-label">Площадь квартиры</span><span>${context.apartment_area_m2} м²</span>
-      <span class="info-label">Площадь ущерба</span><span>${report.area_pick?.value ?? context.affected_area_m2 ?? "—"} м²</span>
-      <span class="info-label">Год ремонта</span><span>${context.last_renovation_year}</span>
-      <span class="info-label">Категория ущерба</span><span>${eventTypeLabel}</span>
-      ${context.event_date ? `<span class="info-label">Дата события</span><span>${context.event_date}</span>` : ""}
-      <span class="info-label">Описание инцидента</span><span class="info-value-block">${context.incident_description || "—"}</span>
+      <span class="info-label">ФИО</span><span class="info-value">${context.name || "—"}</span>
+      <span class="info-label">Телефон</span><span class="info-value">${context.phone || "—"}</span>
+      <span class="info-label">Адрес</span><span class="info-value">${context.address || "—"}</span>
+      <span class="info-label">Площадь квартиры</span><span class="info-value">${context.apartment_area_m2} м²</span>
+      <span class="info-label">Площадь ущерба</span><span class="info-value">${report.area_pick?.value ?? context.affected_area_m2 ?? "—"} м²</span>
+      <span class="info-label">Год ремонта</span><span class="info-value">${context.last_renovation_year}</span>
+      <span class="info-label">Категория ущерба</span><span class="info-value">${eventTypeLabel}</span>
+      ${context.event_date ? `<span class="info-label">Дата события</span><span class="info-value">${context.event_date}</span>` : ""}
+      <span class="info-label">Описание инцидента</span><span class="info-value info-value-block">${context.incident_description || "—"}</span>
     </div>
   </div>
-  <div>
+  <div class="card">
     <h2>AI-заключение</h2>
-    <div class="summary-box">${report.claude_output.summary || "—"}</div>
-    <div class="confidence">Уверенность AI: ${confidence}%</div>
+    <div class="summary-text">${report.claude_output.summary || "—"}</div>
+    ${report.area_pick ? `<div class="source-line"><strong>Площадь повреждений:</strong> ${report.area_pick.value} м² — источник: ${report.area_pick.source || "не указан"}</div>` : ""}
+    <div class="confidence-chip">Уверенность AI · ${confidence}%</div>
   </div>
 </div>
 
-${photos.length > 0 ? `<h2>Фотографии (${photosToShow.length} из ${photos.length})</h2><div class="photos">${photoImgs}</div>` : ""}
+${photos.length > 0 ? `
+<div class="card">
+  <h2>Фотографии (${photosToShow.length} из ${photos.length})</h2>
+  <div class="photos">${photoImgs}</div>
+</div>` : ""}
 
 ${report.works.length > 0 ? `
-<h2>Перечень работ</h2>
-<table>
-  <thead><tr><th>Код</th><th>Наименование</th><th>Объём</th><th class="right">Цена/ед.</th><th class="right">Итого</th></tr></thead>
-  <tbody>
-    ${worksRows}
-    <tr class="total-row">
-      <td colspan="4" class="right">Итого работы:</td>
-      <td class="right">${rub(worksTotal)}</td>
-    </tr>
-  </tbody>
-</table>` : ""}
+<div class="card">
+  <h2>Перечень работ</h2>
+  <table>
+    <thead><tr><th>Код</th><th>Наименование</th><th class="center">Объём</th><th class="right">Цена / ед.</th><th class="right">Итого</th></tr></thead>
+    <tbody>
+      ${worksRows}
+      <tr class="total-row">
+        <td colspan="4" class="right">Итого работы:</td>
+        <td class="right">${rub(worksTotal)}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>` : ""}
 
 ${report.materials.length > 0 ? `
-<h2>Материалы</h2>
-<table>
-  <thead><tr><th>Код</th><th>Наименование</th><th>Объём</th><th class="right">Цена/ед.</th><th class="right">Итого</th></tr></thead>
-  <tbody>
-    ${matsRows}
-    <tr class="total-row">
-      <td colspan="4" class="right">Итого материалы:</td>
-      <td class="right">${rub(matsTotal)}</td>
-    </tr>
-  </tbody>
-</table>` : ""}
+<div class="card">
+  <h2>Материалы</h2>
+  <table>
+    <thead><tr><th>Код</th><th>Наименование</th><th class="center">Объём</th><th class="right">Цена / ед.</th><th class="right">Итого</th></tr></thead>
+    <tbody>
+      ${matsRows}
+      <tr class="total-row">
+        <td colspan="4" class="right">Итого материалы:</td>
+        <td class="right">${rub(matsTotal)}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>` : ""}
 
 <div class="total-box">
   <div>
@@ -179,19 +317,20 @@ ${report.materials.length > 0 ? `
     <div class="value">${rub(report.range.base)}</div>
     <div class="sub">Диапазон: ${rub(report.range.min)} — ${rub(report.range.max)}</div>
   </div>
-  <div style="text-align:right">
+  <div class="breakdown">
     <div class="label">Работы + материалы</div>
-    <div style="font-size:14px;font-weight:700">${rub(worksTotal)} + ${rub(matsTotal)}</div>
+    <strong>${rub(worksTotal)} + ${rub(matsTotal)}</strong>
   </div>
 </div>
 
 ${report.routed_to_expert ? `
 <div class="expert-warning">
-  ⚠ Кейс передан эксперту — сумма превышает порог автоматического урегулирования.
+  <span class="expert-warning-icon">⚠</span>
+  <div>Кейс передан эксперту — сумма превышает порог автоматического урегулирования.</div>
 </div>` : ""}
 
 <div class="footer">
-  Сформировано автоматически системой Claim Assistant · ${new Date().toLocaleString("ru-RU")} · Кейс ${caseId}
+  Сформировано автоматически · ${new Date().toLocaleString("ru-RU")} · Кейс ${caseId}
 </div>
 
 </body>

@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: "Claim Assistant",
   description: "Зафиксируйте страховое событие и получите предварительную оценку ущерба",
   manifest: "/manifest.json",
+  // Favicon и apple-touch-icon подхватываются автоматически
+  // через /app/icon.svg и /app/apple-icon.tsx (Next.js App Router convention).
 };
 
 export const viewport: Viewport = {
