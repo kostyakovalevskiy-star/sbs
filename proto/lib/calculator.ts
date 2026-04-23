@@ -86,6 +86,7 @@ function computeVolume(code: string, A: number, P: number): number {
     case "PAINT":
     case "WALL":
     case "FLOOR":
+    case "CEIL":
       return A;
 
     case "DOOR":
@@ -121,6 +122,12 @@ const WORK_TO_MATERIALS: Record<string, string[]> = {
   "DOOR-001":  ["MAT-DOOR-01"],
   "TRIM-001":  ["MAT-PLINTH-01"],
   "TRIM-002":  ["MAT-PLINTH-02"],
+  // Натяжной потолок ПВХ: полотно + алюминиевый багет по периметру
+  "CEIL-001":  ["MAT-PVC-CEIL-01", "MAT-PVC-BAGUET-01"],
+  // Подвесной потолок ГКЛ: каркас → обшивка → стыки
+  "CEIL-002":  ["MAT-PROFILE-CEIL-01"],
+  "CEIL-003":  ["MAT-GKL-CEIL-01"],
+  "CEIL-004":  ["MAT-GKL-JOINT-01"],
 };
 
 export function calculate(

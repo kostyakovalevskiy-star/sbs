@@ -313,6 +313,72 @@
       "samples_rub": [1100, 1400, 1800],
       "service_life_years": 15,
       "finish_class": "comfort"
+    },
+    {
+      "code": "MAT-PVC-CEIL-01",
+      "name": "Полотно натяжного потолка ПВХ, белое матовое (MSD/Pongs класса стандарт)",
+      "category": "ceiling",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 450,
+      "samples_rub": [350, 450, 580],
+      "service_life_years": 15,
+      "finish_class": "standard"
+    },
+    {
+      "code": "MAT-PVC-BAGUET-01",
+      "name": "Багет алюминиевый для натяжного потолка (гарпунная система, расчёт на 1 м² потолка)",
+      "category": "ceiling",
+      "package_unit": "комплект",
+      "package_amount": 1,
+      "package_unit_label": "комплект на 1 м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 215,
+      "samples_rub": [160, 215, 290],
+      "service_life_years": 20,
+      "finish_class": "standard",
+      "notes": "Цена ~1.4 п.м. багета (расход на периметр при квадратном помещении) × средняя цена 150 ₽/п.м."
+    },
+    {
+      "code": "MAT-GKL-CEIL-01",
+      "name": "Гипсокартонный лист ГКЛ потолочный, 9.5 мм (1.2×2.5 м = 3 м²)",
+      "category": "ceiling",
+      "package_unit": "лист",
+      "package_amount": 3,
+      "package_unit_label": "лист 3 м²",
+      "consumption_m2_per_package": 3,
+      "base_price_rub": 440,
+      "samples_rub": [380, 440, 520],
+      "service_life_years": 25,
+      "finish_class": "standard"
+    },
+    {
+      "code": "MAT-PROFILE-CEIL-01",
+      "name": "Комплект профилей и подвесов для подвесного ГКЛ-потолка (CD-60 + UD-27 + подвесы, на 1 м² потолка)",
+      "category": "ceiling",
+      "package_unit": "комплект",
+      "package_amount": 1,
+      "package_unit_label": "комплект на 1 м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 260,
+      "samples_rub": [210, 260, 330],
+      "service_life_years": 25,
+      "finish_class": "standard"
+    },
+    {
+      "code": "MAT-GKL-JOINT-01",
+      "name": "Серпянка + шпаклёвка для стыков ГКЛ (расчёт на 1 м² потолка)",
+      "category": "ceiling",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 55,
+      "samples_rub": [40, 55, 75],
+      "service_life_years": 25,
+      "finish_class": "standard"
     }
   ]
 }

@@ -414,6 +414,67 @@
       "min_price_rub": 2000,
       "max_price_rub": 3500,
       "samples": [2200, 2600, 3000]
+    },
+    {
+      "code": "DEM-008",
+      "name": "Демонтаж натяжного потолка ПВХ (плёнка + багет)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 340,
+      "min_price_rub": 250,
+      "max_price_rub": 450,
+      "samples": [280, 340, 420]
+    },
+    {
+      "code": "DEM-009",
+      "name": "Демонтаж подвесного потолка из гипсокартона (ГКЛ + металлопрофиль)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 430,
+      "min_price_rub": 320,
+      "max_price_rub": 580,
+      "samples": [370, 430, 510]
+    },
+    {
+      "code": "CEIL-001",
+      "name": "Монтаж натяжного потолка ПВХ (одноуровневый, белое матовое полотно, с нагревом)",
+      "category": "ceiling",
+      "unit": "м²",
+      "base_price_rub": 780,
+      "min_price_rub": 600,
+      "max_price_rub": 1050,
+      "samples": [680, 780, 920],
+      "notes": "Цена за работу «под ключ»: монтаж багета, раскрой и нагрев полотна. Полотно и багет — отдельные материалы."
+    },
+    {
+      "code": "CEIL-002",
+      "name": "Монтаж каркаса подвесного потолка (металлопрофиль CD-60 + UD-27, подвесы)",
+      "category": "ceiling",
+      "unit": "м²",
+      "base_price_rub": 580,
+      "min_price_rub": 450,
+      "max_price_rub": 750,
+      "samples": [500, 580, 680]
+    },
+    {
+      "code": "CEIL-003",
+      "name": "Обшивка подвесного потолка гипсокартоном (ГКЛ 9.5 мм, 1 слой)",
+      "category": "ceiling",
+      "unit": "м²",
+      "base_price_rub": 470,
+      "min_price_rub": 360,
+      "max_price_rub": 620,
+      "samples": [400, 470, 550]
+    },
+    {
+      "code": "CEIL-004",
+      "name": "Шпаклёвка и армирование стыков ГКЛ серпянкой (подвесной потолок)",
+      "category": "ceiling",
+      "unit": "м²",
+      "base_price_rub": 170,
+      "min_price_rub": 130,
+      "max_price_rub": 220,
+      "samples": [150, 170, 200]
     }
   ]
 }
