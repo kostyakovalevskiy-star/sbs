@@ -21,7 +21,8 @@ export interface AreaPick {
 
 export function pickAuthoritativeArea(
   claude: ClaudeOutput,
-  declaredAreaM2: number | undefined
+  declaredAreaM2: number | undefined,
+  overridePriority?: number
 ): AreaPick {
   const candidates: Array<AreaEstimate & { priority: number; used: boolean }> = [];
 
@@ -44,7 +45,10 @@ export function pickAuthoritativeArea(
     return { value: 1, source: "нет данных (fallback 1 м²)", candidates: [] };
   }
 
-  const winner = candidates[0];
+  const winner =
+    (typeof overridePriority === "number"
+      ? candidates.find((c) => c.priority === overridePriority)
+      : undefined) ?? candidates[0];
   winner.used = true;
   return { value: winner.value, source: winner.source, candidates };
 }
@@ -123,9 +127,10 @@ export function calculate(
   claudeOutput: ClaudeOutput,
   context: IncidentContext,
   calibration: CalibrationValues,
-  catalogs: Catalogs
+  catalogs: Catalogs,
+  overridePriority?: number
 ): Report {
-  const areaPick = pickAuthoritativeArea(claudeOutput, context.affected_area_m2);
+  const areaPick = pickAuthoritativeArea(claudeOutput, context.affected_area_m2, overridePriority);
   const S = areaPick.value;
   const h = context.ceiling_height
     ? typeof context.ceiling_height === "number"

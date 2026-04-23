@@ -36,9 +36,10 @@ function extractCalibrationValues(config: CalibrationConfig): CalibrationValues 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { claudeOutput, context } = body as {
+    const { claudeOutput, context, overridePriority } = body as {
       claudeOutput: ClaudeOutput;
       context: IncidentContext;
+      overridePriority?: number;
     };
 
     if (!claudeOutput || !context) {
@@ -55,11 +56,17 @@ export async function POST(req: NextRequest) {
     const materialsCatalog = savedMaterials ?? (materialsCatalogDefault as MaterialsCatalog);
     const regionCoefficients = regionCoefficientsDefault as RegionCoefficients;
 
-    const report = calculate(claudeOutput, context, calibration, {
-      works: worksCatalog.works,
-      materials: materialsCatalog.materials,
-      regions: regionCoefficients,
-    });
+    const report = calculate(
+      claudeOutput,
+      context,
+      calibration,
+      {
+        works: worksCatalog.works,
+        materials: materialsCatalog.materials,
+        regions: regionCoefficients,
+      },
+      overridePriority
+    );
 
     return NextResponse.json({ report });
   } catch (err) {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRub } from "@/lib/utils";
 import type { CaseRecord } from "@/types";
-import { Download, FileText, Home, AlertTriangle } from "lucide-react";
+import { Download, FileText, Home, AlertTriangle, Pencil, Check, Save } from "lucide-react";
 
 export default function ResultPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +14,10 @@ export default function ResultPage() {
   const [caseRecord, setCaseRecord] = useState<CaseRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
+  const [savedPriority, setSavedPriority] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -23,7 +27,7 @@ export default function ResultPage() {
         const draft = JSON.parse(raw);
         if (draft.result?.id === id) {
           // Build partial record from draft
-          setCaseRecord({
+          const rec: CaseRecord = {
             id: draft.id,
             created_at: draft.created_at ?? new Date().toISOString(),
             context: {
@@ -36,7 +40,10 @@ export default function ResultPage() {
             photos_count: draft.photos?.length ?? 0,
             status: draft.result.report?.routed_to_expert ? "expert" : "complete",
             photos: draft.photos?.map((p: { base64: string }) => p.base64),
-          });
+          };
+          setCaseRecord(rec);
+          const usedPrio = rec.report?.area_pick?.candidates.find((c) => c.used)?.priority ?? null;
+          setSavedPriority(usedPrio);
           setLoading(false);
           return;
         }
@@ -46,7 +53,10 @@ export default function ResultPage() {
       try {
         const res = await fetch(`/api/admin/cases/${id}`);
         if (res.ok) {
-          setCaseRecord(await res.json());
+          const rec: CaseRecord = await res.json();
+          setCaseRecord(rec);
+          const usedPrio = rec.report?.area_pick?.candidates.find((c) => c.used)?.priority ?? null;
+          setSavedPriority(usedPrio);
         } else {
           setError("Кейс не найден");
         }
@@ -82,6 +92,76 @@ export default function ResultPage() {
     router.push("/");
   }
 
+  function handleEditParams() {
+    // Draft is already in localStorage — user edits it via /flow/flood, then
+    // /flow/review will POST /api/analyze again and produce a new /result/{id}.
+    router.push("/flow/flood");
+  }
+
+  async function handleSelectArea(priority: number) {
+    if (!caseRecord?.report || recalculating) return;
+    if (report.area_pick?.candidates.find((c) => c.priority === priority)?.used) return;
+
+    setRecalculating(true);
+    setJustSaved(false);
+    try {
+      const res = await fetch("/api/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          claudeOutput: caseRecord.report.claude_output,
+          context: caseRecord.context,
+          overridePriority: priority,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.report) {
+        setCaseRecord({ ...caseRecord, report: data.report });
+      }
+    } catch (err) {
+      console.error("recalc failed", err);
+    } finally {
+      setRecalculating(false);
+    }
+  }
+
+  async function handleSaveSelection() {
+    if (!caseRecord?.report || saving) return;
+
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/cases/${id}/save-report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report: caseRecord.report }),
+      });
+
+      // Always persist to localStorage draft — even if KV-write fails, the
+      // browser view stays consistent with the chosen area.
+      try {
+        const raw = localStorage.getItem("claim_draft");
+        if (raw) {
+          const draft = JSON.parse(raw);
+          if (draft.result?.id === id) {
+            draft.result.report = caseRecord.report;
+            localStorage.setItem("claim_draft", JSON.stringify(draft));
+          }
+        }
+      } catch {}
+
+      if (res.ok) {
+        const usedPrio = caseRecord.report.area_pick?.candidates.find((c) => c.used)?.priority ?? null;
+        setSavedPriority(usedPrio);
+        setJustSaved(true);
+        setTimeout(() => setJustSaved(false), 2500);
+      }
+    } catch (err) {
+      console.error("save failed", err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -105,7 +185,14 @@ export default function ResultPage() {
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-[#21A038] text-white px-4 py-6">
+      <div className="bg-[#21A038] text-white px-4 py-6 relative">
+        <button
+          onClick={handleEditParams}
+          className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 active:bg-white/30 transition-colors rounded-full px-3 py-1.5 text-xs font-medium"
+        >
+          <Pencil className="w-3.5 h-3.5" />
+          Редактировать параметры
+        </button>
         <p className="text-sm opacity-80 mb-1">Предварительная оценка ущерба</p>
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold">{formatRub(report.range.base)}</span>
@@ -158,11 +245,17 @@ export default function ResultPage() {
                   : c.priority === 3 ? "📝 Заявлено клиентом"
                   : "👁 AI визуальная оценка";
                 return (
-                  <div
+                  <button
                     key={i}
-                    className={`flex items-center justify-between p-2 rounded-lg text-sm ${
-                      c.used ? "bg-white border-2 border-[#21A038]" : "bg-gray-50 border border-gray-200"
-                    }`}
+                    type="button"
+                    onClick={() => handleSelectArea(c.priority)}
+                    disabled={recalculating || c.used}
+                    aria-pressed={c.used}
+                    className={`w-full text-left flex items-center justify-between p-2 rounded-lg text-sm transition-all ${
+                      c.used
+                        ? "bg-white border-2 border-[#21A038] cursor-default"
+                        : "bg-gray-50 border border-gray-200 hover:border-[#21A038] hover:bg-white cursor-pointer"
+                    } ${recalculating ? "opacity-60 cursor-wait" : ""}`}
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-gray-700">{label}</p>
@@ -170,17 +263,51 @@ export default function ResultPage() {
                     </div>
                     <div className="text-right shrink-0 ml-2">
                       <p className={`font-bold ${c.used ? "text-[#21A038]" : "text-gray-600"}`}>{c.value} м²</p>
-                      {c.used && <p className="text-xs text-[#21A038]">в расчёте</p>}
+                      {c.used ? (
+                        <p className="text-xs text-[#21A038]">в расчёте</p>
+                      ) : (
+                        <p className="text-xs text-gray-400">выбрать</p>
+                      )}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
             <p className="text-xs text-gray-500 mt-3">
-              Приоритет: Measure &gt; масштабный объект &gt; клиент &gt; AI. Диапазон оценок ущерба:
+              По умолчанию: Measure &gt; масштабный объект &gt; клиент &gt; AI. Можно выбрать источник вручную — расчёт пересчитается. Диапазон оценок:
               от {Math.min(...report.area_pick.candidates.map((c) => c.value))} до
               {" "}{Math.max(...report.area_pick.candidates.map((c) => c.value))} м².
             </p>
+            {(() => {
+              const currentUsedPriority =
+                report.area_pick?.candidates.find((c) => c.used)?.priority ?? null;
+              const isDirty = currentUsedPriority !== null && currentUsedPriority !== savedPriority;
+              if (!isDirty && !justSaved) return null;
+              return (
+                <div className="mt-3 flex items-center justify-between gap-3 pt-3 border-t border-blue-200">
+                  {justSaved ? (
+                    <p className="text-xs text-[#21A038] font-medium flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Выбор сохранён — используется как финальный расчёт
+                    </p>
+                  ) : (
+                    <p className="text-xs text-amber-700">
+                      Выбор отличается от сохранённого. Сохраните, чтобы он попал в отчёт.
+                    </p>
+                  )}
+                  {isDirty && (
+                    <Button
+                      size="sm"
+                      onClick={handleSaveSelection}
+                      disabled={saving || recalculating}
+                      className="gap-1.5 shrink-0"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      {saving ? "Сохранение…" : "Сохранить выбор"}
+                    </Button>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
 
