@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRub, formatDate } from "@/lib/utils";
 import type { CaseRecord } from "@/types";
-import { BarChart3, Settings, Book, History, Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 
 const EVENT_LABELS: Record<string, string> = {
   flood: "Залив",
@@ -63,15 +63,8 @@ export default function HistoryPage() {
     URL.revokeObjectURL(url);
   }
 
-  const navItems = [
-    { href: "/admin", label: "Дашборд", icon: BarChart3 },
-    { href: "/admin/calibration", label: "Калибровка", icon: Settings },
-    { href: "/admin/catalogs", label: "Справочники", icon: Book },
-    { href: "/admin/history", label: "История", icon: History, active: true },
-  ];
-
   return (
-    <main className="min-h-screen bg-gray-50">
+    <>
       {/* Summary tooltip — fixed-positioned so it's not clipped by table overflow */}
       {tooltip && (
         <div
@@ -85,16 +78,6 @@ export default function HistoryPage() {
           <p className="whitespace-pre-wrap">{tooltip.text}</p>
         </div>
       )}
-      <header className="bg-white border-b px-4 py-4">
-        <span className="font-semibold text-gray-900">Claim Assistant Admin</span>
-      </header>
-      <nav className="flex gap-1 px-4 py-2 bg-white border-b overflow-x-auto">
-        {navItems.map(({ href, label, icon: Icon, active }) => (
-          <Link key={href} href={href} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${active ? "bg-[#e8f5ea] text-[#21A038]" : "text-gray-500 hover:text-gray-700"}`}>
-            <Icon className="w-4 h-4" />{label}
-          </Link>
-        ))}
-      </nav>
 
       {/* Case detail modal */}
       {selectedCase && (
@@ -250,6 +233,6 @@ export default function HistoryPage() {
           </div>
         )}
       </div>
-    </main>
+    </>
   );
 }

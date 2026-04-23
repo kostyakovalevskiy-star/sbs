@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { WorkCatalogEntry, MaterialCatalogEntry, CatalogAuditEntry } from "@/types";
-import { BarChart3, Settings, Book, History, Download, Upload, RotateCcw, FileSpreadsheet } from "lucide-react";
+import { History, Download, Upload, RotateCcw, FileSpreadsheet } from "lucide-react";
 import worksCatalogDefault from "@/data/works_catalog.json";
 import materialsCatalogDefault from "@/data/materials_catalog.json";
 
@@ -171,26 +170,8 @@ export default function CatalogsPage() {
     setMaterials((prev) => prev.map((m) => m.code === code ? { ...m, base_price_rub: price } : m));
   }
 
-  const navItems = [
-    { href: "/admin", label: "Дашборд", icon: BarChart3 },
-    { href: "/admin/calibration", label: "Калибровка", icon: Settings },
-    { href: "/admin/catalogs", label: "Справочники", icon: Book, active: true },
-    { href: "/admin/history", label: "История", icon: History },
-  ];
-
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-4 py-4">
-        <span className="font-semibold text-gray-900">Claim Assistant Admin</span>
-      </header>
-      <nav className="flex gap-1 px-4 py-2 bg-white border-b overflow-x-auto">
-        {navItems.map(({ href, label, icon: Icon, active }) => (
-          <Link key={href} href={href} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${active ? "bg-[#e8f5ea] text-[#21A038]" : "text-gray-500 hover:text-gray-700"}`}>
-            <Icon className="w-4 h-4" />{label}
-          </Link>
-        ))}
-      </nav>
-
+    <>
       {/* XLSX Import preview modal */}
       {xlsxPreview && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -397,6 +378,6 @@ export default function CatalogsPage() {
           </div>
         </div>
       )}
-    </main>
+    </>
   );
 }

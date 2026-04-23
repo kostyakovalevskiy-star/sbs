@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRub } from "@/lib/utils";
 import type { CaseRecord } from "@/types";
-import { Download, FileText, Home, AlertTriangle, Pencil, Check, Save, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, FileText, Home, AlertTriangle, Pencil, Check, Save, ChevronDown, ChevronUp, Info } from "lucide-react";
 
 export default function ResultPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +20,19 @@ export default function ResultPage() {
   const [justSaved, setJustSaved] = useState(false);
   const [worksExpanded, setWorksExpanded] = useState(false);
   const [materialsExpanded, setMaterialsExpanded] = useState(false);
+  const [confidenceOpen, setConfidenceOpen] = useState(false);
+  const confidencePopoverRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!confidenceOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (confidencePopoverRef.current && !confidencePopoverRef.current.contains(e.target as Node)) {
+        setConfidenceOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [confidenceOpen]);
 
   useEffect(() => {
     async function load() {
@@ -186,8 +199,8 @@ export default function ResultPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-[#21A038] text-white px-4 py-6 relative">
+      {/* Header — sticky on scroll */}
+      <div className="bg-[#21A038] text-white px-4 py-6 relative sticky top-0 z-20 shadow-md">
         <button
           onClick={handleEditParams}
           className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 active:bg-white/30 transition-colors rounded-full px-3 py-1.5 text-xs font-medium"
@@ -227,11 +240,56 @@ export default function ResultPage() {
         <div className="bg-gray-50 rounded-xl p-4">
           <h2 className="text-sm font-semibold text-gray-700 mb-2">AI-заключение</h2>
           <p className="text-sm text-gray-600 leading-relaxed">{report.claude_output.summary}</p>
-          <div className="mt-2 flex items-center gap-1">
+          {report.area_pick && (
+            <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+              <span className="font-medium text-gray-700">Площадь повреждений:</span>{" "}
+              {report.area_pick.value} м² — источник: {report.area_pick.source || "не указан"}
+            </p>
+          )}
+          <div className="mt-2 flex items-center gap-1 relative">
             <span className="text-xs text-gray-400">Уверенность AI:</span>
             <Badge variant={report.claude_output.average_confidence >= 0.7 ? "success" : "warning"} className="text-xs">
               {Math.round(report.claude_output.average_confidence * 100)}%
             </Badge>
+            <div ref={confidencePopoverRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setConfidenceOpen((v) => !v)}
+                aria-label="Что такое уверенность AI"
+                aria-expanded={confidenceOpen}
+                className="inline-flex items-center justify-center w-5 h-5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+              {confidenceOpen && (
+                <div
+                  role="dialog"
+                  className="absolute left-0 top-full mt-2 z-30 w-80 max-w-[90vw] rounded-lg border border-gray-200 bg-white p-4 text-xs leading-relaxed text-gray-700 shadow-lg"
+                >
+                  <p className="font-semibold text-gray-900 mb-2">Что такое «Уверенность AI»?</p>
+                  <p className="mb-2">
+                    AI анализирует каждое фото повреждений и для каждого выставляет оценку
+                    собственной точности от 0% до 100%. Показатель в отчёте — это среднее
+                    значение по всем фото.
+                  </p>
+                  <p className="mb-2">
+                    На что влияет:
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1 mb-2">
+                    <li>≥ 70% — оценка считается надёжной (зелёный индикатор).</li>
+                    <li>&lt; 70% — оценка требует внимания (жёлтый индикатор).</li>
+                    <li>
+                      &lt; 60% — к итоговой сумме применяется понижающий коэффициент ×0.85,
+                      чтобы компенсировать возможную ошибку AI.
+                    </li>
+                  </ul>
+                  <p className="text-gray-500">
+                    Уверенность зависит от качества фото: освещения, резкости, ракурса
+                    и наличия масштабной привязки (монета, карта, measure-скриншот).
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -1,15 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { formatRub } from "@/lib/utils";
 import type { CaseRecord } from "@/types";
-import { BarChart3, Settings, Book, History, LogOut } from "lucide-react";
 
 export default function AdminDashboard() {
-  const router = useRouter();
   const [cases, setCases] = useState<CaseRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,11 +15,6 @@ export default function AdminDashboard() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
-
-  async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
-  }
 
   const complete = cases.filter((c) => c.status === "complete");
   const expert = cases.filter((c) => c.status === "expert");
@@ -55,39 +45,6 @@ export default function AdminDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Top bar */}
-      <header className="bg-white border-b px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#21A038] rounded-md" />
-          <span className="font-semibold text-gray-900">Claim Assistant Admin</span>
-        </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-gray-500">
-          <LogOut className="w-4 h-4" /> Выйти
-        </Button>
-      </header>
-
-      {/* Nav */}
-      <nav className="flex gap-1 px-4 py-2 bg-white border-b overflow-x-auto">
-        {[
-          { href: "/admin", label: "Дашборд", icon: BarChart3 },
-          { href: "/admin/calibration", label: "Калибровка", icon: Settings },
-          { href: "/admin/catalogs", label: "Справочники", icon: Book },
-          { href: "/admin/history", label: "История", icon: History },
-        ].map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${
-              href === "/admin" ? "bg-[#e8f5ea] text-[#21A038]" : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </Link>
-        ))}
-      </nav>
-
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         <h1 className="text-xl font-bold text-gray-900">Дашборд</h1>
 
@@ -146,6 +103,5 @@ export default function AdminDashboard() {
           </>
         )}
       </div>
-    </main>
   );
 }

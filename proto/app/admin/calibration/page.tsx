@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { formatRub } from "@/lib/utils";
 import type { CalibrationValues } from "@/types";
 import calibrationDefaults from "@/data/calibration_defaults.json";
-import { BarChart3, Settings, Book, History, Save, RotateCcw, Download } from "lucide-react";
+import { Save, RotateCcw, Download } from "lucide-react";
 
 function extractDefaults(): CalibrationValues {
   const w = calibrationDefaults.weights;
@@ -109,23 +108,6 @@ export default function CalibrationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-4 py-4 flex items-center justify-between">
-        <span className="font-semibold text-gray-900">Claim Assistant Admin</span>
-      </header>
-      <nav className="flex gap-1 px-4 py-2 bg-white border-b overflow-x-auto">
-        {[
-          { href: "/admin", label: "Дашборд", icon: BarChart3 },
-          { href: "/admin/calibration", label: "Калибровка", icon: Settings, active: true },
-          { href: "/admin/catalogs", label: "Справочники", icon: Book },
-          { href: "/admin/history", label: "История", icon: History },
-        ].map(({ href, label, icon: Icon, active }) => (
-          <Link key={href} href={href} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${active ? "bg-[#e8f5ea] text-[#21A038]" : "text-gray-500 hover:text-gray-700"}`}>
-            <Icon className="w-4 h-4" />{label}
-          </Link>
-        ))}
-      </nav>
-
       <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Калибровка</h1>
@@ -200,6 +182,5 @@ export default function CalibrationPage() {
           {saved ? "Сохранено ✓" : loading ? "Сохраняем…" : "Сохранить и применить"}
         </Button>
       </div>
-    </main>
   );
 }
