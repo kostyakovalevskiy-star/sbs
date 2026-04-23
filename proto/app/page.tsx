@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generateId } from "@/lib/utils";
 import type { DraftState } from "@/types";
-import { ShieldCheck, AlertTriangle, Settings } from "lucide-react";
+import { AlertTriangle, Settings, ArrowRight, FileEdit, Camera, FileText } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -49,88 +49,130 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white pt-safe relative">
-      {/* Admin link */}
-      <Link
-        href="/admin"
-        className="absolute right-4 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
-        style={{ top: 'max(1rem, env(safe-area-inset-top, 1rem))' }}
-      >
-        <Settings className="w-3.5 h-3.5" />
-        Админка
-      </Link>
-
-      <div className="w-full max-w-sm space-y-6">
-        {/* Logo */}
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-[#21A038] rounded-2xl flex items-center justify-center">
-              <ShieldCheck className="w-9 h-9 text-white" />
+    <main className="min-h-screen bg-[#f5f6f7] pt-safe">
+      {/* Top bar */}
+      <header className="bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#21A038] flex items-center justify-center">
+              <span className="text-white font-bold text-lg leading-none">S</span>
             </div>
+            <span className="font-display font-bold text-gray-900 text-lg">Claim Assistant</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Claim Assistant</h1>
-          <p className="mt-2 text-gray-500 text-sm leading-relaxed">
-            Зафиксируйте страховое событие и получите предварительную оценку ущерба за 15 минут
-          </p>
+          <Link
+            href="/admin"
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="hidden sm:inline">Админка</span>
+          </Link>
         </div>
+      </header>
 
-        {/* Disclaimer */}
-        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
-          <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-xs text-amber-800 leading-relaxed">
-            <strong>Прототип</strong> — данные не передаются в страховую компанию. Используется для UX-тестирования.
-          </p>
-        </div>
-
-        {/* Existing draft */}
-        {existingDraft && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-            <p className="text-sm text-blue-800 font-medium">У вас есть незавершённый кейс</p>
-            <p className="text-xs text-blue-600">
-              Создан: {new Date(existingDraft.created_at).toLocaleDateString("ru-RU")}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+        {/* Hero */}
+        <section className="bg-[#21A038] rounded-3xl px-6 sm:px-10 py-10 sm:py-14 text-white relative overflow-hidden">
+          <div className="absolute -right-20 -bottom-20 w-72 h-72 rounded-full bg-white/10" />
+          <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5" />
+          <div className="relative max-w-2xl">
+            <p className="text-sm sm:text-base opacity-80 mb-3 font-medium">Страхование имущества</p>
+            <h1 className="font-display text-3xl sm:text-5xl font-bold leading-tight mb-4">
+              Зафиксируйте страховое событие за&nbsp;15&nbsp;минут
+            </h1>
+            <p className="text-base sm:text-lg opacity-90 leading-relaxed mb-7 max-w-xl">
+              Сфотографируйте повреждения — AI оценит ущерб и подготовит PDF-отчёт
+              для страховой компании.
             </p>
-            <div className="flex gap-2">
-              <Button onClick={continueDraft} size="sm" className="flex-1">
-                Продолжить
-              </Button>
-              <Button
-                onClick={() => {
-                  localStorage.removeItem("claim_draft");
-                  setExistingDraft(null);
-                }}
-                variant="outline"
-                size="sm"
-                className="flex-1"
-              >
-                Начать заново
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Main CTA */}
-        {!existingDraft && (
-          <Button onClick={startNew} size="xl" className="w-full text-base">
-            Зафиксировать страховое событие
-          </Button>
-        )}
-
-        {/* How it works */}
-        <div className="space-y-2 pt-2">
-          <p className="text-xs text-gray-400 text-center uppercase tracking-wide font-medium">Как это работает</p>
-          {[
-            { n: "1", t: "Ответьте на вопросы об инциденте" },
-            { n: "2", t: "Сфотографируйте повреждения" },
-            { n: "3", t: "Получите оценку ущерба с PDF-отчётом" },
-          ].map((s) => (
-            <div key={s.n} className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#e8f5ea] text-[#21A038] text-xs font-bold flex items-center justify-center shrink-0">
-                {s.n}
+            {existingDraft ? (
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={continueDraft}
+                  size="xl"
+                  className="bg-white text-[#21A038] hover:bg-white/90 rounded-2xl shadow-lg font-semibold"
+                >
+                  Продолжить оформление
+                  <ArrowRight className="w-5 h-5 ml-1" />
+                </Button>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("claim_draft");
+                    setExistingDraft(null);
+                  }}
+                  className="px-6 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-medium transition-colors"
+                >
+                  Начать заново
+                </button>
               </div>
-              <p className="text-sm text-gray-600">{s.t}</p>
-            </div>
-          ))}
-        </div>
+            ) : (
+              <Button
+                onClick={startNew}
+                size="xl"
+                className="bg-white text-[#21A038] hover:bg-white/90 rounded-2xl shadow-lg font-semibold px-7"
+              >
+                Оформить онлайн
+                <ArrowRight className="w-5 h-5 ml-1" />
+              </Button>
+            )}
+          </div>
+        </section>
+
+        {/* How it works — Sber-style service tiles */}
+        <section>
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-gray-900 mb-4 px-1">
+            Как это работает
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            {[
+              {
+                n: "01",
+                icon: FileEdit,
+                title: "Анкета",
+                desc: "Несколько вопросов о событии и помещении",
+              },
+              {
+                n: "02",
+                icon: Camera,
+                title: "Фото",
+                desc: "Снимки повреждений прямо из камеры",
+              },
+              {
+                n: "03",
+                icon: FileText,
+                title: "Отчёт",
+                desc: "AI-оценка ущерба и готовый PDF",
+              },
+            ].map(({ n, icon: Icon, title, desc }) => (
+              <div
+                key={n}
+                className="bg-white rounded-3xl p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-[#e8f5ea] flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-[#21A038]" />
+                  </div>
+                  <span className="text-xs font-bold text-gray-300 tracking-wider">{n}</span>
+                </div>
+                <h3 className="font-display font-bold text-lg text-gray-900 mb-1.5">{title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Prototype disclaimer */}
+        <section className="bg-white rounded-3xl p-5 sm:p-6 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900 mb-0.5">Это прототип</p>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Данные не передаются в страховую компанию. Используется для UX-тестирования и демонстрации.
+            </p>
+          </div>
+        </section>
+
+        <div className="pb-8" />
       </div>
     </main>
   );

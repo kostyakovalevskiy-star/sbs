@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin", "cyrillic"] });
+// Inter is loaded as fallback for Sber's SB Sans (visually close).
+// Exposed as a CSS variable so globals.css can keep SB Sans first in the chain.
+const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "Claim Assistant",
@@ -25,7 +27,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={inter.className}>
+      <body className={inter.variable}>
         <div className="min-h-screen bg-background">
           {children}
         </div>
