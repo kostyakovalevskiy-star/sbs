@@ -2,50 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Sber brand fonts. Drop .woff2 files into /public/fonts/ — see README there.
-   If missing, @font-face silently fails and the body-level fallback chain applies. */
-@font-face {
-  font-family: "SB Sans Text";
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/SBSansText-Regular.woff2") format("woff2");
-}
-@font-face {
-  font-family: "SB Sans Text";
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/SBSansText-Medium.woff2") format("woff2");
-}
-@font-face {
-  font-family: "SB Sans Text";
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/SBSansText-Bold.woff2") format("woff2");
-}
-@font-face {
-  font-family: "SB Sans Display";
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/SBSansDisplay-Regular.woff2") format("woff2");
-}
-@font-face {
-  font-family: "SB Sans Display";
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/SBSansDisplay-Bold.woff2") format("woff2");
-}
-
 html {
-  font-family: "SB Sans Text", var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans), "Golos Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, .font-display {
-  font-family: "SB Sans Display", "SB Sans Text", var(--font-inter), "Inter", -apple-system, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 @layer base {

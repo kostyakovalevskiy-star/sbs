@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Golos_Text } from "next/font/google";
 import "./globals.css";
 
-// Inter is loaded as fallback for Sber's SB Sans (visually close).
-// Exposed as a CSS variable so globals.css can keep SB Sans first in the chain.
-const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
+// Golos Text — основной шрифт проекта. Подключается через next/font/google
+// с подмножествами latin + cyrillic.
+const golosText = Golos_Text({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Claim Assistant",
@@ -27,7 +31,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={inter.variable}>
+      <body className={golosText.variable}>
         <div className="min-h-screen bg-background">
           {children}
         </div>
