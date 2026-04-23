@@ -98,7 +98,7 @@ export default function ReviewPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white pt-safe">
+    <main className="min-h-screen bg-white">
       {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 bg-white/95 flex flex-col items-center justify-center z-50 gap-4">
@@ -108,33 +108,41 @@ export default function ReviewPage() {
         </div>
       )}
 
-      <div className="bg-[#21A038] h-1.5">
-        <div className="bg-white/40 h-full" style={{ width: "0%" }} />
-      </div>
-      <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <p className="text-xs text-gray-500">Шаг 4 из 5 — Проверка</p>
+      <div className="sticky top-0 z-20 bg-white pt-safe">
+        <div className="bg-[#21A038] h-1.5">
+          <div className="bg-white/40 h-full" style={{ width: "0%" }} />
         </div>
-        <button
-          onClick={() => router.push("/thank-you?abandoned=1")}
-          className="text-xs text-[#21A038] font-medium whitespace-nowrap"
-        >
-          Завершить
-        </button>
+        <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <p className="text-xs text-gray-500">Шаг 4 из 5 — Проверка</p>
+          </div>
+          <button
+            onClick={() => router.push("/thank-you?abandoned=1")}
+            className="text-xs text-[#21A038] font-medium whitespace-nowrap"
+          >
+            Завершить
+          </button>
+        </div>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         <h1 className="text-xl font-bold text-gray-900">Проверьте данные</h1>
 
         {/* Summary */}
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-          <h2 className="text-sm font-semibold text-gray-700">Данные об инциденте</h2>
+        <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-gray-700">Данные об инциденте</h2>
+            <button
+              onClick={() => router.push("/flow/intro")}
+              className="text-xs text-[#21A038] font-medium whitespace-nowrap"
+            >
+              Внести изменения
+            </button>
+          </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            <span className="text-gray-500">Регион</span>
-            <span className="text-gray-900">{intro.region}</span>
             <span className="text-gray-500">Адрес</span>
             <span className="text-gray-900 break-all">{intro.address}</span>
             <span className="text-gray-500">Площадь повреждений</span>
@@ -144,6 +152,12 @@ export default function ReviewPage() {
             <span className="text-gray-500">Дата события</span>
             <span className="text-gray-900">{flood.event_date}</span>
           </div>
+          {intro.incident_description && (
+            <div className="pt-2 border-t border-gray-200 space-y-1">
+              <span className="block text-xs text-gray-500">Описание клиента</span>
+              <p className="text-sm text-gray-900 whitespace-pre-wrap">{intro.incident_description}</p>
+            </div>
+          )}
         </div>
 
         {/* Photos */}

@@ -241,7 +241,7 @@ export default function CameraPage() {
     <main className="bg-black flex flex-col overflow-hidden" style={{ height: '100dvh', maxHeight: '100dvh' }}>
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 pb-3 bg-black/80 z-10"
+        className="shrink-0 flex items-center justify-between px-4 pb-3 bg-black/80 z-10"
         style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top, 0px))' }}
       >
         <button onClick={() => router.back()} className="text-white/70 p-1 flex items-center gap-0.5">

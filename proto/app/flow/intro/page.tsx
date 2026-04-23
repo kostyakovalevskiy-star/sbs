@@ -154,23 +154,25 @@ export default function IntroPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white pt-safe">
-      <div className="bg-[#21A038] h-1.5">
-        <div className="bg-white/40 h-full" style={{ width: "28%" }} />
-      </div>
-      <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <p className="text-xs text-gray-500">Шаг 1 из 5 — Общие сведения</p>
+    <main className="min-h-screen bg-white">
+      <div className="sticky top-0 z-20 bg-white pt-safe">
+        <div className="bg-[#21A038] h-1.5">
+          <div className="bg-white/40 h-full" style={{ width: "28%" }} />
         </div>
-        <button
-          onClick={() => router.push("/thank-you?abandoned=1")}
-          className="text-xs text-[#21A038] font-medium whitespace-nowrap"
-        >
-          Завершить
-        </button>
+        <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <p className="text-xs text-gray-500">Шаг 1 из 5 — Общие сведения</p>
+          </div>
+          <button
+            onClick={() => router.push("/thank-you?abandoned=1")}
+            className="text-xs text-[#21A038] font-medium whitespace-nowrap"
+          >
+            Завершить
+          </button>
+        </div>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-5">
