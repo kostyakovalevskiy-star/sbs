@@ -95,6 +95,11 @@ function computeVolume(code: string, A: number, P: number): number {
     case "TRIM":
       return code === "TRIM-003" ? Math.max(1, Math.round(P / 6)) : P;
 
+    // Штучные работы (unit: "шт."): 1 на кейс.
+    // ELEC — розетка, люстра и т.п.
+    case "ELEC":
+      return 1;
+
     default:
       return A;
   }
@@ -159,16 +164,9 @@ export function calculate(
   const currentYear = new Date().getFullYear();
   const renovationAge = currentYear - (context.last_renovation_year ?? currentYear - 10);
 
-  // Filter out LOG (мусорный контейнер / вынос мусора) for small damage — not economical under 20 m²
-  const SMALL_AREA_THRESHOLD_M2 = 20;
-  const effectiveWorks = claudeOutput.recommended_works.filter((code) => {
-    if (S < SMALL_AREA_THRESHOLD_M2 && (code === "LOG-001" || code === "LOG-002")) return false;
-    return true;
-  });
-
   // Build work items
   const workItems: WorkItem[] = [];
-  for (const code of effectiveWorks) {
+  for (const code of claudeOutput.recommended_works) {
     const catalogEntry = catalogs.works.find((w) => w.code === code);
     if (!catalogEntry) continue;
 

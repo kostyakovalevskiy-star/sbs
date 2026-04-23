@@ -4,11 +4,6 @@
   "currency": "RUB",
   "region_baseline": "moscow",
   "description": "Справочник цен на отделочные и ремонтные работы. Цены — средние арифметические по 3+ источникам в Москве на апрель 2026. Для регионов применяется коэффициент region_coefficient (см. region_coefficients.json).",
-  "notes": {
-    "LOG-001": "Мусорный контейнер 8 м³ — применяется ТОЛЬКО для кейсов с площадью ущерба ≥ 20 м² (крупные демонтажи). Для мелких кейсов выносим мусор в мешках (LOG-002) или вообще не учитываем.",
-    "LOG-002": "Вынос мусора в мешках — применяется ТОЛЬКО для кейсов с площадью ущерба ≥ 20 м². На малой площади мусор обычно выносит бригада в рамках работ без отдельной строки.",
-    "threshold_comment": "Фильтр на стороне сервера (calculator.ts): при S < 20 м² — LOG-* коды исключаются из сметы автоматически, даже если AI их рекомендовал."
-  },
   "sources_aggregated": [
     {"name": "Профи Ремонтник", "url": "https://profiremontnik.ru/tseny/shtukaturno-malyarnye-raboty/"},
     {"name": "Домашний Мастерок", "url": "https://domashniy-masterok.ru/price/prays-na-otdelochnye-raboty/"},
@@ -26,8 +21,7 @@
     "ceiling": "Потолочные работы",
     "doors": "Двери и проёмы",
     "trim": "Плинтуса и наличники",
-    "electrical_minor": "Мелкие электромонтажные",
-    "logistics": "Логистика и мусор"
+    "electrical_minor": "Мелкие электромонтажные"
   },
   "works": [
     {
@@ -384,36 +378,6 @@
       "min_price_rub": 1100,
       "max_price_rub": 2000,
       "samples": [1250, 1450, 1700]
-    },
-    {
-      "code": "LOG-001",
-      "name": "Заказ мусорного контейнера 8 м³ (вывоз)",
-      "category": "logistics",
-      "unit": "шт.",
-      "base_price_rub": 7800,
-      "min_price_rub": 6500,
-      "max_price_rub": 9500,
-      "samples": [7000, 7800, 8800]
-    },
-    {
-      "code": "LOG-002",
-      "name": "Вынос строительного мусора (до 20 мешков)",
-      "category": "logistics",
-      "unit": "ед.",
-      "base_price_rub": 2100,
-      "min_price_rub": 1500,
-      "max_price_rub": 3000,
-      "samples": [1800, 2100, 2500]
-    },
-    {
-      "code": "LOG-003",
-      "name": "Вынос/занос мебели для производства работ",
-      "category": "logistics",
-      "unit": "ед.",
-      "base_price_rub": 2600,
-      "min_price_rub": 2000,
-      "max_price_rub": 3500,
-      "samples": [2200, 2600, 3000]
     },
     {
       "code": "DEM-008",
