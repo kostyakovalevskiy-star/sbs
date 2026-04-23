@@ -1,15 +1,25 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { WorkCatalogEntry, MaterialCatalogEntry } from "@/types";
+import type { WorkCatalogEntry, MaterialCatalogEntry, CatalogAuditEntry } from "@/types";
 import { BarChart3, Settings, Book, History, Download, Upload, RotateCcw, FileSpreadsheet } from "lucide-react";
 import worksCatalogDefault from "@/data/works_catalog.json";
 import materialsCatalogDefault from "@/data/materials_catalog.json";
 
 type Tab = "works" | "materials";
+
+const MIN_PRICE_RUB = 1;
+const MAX_PRICE_RUB = 1_000_000;
+
+function priceError(v: number): string | null {
+  if (!Number.isFinite(v)) return "введите число";
+  if (v < MIN_PRICE_RUB) return `мин. ${MIN_PRICE_RUB} ₽`;
+  if (v > MAX_PRICE_RUB) return `макс. ${MAX_PRICE_RUB.toLocaleString("ru-RU")} ₽`;
+  return null;
+}
 
 interface XlsxPreview {
   changed: number;
@@ -23,8 +33,26 @@ export default function CatalogsPage() {
   const [works, setWorks] = useState<WorkCatalogEntry[]>([]);
   const [materials, setMaterials] = useState<MaterialCatalogEntry[]>([]);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [xlsxPreview, setXlsxPreview] = useState<XlsxPreview | null>(null);
+  const [auditEntries, setAuditEntries] = useState<CatalogAuditEntry[]>([]);
+  const [auditOpen, setAuditOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const invalidCount = useMemo(() => {
+    const rows = tab === "works" ? works : materials;
+    return rows.reduce((n, r) => (priceError(r.base_price_rub) ? n + 1 : n), 0);
+  }, [tab, works, materials]);
+
+  async function refreshAudit() {
+    try {
+      const r = await fetch("/api/admin/audit?limit=50");
+      const data = await r.json();
+      setAuditEntries(data.entries ?? []);
+    } catch {
+      /* ignore */
+    }
+  }
 
   useEffect(() => {
     fetch("/api/admin/catalogs")
@@ -37,21 +65,37 @@ export default function CatalogsPage() {
         setWorks(worksCatalogDefault.works as WorkCatalogEntry[]);
         setMaterials(materialsCatalogDefault.materials as unknown as MaterialCatalogEntry[]);
       });
+    refreshAudit();
   }, []);
 
   async function handleSave() {
+    setSaveError(null);
+    if (invalidCount > 0) {
+      setSaveError(`Есть ${invalidCount} некорректных цен — исправьте перед сохранением`);
+      return;
+    }
     const type = tab;
     const data = type === "works"
       ? { version: "2026.04.1", works }
       : { version: "2026.04.1", materials };
 
-    await fetch("/api/admin/catalogs", {
+    const res = await fetch("/api/admin/catalogs", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, data }),
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      if (body?.error === "validation_failed" && Array.isArray(body.invalid)) {
+        setSaveError(`Сервер отклонил ${body.invalid.length} позиций: ${body.invalid.slice(0, 3).map((i: { code: string; reason: string }) => `${i.code} (${i.reason})`).join(", ")}${body.invalid.length > 3 ? "…" : ""}`);
+      } else {
+        setSaveError("Ошибка сохранения");
+      }
+      return;
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+    refreshAudit();
   }
 
   async function handleReset() {
@@ -244,47 +288,115 @@ export default function CatalogsPage() {
                 </tr>
               </thead>
               <tbody>
-                {tab === "works" && works.map((w) => (
-                  <tr key={w.code} className="border-b last:border-0 hover:bg-gray-50">
-                    <td className="px-4 py-2 text-xs text-gray-400 font-mono">{w.code}</td>
-                    <td className="px-4 py-2 text-gray-700">{w.name}</td>
-                    <td className="px-4 py-2 text-gray-500 text-xs">{w.unit}</td>
-                    <td className="px-4 py-2">
-                      <Input
-                        type="number"
-                        value={w.base_price_rub}
-                        onChange={(e) => updateWorkPrice(w.code, parseFloat(e.target.value))}
-                        className="h-8 text-right w-full"
-                        min={0}
-                      />
-                    </td>
-                  </tr>
-                ))}
-                {tab === "materials" && materials.map((m) => (
-                  <tr key={m.code} className="border-b last:border-0 hover:bg-gray-50">
-                    <td className="px-4 py-2 text-xs text-gray-400 font-mono">{m.code}</td>
-                    <td className="px-4 py-2 text-gray-700">{m.name}</td>
-                    <td className="px-4 py-2 text-gray-500 text-xs">{m.package_unit}</td>
-                    <td className="px-4 py-2">
-                      <Input
-                        type="number"
-                        value={m.base_price_rub}
-                        onChange={(e) => updateMaterialPrice(m.code, parseFloat(e.target.value))}
-                        className="h-8 text-right w-full"
-                        min={0}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {tab === "works" && works.map((w) => {
+                  const err = priceError(w.base_price_rub);
+                  return (
+                    <tr key={w.code} className="border-b last:border-0 hover:bg-gray-50">
+                      <td className="px-4 py-2 text-xs text-gray-400 font-mono">{w.code}</td>
+                      <td className="px-4 py-2 text-gray-700">{w.name}</td>
+                      <td className="px-4 py-2 text-gray-500 text-xs">{w.unit}</td>
+                      <td className="px-4 py-2">
+                        <Input
+                          type="number"
+                          value={w.base_price_rub}
+                          onChange={(e) => updateWorkPrice(w.code, parseFloat(e.target.value))}
+                          className={`h-8 text-right w-full ${err ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          min={MIN_PRICE_RUB}
+                          max={MAX_PRICE_RUB}
+                        />
+                        {err && <div className="text-[10px] text-red-600 mt-0.5 text-right">{err}</div>}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {tab === "materials" && materials.map((m) => {
+                  const err = priceError(m.base_price_rub);
+                  return (
+                    <tr key={m.code} className="border-b last:border-0 hover:bg-gray-50">
+                      <td className="px-4 py-2 text-xs text-gray-400 font-mono">{m.code}</td>
+                      <td className="px-4 py-2 text-gray-700">{m.name}</td>
+                      <td className="px-4 py-2 text-gray-500 text-xs">{m.package_unit}</td>
+                      <td className="px-4 py-2">
+                        <Input
+                          type="number"
+                          value={m.base_price_rub}
+                          onChange={(e) => updateMaterialPrice(m.code, parseFloat(e.target.value))}
+                          className={`h-8 text-right w-full ${err ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          min={MIN_PRICE_RUB}
+                          max={MAX_PRICE_RUB}
+                        />
+                        {err && <div className="text-[10px] text-red-600 mt-0.5 text-right">{err}</div>}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
 
-        <Button onClick={handleSave} className="w-full">
-          {saved ? "Сохранено ✓" : "Сохранить изменения"}
-        </Button>
+        {saveError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">
+            {saveError}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <Button onClick={handleSave} className="flex-1" disabled={invalidCount > 0}>
+            {saved ? "Сохранено ✓" : invalidCount > 0 ? `Исправьте ${invalidCount} ошибок` : "Сохранить изменения"}
+          </Button>
+          <Button variant="outline" onClick={() => { setAuditOpen(true); refreshAudit(); }} className="gap-1.5">
+            <History className="w-4 h-4" /> Журнал
+          </Button>
+        </div>
       </div>
+
+      {auditOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setAuditOpen(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b flex items-center justify-between">
+              <h2 className="font-semibold text-gray-900">Журнал изменений каталога</h2>
+              <button onClick={() => setAuditOpen(false)} className="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
+            </div>
+            <div className="overflow-y-auto px-6 py-4 space-y-4">
+              {auditEntries.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-8">Пока нет записей</p>
+              )}
+              {auditEntries.map((entry, idx) => (
+                <div key={idx} className="border rounded-lg p-3 text-sm">
+                  <div className="flex justify-between items-start mb-2 text-xs">
+                    <span className="font-medium text-gray-700">
+                      {new Date(entry.ts).toLocaleString("ru-RU")} · {entry.type === "works" ? "Работы" : "Материалы"}
+                    </span>
+                    <span className="text-gray-400 font-mono text-[10px]">{entry.actor}</span>
+                  </div>
+                  {entry.changes.length > 0 && (
+                    <div className="space-y-0.5 text-xs">
+                      {entry.changes.slice(0, 10).map((c, i) => (
+                        <div key={i} className="flex gap-2">
+                          <span className="font-mono text-gray-500 w-20 flex-shrink-0">{c.code}</span>
+                          <span className="text-gray-400 line-through">{c.old} ₽</span>
+                          <span className="text-gray-400">→</span>
+                          <span className="text-[#21A038] font-medium">{c.new} ₽</span>
+                        </div>
+                      ))}
+                      {entry.changes.length > 10 && (
+                        <div className="text-gray-400 text-[10px]">…и ещё {entry.changes.length - 10}</div>
+                      )}
+                    </div>
+                  )}
+                  {entry.added.length > 0 && (
+                    <div className="text-[10px] text-blue-600 mt-1">Добавлено: {entry.added.join(", ")}</div>
+                  )}
+                  {entry.removed.length > 0 && (
+                    <div className="text-[10px] text-red-600 mt-1">Удалено: {entry.removed.join(", ")}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

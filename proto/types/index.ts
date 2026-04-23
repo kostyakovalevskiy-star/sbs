@@ -210,6 +210,23 @@ export interface MaterialsCatalog {
   materials: MaterialCatalogEntry[];
 }
 
+export interface CatalogAuditChange {
+  code: string;
+  field: "base_price_rub";
+  old: number;
+  new: number;
+}
+
+export interface CatalogAuditEntry {
+  ts: number;
+  type: "works" | "materials";
+  actor: string;
+  userAgent?: string;
+  changes: CatalogAuditChange[];
+  added: string[];
+  removed: string[];
+}
+
 export interface DraftState {
   id: string;
   created_at: string;
