@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRub } from "@/lib/utils";
 import type { CaseRecord } from "@/types";
-import { Download, FileText, Home, AlertTriangle, Pencil, Check, Save } from "lucide-react";
+import { Download, FileText, Home, AlertTriangle, Pencil, Check, Save, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function ResultPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +18,8 @@ export default function ResultPage() {
   const [savedPriority, setSavedPriority] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [worksExpanded, setWorksExpanded] = useState(false);
+  const [materialsExpanded, setMaterialsExpanded] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -204,10 +206,10 @@ export default function ResultPage() {
         <p className="text-xs opacity-60 mt-2">Кейс {id?.slice(0, 8).toUpperCase()}</p>
       </div>
 
-      <div className="px-4 py-5 max-w-2xl mx-auto space-y-6">
+      <div className="px-4 py-5 max-w-6xl mx-auto">
         {/* Expert routing */}
         {report.routed_to_expert && (
-          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-amber-800">Кейс передан эксперту</p>
@@ -218,6 +220,9 @@ export default function ResultPage() {
           </div>
         )}
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+          {/* Left column: AI summary + area + actions */}
+          <div className="space-y-5">
         {/* AI Summary */}
         <div className="bg-gray-50 rounded-xl p-4">
           <h2 className="text-sm font-semibold text-gray-700 mb-2">AI-заключение</h2>
@@ -311,83 +316,138 @@ export default function ResultPage() {
           </div>
         )}
 
-        {/* Works table */}
-        {report.works.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">Работы</h2>
-            <div className="overflow-x-auto rounded-xl border">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="text-left px-3 py-2 text-gray-500 font-medium">Наименование</th>
-                    <th className="text-right px-3 py-2 text-gray-500 font-medium">Объём</th>
-                    <th className="text-right px-3 py-2 text-gray-500 font-medium">Итого</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.works.map((w, i) => (
-                    <tr key={i} className="border-b last:border-b-0">
-                      <td className="px-3 py-2 text-gray-700">{w.name}</td>
-                      <td className="px-3 py-2 text-right text-gray-500">{w.volume} {w.unit}</td>
-                      <td className="px-3 py-2 text-right font-medium">{formatRub(w.total)}</td>
-                    </tr>
-                  ))}
-                  <tr className="bg-gray-50">
-                    <td colSpan={2} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Итого работы:</td>
-                    <td className="px-3 py-2 text-right font-bold text-gray-900">
-                      {formatRub(report.works.reduce((s, w) => s + w.total, 0))}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            {/* Actions */}
+            <div className="space-y-3">
+              <Button onClick={handleDownloadPDF} className="w-full gap-2">
+                <Download className="w-4 h-4" /> Скачать PDF-отчёт
+              </Button>
+              <Button onClick={handleDownloadJSON} variant="outline" className="w-full gap-2">
+                <FileText className="w-4 h-4" /> Скачать JSON
+              </Button>
+              <Button onClick={handleNewCase} variant="ghost" className="w-full gap-2">
+                <Home className="w-4 h-4" /> Начать новый кейс
+              </Button>
             </div>
           </div>
-        )}
 
-        {/* Materials table */}
-        {report.materials.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">Материалы</h2>
-            <div className="overflow-x-auto rounded-xl border">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="text-left px-3 py-2 text-gray-500 font-medium">Материал</th>
-                    <th className="text-right px-3 py-2 text-gray-500 font-medium">Объём</th>
-                    <th className="text-right px-3 py-2 text-gray-500 font-medium">Итого</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.materials.map((m, i) => (
-                    <tr key={i} className="border-b last:border-b-0">
-                      <td className="px-3 py-2 text-gray-700">{m.name}</td>
-                      <td className="px-3 py-2 text-right text-gray-500">{m.volume} {m.unit}</td>
-                      <td className="px-3 py-2 text-right font-medium">{formatRub(m.total)}</td>
-                    </tr>
-                  ))}
-                  <tr className="bg-gray-50">
-                    <td colSpan={2} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Итого материалы:</td>
-                    <td className="px-3 py-2 text-right font-bold text-gray-900">
-                      {formatRub(report.materials.reduce((s, m) => s + m.total, 0))}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          {/* Right column: works + materials with expand/collapse */}
+          <div className="space-y-5 pb-8">
+            {/* Works table */}
+            {report.works.length > 0 && (() => {
+              const visibleWorks = worksExpanded ? report.works : report.works.slice(0, 3);
+              const hiddenCount = report.works.length - visibleWorks.length;
+              return (
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-700 mb-2">Работы</h2>
+                  <div className="overflow-x-auto rounded-xl border">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 border-b">
+                          <th className="text-left px-3 py-2 text-gray-500 font-medium">Наименование</th>
+                          <th className="text-right px-3 py-2 text-gray-500 font-medium">Объём</th>
+                          <th className="text-right px-3 py-2 text-gray-500 font-medium">Итого</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visibleWorks.map((w, i) => (
+                          <tr key={i} className="border-b last:border-b-0">
+                            <td className="px-3 py-2 text-gray-700">{w.name}</td>
+                            <td className="px-3 py-2 text-right text-gray-500">{w.volume} {w.unit}</td>
+                            <td className="px-3 py-2 text-right font-medium">{formatRub(w.total)}</td>
+                          </tr>
+                        ))}
+                        {report.works.length > 3 && (
+                          <tr className="border-b last:border-b-0">
+                            <td colSpan={3} className="px-3 py-2">
+                              <button
+                                type="button"
+                                onClick={() => setWorksExpanded((v) => !v)}
+                                className="inline-flex items-center gap-1 text-xs text-[#21A038] hover:underline font-medium"
+                              >
+                                {worksExpanded ? (
+                                  <>
+                                    <ChevronUp className="w-3.5 h-3.5" /> Свернуть
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="w-3.5 h-3.5" /> Показать ещё {hiddenCount}
+                                  </>
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        )}
+                        <tr className="bg-gray-50">
+                          <td colSpan={2} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Итого работы:</td>
+                          <td className="px-3 py-2 text-right font-bold text-gray-900">
+                            {formatRub(report.works.reduce((s, w) => s + w.total, 0))}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Materials table */}
+            {report.materials.length > 0 && (() => {
+              const visibleMaterials = materialsExpanded ? report.materials : report.materials.slice(0, 3);
+              const hiddenCount = report.materials.length - visibleMaterials.length;
+              return (
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-700 mb-2">Материалы</h2>
+                  <div className="overflow-x-auto rounded-xl border">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 border-b">
+                          <th className="text-left px-3 py-2 text-gray-500 font-medium">Материал</th>
+                          <th className="text-right px-3 py-2 text-gray-500 font-medium">Объём</th>
+                          <th className="text-right px-3 py-2 text-gray-500 font-medium">Итого</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visibleMaterials.map((m, i) => (
+                          <tr key={i} className="border-b last:border-b-0">
+                            <td className="px-3 py-2 text-gray-700">{m.name}</td>
+                            <td className="px-3 py-2 text-right text-gray-500">{m.volume} {m.unit}</td>
+                            <td className="px-3 py-2 text-right font-medium">{formatRub(m.total)}</td>
+                          </tr>
+                        ))}
+                        {report.materials.length > 3 && (
+                          <tr className="border-b last:border-b-0">
+                            <td colSpan={3} className="px-3 py-2">
+                              <button
+                                type="button"
+                                onClick={() => setMaterialsExpanded((v) => !v)}
+                                className="inline-flex items-center gap-1 text-xs text-[#21A038] hover:underline font-medium"
+                              >
+                                {materialsExpanded ? (
+                                  <>
+                                    <ChevronUp className="w-3.5 h-3.5" /> Свернуть
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="w-3.5 h-3.5" /> Показать ещё {hiddenCount}
+                                  </>
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        )}
+                        <tr className="bg-gray-50">
+                          <td colSpan={2} className="px-3 py-2 text-right text-xs font-semibold text-gray-600">Итого материалы:</td>
+                          <td className="px-3 py-2 text-right font-bold text-gray-900">
+                            {formatRub(report.materials.reduce((s, m) => s + m.total, 0))}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-        )}
-
-        {/* Actions */}
-        <div className="space-y-3 pt-2 pb-8">
-          <Button onClick={handleDownloadPDF} className="w-full gap-2">
-            <Download className="w-4 h-4" /> Скачать PDF-отчёт
-          </Button>
-          <Button onClick={handleDownloadJSON} variant="outline" className="w-full gap-2">
-            <FileText className="w-4 h-4" /> Скачать JSON
-          </Button>
-          <Button onClick={handleNewCase} variant="ghost" className="w-full gap-2">
-            <Home className="w-4 h-4" /> Начать новый кейс
-          </Button>
         </div>
       </div>
     </main>

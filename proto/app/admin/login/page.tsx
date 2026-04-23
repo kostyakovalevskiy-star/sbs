@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Loader2, ChevronLeft } from "lucide-react";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,15 +17,18 @@ export default function AdminLoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
+        credentials: "same-origin",
       });
       if (res.ok) {
-        router.push("/admin");
+        // Full navigation (not router.push) ensures the freshly-set cookie
+        // rides the next request so middleware sees the session.
+        window.location.assign("/admin");
       } else {
         setError("Не удалось войти");
+        setLoading(false);
       }
     } catch {
       setError("Ошибка соединения");
-    } finally {
       setLoading(false);
     }
   }

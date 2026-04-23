@@ -42,10 +42,11 @@ export default function HistoryPage() {
   });
 
   function exportCSV() {
-    const header = "ID,Дата,Тип,Регион,Оценка,Статус\n";
-    const rows = filtered.map((c) =>
-      `${c.id.slice(0, 8)},${formatDate(c.created_at)},${EVENT_LABELS[c.context.event_type] ?? c.context.event_type},${c.context.region},${c.report?.range.base ?? ""},${c.status}`
-    ).join("\n");
+    const header = "ID,Дата,Тип,Описание,Оценка,Статус\n";
+    const rows = filtered.map((c) => {
+      const desc = (c.report?.claude_output?.summary ?? "").replace(/[\r\n"]/g, " ").trim();
+      return `${c.id.slice(0, 8)},${formatDate(c.created_at)},${EVENT_LABELS[c.context.event_type] ?? c.context.event_type},"${desc}",${c.report?.range.base ?? ""},${c.status}`;
+    }).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -177,18 +178,23 @@ export default function HistoryPage() {
                   <tr className="bg-gray-50 border-b">
                     <th className="text-left px-4 py-3 text-gray-500 font-medium">Дата</th>
                     <th className="text-left px-4 py-3 text-gray-500 font-medium">Тип</th>
-                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Регион</th>
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium">Описание инцидента</th>
                     <th className="text-right px-4 py-3 text-gray-500 font-medium">Оценка</th>
                     <th className="text-center px-4 py-3 text-gray-500 font-medium">Статус</th>
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((c) => (
+                  {filtered.map((c) => {
+                    const summary = c.report?.claude_output?.summary ?? "";
+                    const short = summary.length > 30 ? summary.slice(0, 30) + "…" : summary;
+                    return (
                     <tr key={c.id} className="border-b last:border-0 hover:bg-gray-50">
                       <td className="px-4 py-3 text-gray-600">{formatDate(c.created_at)}</td>
                       <td className="px-4 py-3">{EVENT_LABELS[c.context.event_type] ?? c.context.event_type}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.context.region}</td>
+                      <td className="px-4 py-3 text-gray-600 max-w-[240px] truncate" title={summary}>
+                        {short || "—"}
+                      </td>
                       <td className="px-4 py-3 text-right font-medium">
                         {c.report ? formatRub(c.report.range.base) : "—"}
                       </td>
@@ -206,7 +212,8 @@ export default function HistoryPage() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

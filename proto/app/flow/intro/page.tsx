@@ -131,10 +131,6 @@ export default function IntroPage() {
     if (!form.name.trim()) errs.name = "Укажите ФИО";
     if (normalizePhoneDigits(form.phone).length !== 10) errs.phone = "Телефон должен содержать 10 цифр";
     if (!form.address.trim()) errs.address = "Укажите адрес";
-    if (!form.apartment_area_m2 || parseFloat(form.apartment_area_m2) <= 0)
-      errs.apartment_area_m2 = "Укажите площадь";
-    if (!form.last_renovation_year || parseInt(form.last_renovation_year) < 1950)
-      errs.last_renovation_year = "Укажите год ремонта";
     if (!form.event_type) errs.event_type = "Выберите тип события";
     if (!form.incident_description.trim()) errs.incident_description = "Опишите, что произошло";
     return errs;
@@ -255,7 +251,7 @@ export default function IntroPage() {
 
         {/* Area */}
         <div className="space-y-1.5">
-          <Label htmlFor="area">Площадь квартиры, м² *</Label>
+          <Label htmlFor="area">Площадь квартиры, м²</Label>
           <Input
             id="area"
             type="number"
@@ -265,14 +261,13 @@ export default function IntroPage() {
             max={2000}
             value={form.apartment_area_m2}
             onChange={(e) => update("apartment_area_m2", e.target.value)}
-            className={errors.apartment_area_m2 ? "border-red-400" : ""}
+            disabled
           />
-          {errors.apartment_area_m2 && <p className="text-xs text-red-500">{errors.apartment_area_m2}</p>}
         </div>
 
         {/* Renovation year */}
         <div className="space-y-1.5">
-          <Label htmlFor="renovation">Год последнего ремонта *</Label>
+          <Label htmlFor="renovation">Год последнего ремонта</Label>
           <Input
             id="renovation"
             type="number"
@@ -282,9 +277,8 @@ export default function IntroPage() {
             max={new Date().getFullYear()}
             value={form.last_renovation_year}
             onChange={(e) => update("last_renovation_year", e.target.value)}
-            className={errors.last_renovation_year ? "border-red-400" : ""}
+            disabled
           />
-          {errors.last_renovation_year && <p className="text-xs text-red-500">{errors.last_renovation_year}</p>}
         </div>
 
         {/* Finish level */}
