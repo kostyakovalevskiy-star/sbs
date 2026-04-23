@@ -78,27 +78,27 @@ function ThankYouContent() {
   if (abandoned) {
     return (
       <main
-        className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white pt-safe"
+        className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-[#f5f6f7] pt-safe"
         style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}
       >
-        <div className="w-full max-w-sm space-y-6 text-center">
+        <div className="w-full max-w-sm bg-white rounded-3xl p-6 sm:p-8 space-y-6 text-center">
           <div className="flex justify-center">
-            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center">
               <XCircle className="w-10 h-10 text-amber-500" />
             </div>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Заявка не завершена</h1>
+            <h1 className="font-display text-2xl font-bold text-gray-900">Заявка не завершена</h1>
             <p className="mt-3 text-gray-600 text-sm leading-relaxed">
               Сожалеем, что вам не удалось оформить заявление об убытке. Вы всегда сможете вернуться к заявке или связаться с нами по номеру <strong>900</strong>.
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
-            <Button onClick={handleReturnToDraft} className="w-full gap-2">
+          <div className="space-y-3 pt-1">
+            <Button onClick={handleReturnToDraft} className="w-full gap-2 rounded-2xl">
               <ArrowLeft className="w-4 h-4" /> Вернуться к заявке
             </Button>
-            <Button asChild variant="outline" className="w-full gap-2">
+            <Button asChild variant="outline" className="w-full gap-2 rounded-2xl">
               <a href="tel:900">
                 <Phone className="w-4 h-4" /> Позвонить 900
               </a>
@@ -109,7 +109,7 @@ function ThankYouContent() {
                 router.push("/");
               }}
               variant="ghost"
-              className="w-full text-gray-500"
+              className="w-full text-gray-500 rounded-2xl"
             >
               На главную
             </Button>
@@ -122,25 +122,25 @@ function ThankYouContent() {
   // Normal completion (non-flood submission → expert review)
   return (
     <main
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-white pt-safe"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-[#f5f6f7] pt-safe"
       style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}
     >
-      <div className="w-full max-w-sm space-y-6 text-center">
+      <div className="w-full max-w-sm bg-white rounded-3xl p-6 sm:p-8 space-y-6 text-center">
         <div className="flex justify-center">
-          <div className="w-20 h-20 bg-[#e8f5ea] rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 bg-[#e8f5ea] rounded-2xl flex items-center justify-center">
             <CheckCircle className="w-10 h-10 text-[#21A038]" />
           </div>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Спасибо! Заявка принята</h1>
+          <h1 className="font-display text-2xl font-bold text-gray-900">Спасибо! Заявка принята</h1>
           <p className="mt-2 text-gray-500 text-sm leading-relaxed">
             Для данного типа события автоматический расчёт пока недоступен. Эксперт рассмотрит ваш кейс в ближайшее время.
           </p>
         </div>
 
         {draft?.intro && (
-          <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase">Ваши данные сохранены</p>
+          <div className="bg-[#f5f6f7] rounded-2xl p-4 text-left space-y-2">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Ваши данные сохранены</p>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">ФИО</span>
@@ -161,7 +161,7 @@ function ThankYouContent() {
         )}
 
         <div className="space-y-3">
-          <Button onClick={handleDownloadJSON} variant="outline" className="w-full gap-2">
+          <Button onClick={handleDownloadJSON} variant="outline" className="w-full gap-2 rounded-2xl">
             <FileText className="w-4 h-4" /> Скачать JSON-пакет
           </Button>
           <Button
@@ -169,7 +169,7 @@ function ThankYouContent() {
               localStorage.removeItem("claim_draft");
               router.push("/");
             }}
-            className="w-full"
+            className="w-full rounded-2xl"
           >
             Начать новый кейс
           </Button>

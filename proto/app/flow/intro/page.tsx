@@ -154,12 +154,12 @@ export default function IntroPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#f5f6f7]">
       <div className="sticky top-0 z-20 bg-white pt-safe">
         <div className="bg-[#21A038] h-1.5">
           <div className="bg-white/40 h-full" style={{ width: "28%" }} />
         </div>
-        <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
               <ChevronLeft className="w-5 h-5" />
@@ -176,7 +176,8 @@ export default function IntroPage() {
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-5">
-        <h1 className="text-xl font-bold text-gray-900">Расскажите о себе и событии</h1>
+        <h1 className="font-display text-2xl font-bold text-gray-900 px-1">Расскажите о себе и событии</h1>
+        <div className="bg-white rounded-3xl p-5 sm:p-6 space-y-5">
 
         {/* Name */}
         <div className="space-y-1.5">
@@ -334,9 +335,10 @@ export default function IntroPage() {
           />
           {errors.incident_description && <p className="text-xs text-red-500">{errors.incident_description}</p>}
         </div>
+        </div>
 
-        <div className="pt-4" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
-          <Button onClick={handleNext} size="lg" className="w-full">
+        <div className="pt-2" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
+          <Button onClick={handleNext} size="lg" className="w-full rounded-2xl">
             Далее
           </Button>
         </div>

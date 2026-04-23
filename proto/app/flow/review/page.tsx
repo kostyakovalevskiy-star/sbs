@@ -98,7 +98,7 @@ export default function ReviewPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#f5f6f7]">
       {/* Loading overlay */}
       {loading && (
         <div className="fixed inset-0 bg-white/95 flex flex-col items-center justify-center z-50 gap-4">
@@ -112,7 +112,7 @@ export default function ReviewPage() {
         <div className="bg-[#21A038] h-1.5">
           <div className="bg-white/40 h-full" style={{ width: "0%" }} />
         </div>
-        <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
               <ChevronLeft className="w-5 h-5" />
@@ -129,10 +129,10 @@ export default function ReviewPage() {
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
-        <h1 className="text-xl font-bold text-gray-900">Проверьте данные</h1>
+        <h1 className="font-display text-2xl font-bold text-gray-900 px-1">Проверьте данные</h1>
 
         {/* Summary */}
-        <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-gray-700">Данные об инциденте</h2>
             <button
@@ -161,7 +161,7 @@ export default function ReviewPage() {
         </div>
 
         {/* Photos */}
-        <div className="space-y-3">
+        <div className="bg-white rounded-3xl p-5 sm:p-6 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-700">
               Фотографии ({photos.length})
@@ -204,14 +204,14 @@ export default function ReviewPage() {
           </div>
         )}
 
-        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
-          <Button variant="outline" onClick={() => router.back()} className="flex-1">
+        <div className="pt-2 flex gap-3" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
+          <Button variant="outline" onClick={() => router.back()} className="flex-1 rounded-2xl">
             Назад
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={photos.length === 0 || loading}
-            className="flex-1"
+            className="flex-1 rounded-2xl"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Анализ…</>

@@ -198,7 +198,7 @@ export default function ResultPage() {
   const sigmaPct = Math.round(report.sigma * 100);
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#f5f6f7]">
       {/* Header — sticky on scroll */}
       <div className="bg-[#21A038] text-white px-4 py-6 relative sticky top-0 z-20 shadow-md">
         <button
@@ -222,7 +222,7 @@ export default function ResultPage() {
       <div className="px-4 py-5 max-w-6xl mx-auto">
         {/* Expert routing */}
         {report.routed_to_expert && (
-          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-3xl p-4 mb-5">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-amber-800">Кейс передан эксперту</p>
@@ -237,7 +237,7 @@ export default function ResultPage() {
           {/* Left column: AI summary + area + actions */}
           <div className="space-y-5">
         {/* AI Summary */}
-        <div className="bg-gray-50 rounded-xl p-4">
+        <div className="bg-white rounded-3xl p-5">
           <h2 className="text-sm font-semibold text-gray-700 mb-2">AI-заключение</h2>
           <p className="text-sm text-gray-600 leading-relaxed">{report.claude_output.summary}</p>
           {report.area_pick && (
@@ -295,7 +295,7 @@ export default function ResultPage() {
 
         {/* Damage area — four estimates with priority */}
         {report.area_pick && report.area_pick.candidates.length > 0 && (
-          <div className="rounded-xl p-4 border bg-blue-50 border-blue-200">
+          <div className="rounded-3xl p-5 bg-blue-50">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-700">Площадь повреждений</h2>
               <span className="text-xs text-gray-500">в расчёте: <strong className="text-gray-900">{report.area_pick.value} м²</strong></span>
@@ -397,7 +397,7 @@ export default function ResultPage() {
               return (
                 <div>
                   <h2 className="text-sm font-semibold text-gray-700 mb-2">Работы</h2>
-                  <div className="overflow-x-auto rounded-xl border">
+                  <div className="overflow-x-auto rounded-3xl bg-white">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50 border-b">
@@ -455,7 +455,7 @@ export default function ResultPage() {
               return (
                 <div>
                   <h2 className="text-sm font-semibold text-gray-700 mb-2">Материалы</h2>
-                  <div className="overflow-x-auto rounded-xl border">
+                  <div className="overflow-x-auto rounded-3xl bg-white">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50 border-b">

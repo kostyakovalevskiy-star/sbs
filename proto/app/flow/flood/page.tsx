@@ -96,12 +96,12 @@ export default function FloodPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#f5f6f7]">
       <div className="sticky top-0 z-20 bg-white pt-safe">
         <div className="bg-[#21A038] h-1.5">
           <div className="bg-white/40 h-full" style={{ width: "0%" }} />
         </div>
-        <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600 p-1 -ml-1">
               <ChevronLeft className="w-5 h-5" />
@@ -118,7 +118,8 @@ export default function FloodPage() {
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-5">
-        <h1 className="text-xl font-bold text-gray-900">Уточните детали залива</h1>
+        <h1 className="font-display text-2xl font-bold text-gray-900 px-1">Уточните детали залива</h1>
+        <div className="bg-white rounded-3xl p-5 sm:p-6 space-y-5">
 
         {/* Floor */}
         <div className="space-y-1.5">
@@ -229,12 +230,13 @@ export default function FloodPage() {
             ))}
           </div>
         </div>
+        </div>
 
-        <div className="pt-4 flex gap-3" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
-          <Button variant="outline" onClick={() => router.back()} className="flex-1">
+        <div className="pt-2 flex gap-3" style={{ paddingBottom: 'max(3rem, env(safe-area-inset-bottom, 3rem))' }}>
+          <Button variant="outline" onClick={() => router.back()} className="flex-1 rounded-2xl">
             Назад
           </Button>
-          <Button onClick={handleNext} className="flex-1">
+          <Button onClick={handleNext} className="flex-1 rounded-2xl">
             Далее
           </Button>
         </div>

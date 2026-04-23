@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4 pt-safe relative">
+    <main className="min-h-screen flex items-center justify-center bg-[#f5f6f7] px-4 pt-safe relative">
       <Link
         href="/"
         className="absolute left-4 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
@@ -46,20 +46,20 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <div className="w-12 h-12 bg-[#21A038] rounded-xl flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6 text-white" />
+            <div className="w-14 h-14 bg-[#21A038] rounded-2xl flex items-center justify-center">
+              <ShieldCheck className="w-7 h-7 text-white" />
             </div>
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Кабинет администратора</h1>
+          <h1 className="font-display text-2xl font-bold text-gray-900">Кабинет администратора</h1>
           <p className="text-sm text-gray-500 mt-1">Claim Assistant</p>
         </div>
 
-        <div className="space-y-4 bg-white rounded-2xl p-6 shadow-sm border">
+        <div className="space-y-4 bg-white rounded-3xl p-6 sm:p-8">
           <p className="text-sm text-gray-600 text-center">
             Демо-режим: вход без пароля
           </p>
           {error && <p className="text-xs text-red-500 text-center">{error}</p>}
-          <Button onClick={handleEnter} className="w-full" disabled={loading}>
+          <Button onClick={handleEnter} className="w-full rounded-2xl" disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Войти"}
           </Button>
         </div>
