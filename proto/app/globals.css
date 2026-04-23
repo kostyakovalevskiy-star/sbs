@@ -2,16 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  font-family: var(--font-sans), "Golos Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-h1, h2, h3, .font-display {
-  letter-spacing: -0.02em;
-}
 
 @layer base {
   :root {

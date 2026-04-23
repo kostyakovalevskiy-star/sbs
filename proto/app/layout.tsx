@@ -1,14 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Golos_Text } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-// Golos Text — основной шрифт проекта. Подключается через next/font/google
-// с подмножествами latin + cyrillic.
-const golosText = Golos_Text({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-sans",
-});
+const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
   title: "Claim Assistant",
@@ -31,7 +25,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={golosText.variable}>
+      <body className={inter.className}>
         <div className="min-h-screen bg-background">
           {children}
         </div>
