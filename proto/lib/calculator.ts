@@ -108,6 +108,7 @@ const WORK_TO_MATERIALS: Record<string, string[]> = {
   "PAINT-002": ["MAT-PAINT-01"],
   "WALL-001":  ["MAT-WALL-01"],
   "WALL-002":  ["MAT-WALL-01"],
+  "WALL-003":  ["MAT-TILE-WALL-01", "MAT-TILE-GLUE-01"],
   "FLOOR-001": ["MAT-LAM-01", "MAT-UNDER-01"],
   "FLOOR-002": ["MAT-LINO-01"],
   "FLOOR-003": ["MAT-TILE-01", "MAT-TILE-GLUE-01"],

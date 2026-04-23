@@ -50,6 +50,7 @@ export default function AdminDashboard() {
     laminate_swelling: "Вспучивание ламината",
     plaster_destruction: "Разрушение штукатурки",
     mold: "Плесень",
+    ceramic_tile_damage: "Повреждение плитки",
     no_damage: "Без повреждений",
   };
 

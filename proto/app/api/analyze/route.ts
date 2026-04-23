@@ -40,7 +40,7 @@ async function callClaude(
   client: Anthropic,
   context: IncidentContext,
   photos: Array<{ base64: string }>,
-  workCodes: string[]
+  workCodes: Array<{ code: string; name: string }>
 ): Promise<string> {
   const userContent = buildUserMessage(context, photos, workCodes);
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     const materialsCatalog = savedMaterials ?? (materialsCatalogDefault as MaterialsCatalog);
     const regionCoefficients = regionCoefficientsDefault as RegionCoefficients;
 
-    const workCodes = worksCatalog.works.map((w) => w.code);
+    const workCodes = worksCatalog.works.map((w) => ({ code: w.code, name: w.name }));
 
     // Call Claude
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

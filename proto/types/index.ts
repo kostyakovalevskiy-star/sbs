@@ -8,6 +8,7 @@ export type DamageClass =
   | "laminate_swelling"
   | "plaster_destruction"
   | "mold"
+  | "ceramic_tile_damage"
   | "no_damage";
 export type Surface = "ceiling" | "wall" | "floor" | "doorway" | "window";
 export type Severity = "low" | "medium" | "high" | "critical";

@@ -276,6 +276,19 @@
       "finish_class": "standard"
     },
     {
+      "code": "MAT-TILE-WALL-01",
+      "name": "Плитка керамическая настенная (20×30 / 25×40 см)",
+      "category": "tiling",
+      "package_unit": "м²",
+      "package_amount": 1,
+      "package_unit_label": "м²",
+      "consumption_m2_per_package": 1,
+      "base_price_rub": 950,
+      "samples_rub": [700, 950, 1300],
+      "service_life_years": 25,
+      "finish_class": "standard"
+    },
+    {
       "code": "MAT-CARPET-01",
       "name": "Ковролин модульный (плитка 50×50 см, коммерческий)",
       "category": "flooring",

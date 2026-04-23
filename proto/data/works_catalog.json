@@ -266,6 +266,16 @@
       "samples": [420, 480, 560]
     },
     {
+      "code": "WALL-003",
+      "name": "Облицовка стен керамической плиткой",
+      "category": "tiling",
+      "unit": "м²",
+      "base_price_rub": 1650,
+      "min_price_rub": 1250,
+      "max_price_rub": 2200,
+      "samples": [1450, 1650, 1900]
+    },
+    {
       "code": "FLOOR-001",
       "name": "Укладка ламината с подложкой",
       "category": "flooring",
