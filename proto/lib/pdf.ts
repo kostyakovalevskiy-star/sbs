@@ -44,9 +44,18 @@ function buildHTML(report: Report, context: IncidentContext, photos: string[]): 
       <td class="right bold">${rub(m.total)}</td>
     </tr>`).join("");
 
-  const photoImgs = photos.slice(0, 6).map((b64) =>
+  const photosToShow = photos.slice(0, 3);
+  const photoImgs = photosToShow.map((b64) =>
     `<img src="data:image/jpeg;base64,${b64}" />`
   ).join("");
+
+  const eventTypeLabels: Record<string, string> = {
+    flood: "Залив квартиры",
+    fire: "Пожар",
+    theft: "Взлом / кража",
+    natural: "Стихийное бедствие",
+  };
+  const eventTypeLabel = eventTypeLabels[context.event_type] ?? "—";
 
   const caseId = (context.id ?? "").slice(0, 8).toUpperCase();
   const date = new Date().toLocaleDateString("ru-RU");
@@ -67,12 +76,15 @@ function buildHTML(report: Report, context: IncidentContext, photos: string[]): 
   .header-right { text-align: right; font-size: 11px; opacity: 0.85; }
   .disclaimer { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #7b5e00; margin-bottom: 16px; }
   h2 { font-size: 13px; font-weight: 700; color: #21A038; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; margin: 16px 0 8px; }
-  .info-grid { display: grid; grid-template-columns: 140px 1fr; gap: 4px 12px; font-size: 11px; }
+  .info-grid { display: grid; grid-template-columns: 130px 1fr; gap: 4px 10px; font-size: 11px; }
   .info-label { color: #666; }
+  .info-value-block { white-space: pre-wrap; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; align-items: start; }
+  .two-col h2 { margin-top: 0; }
   .summary-box { background: #f5faf6; border-radius: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.5; color: #333; margin-bottom: 6px; }
   .confidence { font-size: 11px; color: #666; }
-  .photos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
-  .photos img { height: 90px; width: auto; border-radius: 4px; object-fit: cover; }
+  .photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+  .photos img { width: 100%; height: 450px; border-radius: 4px; object-fit: cover; }
   table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 4px; }
   th { background: #f0f0f0; text-align: left; padding: 5px 8px; border-bottom: 2px solid #ccc; font-size: 10px; text-transform: uppercase; color: #555; }
   td { padding: 5px 8px; border-bottom: 1px solid #eee; }
@@ -111,25 +123,29 @@ function buildHTML(report: Report, context: IncidentContext, photos: string[]): 
   ⚠ Прототип — данные не передаются в страховую компанию. Используется для UX-тестирования.
 </div>
 
-<h2>Данные клиента и инцидента</h2>
-<div class="info-grid">
-  <span class="info-label">ФИО</span><span>${context.name || "—"}</span>
-  <span class="info-label">Телефон</span><span>${context.phone || "—"}</span>
-  <span class="info-label">Адрес</span><span>${context.address || "—"}</span>
-  <span class="info-label">Регион</span><span>${context.region || "—"}</span>
-  <span class="info-label">Площадь квартиры</span><span>${context.apartment_area_m2} м²</span>
-  <span class="info-label">Площадь ущерба (в расчёте)</span><span>${report.area_pick?.value ?? context.affected_area_m2 ?? "—"} м² <em style="color:#555">(источник: ${report.area_pick?.source ?? "заявлено клиентом"})</em></span>
-  <span class="info-label">Год ремонта</span><span>${context.last_renovation_year}</span>
-  <span class="info-label">Уровень отделки</span><span>${context.finish_level ?? "—"}</span>
-  ${context.event_date ? `<span class="info-label">Дата события</span><span>${context.event_date}</span>` : ""}
-  ${context.ceiling_height ? `<span class="info-label">Высота потолков</span><span>${context.ceiling_height} м</span>` : ""}
+<div class="two-col">
+  <div>
+    <h2>Данные клиента и инцидента</h2>
+    <div class="info-grid">
+      <span class="info-label">ФИО</span><span>${context.name || "—"}</span>
+      <span class="info-label">Телефон</span><span>${context.phone || "—"}</span>
+      <span class="info-label">Адрес</span><span>${context.address || "—"}</span>
+      <span class="info-label">Площадь квартиры</span><span>${context.apartment_area_m2} м²</span>
+      <span class="info-label">Площадь ущерба</span><span>${report.area_pick?.value ?? context.affected_area_m2 ?? "—"} м²</span>
+      <span class="info-label">Год ремонта</span><span>${context.last_renovation_year}</span>
+      <span class="info-label">Категория ущерба</span><span>${eventTypeLabel}</span>
+      ${context.event_date ? `<span class="info-label">Дата события</span><span>${context.event_date}</span>` : ""}
+      <span class="info-label">Описание инцидента</span><span class="info-value-block">${context.incident_description || "—"}</span>
+    </div>
+  </div>
+  <div>
+    <h2>AI-заключение</h2>
+    <div class="summary-box">${report.claude_output.summary || "—"}</div>
+    <div class="confidence">Уверенность AI: ${confidence}%</div>
+  </div>
 </div>
 
-<h2>AI-заключение</h2>
-<div class="summary-box">${report.claude_output.summary || "—"}</div>
-<div class="confidence">Уверенность AI: ${confidence}%</div>
-
-${photos.length > 0 ? `<h2>Фотографии (${Math.min(photos.length, 6)} из ${photos.length})</h2><div class="photos">${photoImgs}</div>` : ""}
+${photos.length > 0 ? `<h2>Фотографии (${photosToShow.length} из ${photos.length})</h2><div class="photos">${photoImgs}</div>` : ""}
 
 ${report.works.length > 0 ? `
 <h2>Перечень работ</h2>
