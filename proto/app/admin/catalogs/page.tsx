@@ -221,21 +221,21 @@ export default function CatalogsPage() {
         </div>
       )}
 
-      <div className="px-4 py-6 max-w-4xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Справочники</h1>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-5">
+        <div className="flex items-center justify-between px-1 flex-wrap gap-3">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-gray-900">Справочники</h1>
           <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={handleExportXlsx} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={handleExportXlsx} className="gap-1.5 rounded-xl">
               <FileSpreadsheet className="w-4 h-4" /> XLSX
             </Button>
-            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="gap-1.5 rounded-xl">
               <Upload className="w-4 h-4" /> Импорт
             </Button>
             <input ref={fileInputRef} type="file" accept=".xlsx" className="hidden" onChange={handleImportXlsx} />
-            <Button variant="outline" size="sm" onClick={handleReset} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={handleReset} className="gap-1.5 rounded-xl">
               <Download className="w-4 h-4" /> JSON
             </Button>
-            <Button variant="outline" size="sm" onClick={handleReset} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={handleReset} className="gap-1.5 rounded-xl">
               <RotateCcw className="w-4 h-4" /> Сброс
             </Button>
           </div>
@@ -247,8 +247,8 @@ export default function CatalogsPage() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tab === t ? "bg-[#21A038] text-white" : "bg-white border text-gray-600 hover:border-gray-400"
+              className={`px-5 py-2 rounded-xl text-sm font-medium transition-colors ${
+                tab === t ? "bg-[#21A038] text-white shadow-sm" : "bg-white text-gray-600 hover:bg-gray-50"
               }`}
             >
               {t === "works" ? "Работы" : "Материалы"}
@@ -257,7 +257,7 @@ export default function CatalogsPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border overflow-hidden">
+        <div className="bg-white rounded-3xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

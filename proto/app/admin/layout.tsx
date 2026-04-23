@@ -27,31 +27,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <main className="min-h-screen bg-[#f5f6f7]">
       <div className="sticky top-0 z-20">
-        <header className="bg-white border-b px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-[#21A038] rounded-md" />
-            <span className="font-semibold text-gray-900">Claim Assistant Admin</span>
+        <header className="bg-white border-b border-gray-100">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#21A038] flex items-center justify-center">
+                <span className="text-white font-bold text-lg leading-none">S</span>
+              </div>
+              <span className="font-display font-bold text-gray-900 text-lg">Claim Assistant Admin</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-gray-500 rounded-xl">
+              <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Выйти</span>
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-gray-500">
-            <LogOut className="w-4 h-4" /> Выйти
-          </Button>
         </header>
-        <nav className="flex gap-1 px-4 py-2 bg-white border-b overflow-x-auto">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap ${
-                  active ? "bg-[#e8f5ea] text-[#21A038]" : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-              </Link>
-            );
-          })}
+        <nav className="bg-white border-b border-gray-100">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2 flex gap-1 overflow-x-auto">
+            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+                    active ? "bg-[#e8f5ea] text-[#21A038]" : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
       </div>
       {children}

@@ -132,10 +132,10 @@ export default function HistoryPage() {
         </div>
       )}
 
-      <div className="px-4 py-6 max-w-4xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">История кейсов</h1>
-          <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-5">
+        <div className="flex items-center justify-between px-1">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-gray-900">История кейсов</h1>
+          <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 rounded-xl">
             <Download className="w-4 h-4" /> CSV
           </Button>
         </div>
@@ -145,7 +145,7 @@ export default function HistoryPage() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="text-sm border rounded-lg px-3 py-1.5 bg-white text-gray-700"
+            className="text-sm rounded-xl px-4 py-2 bg-white text-gray-700"
           >
             <option value="all">Все типы</option>
             <option value="flood">Залив</option>
@@ -156,13 +156,13 @@ export default function HistoryPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="text-sm border rounded-lg px-3 py-1.5 bg-white text-gray-700"
+            className="text-sm rounded-xl px-4 py-2 bg-white text-gray-700"
           >
             <option value="all">Все статусы</option>
             <option value="complete">Завершён</option>
             <option value="expert">На эксперте</option>
           </select>
-          <span className="text-sm text-gray-400 self-center">{filtered.length} кейсов</span>
+          <span className="text-sm text-gray-400 self-center px-1">{filtered.length} кейсов</span>
         </div>
 
         {loading ? (
@@ -170,11 +170,11 @@ export default function HistoryPage() {
             <div className="w-8 h-8 border-2 border-[#21A038] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border text-gray-400">
+          <div className="text-center py-16 bg-white rounded-3xl text-gray-400">
             Кейсов не найдено
           </div>
         ) : (
-          <div className="bg-white rounded-xl border overflow-hidden">
+          <div className="bg-white rounded-3xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
