@@ -200,15 +200,19 @@ export default function ResultPage() {
   return (
     <main className="min-h-screen bg-[#f5f6f7]">
       {/* Header — sticky on scroll */}
-      <div className="bg-[#21A038] text-white px-4 py-6 relative sticky top-0 z-20 shadow-md">
-        <button
-          onClick={handleEditParams}
-          className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 active:bg-white/30 transition-colors rounded-full px-3 py-1.5 text-xs font-medium"
-        >
-          <Pencil className="w-3.5 h-3.5" />
-          Редактировать параметры
-        </button>
-        <p className="text-sm opacity-80 mb-1">Предварительная оценка ущерба</p>
+      <div className="bg-[#21A038] text-white px-4 py-6 sticky top-0 z-20 shadow-md">
+        <div className="flex items-start justify-between gap-3 mb-1">
+          <p className="text-sm opacity-80">Предварительная оценка ущерба</p>
+          <button
+            onClick={handleEditParams}
+            aria-label="Редактировать параметры"
+            className="shrink-0 inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 active:bg-white/30 transition-colors rounded-full px-3 py-1.5 text-xs font-medium"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Редактировать параметры</span>
+            <span className="sm:hidden">Изменить</span>
+          </button>
+        </div>
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold">{formatRub(report.range.base)}</span>
         </div>

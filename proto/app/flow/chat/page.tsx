@@ -310,26 +310,26 @@ export default function ChatFlowPage() {
       style={{ height: "100dvh" }}
     >
       <div className="shrink-0 sticky top-0 z-20 bg-white pt-safe">
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 min-h-[60px]">
           {/* Left: back */}
           <button
             onClick={() => router.push("/")}
-            className="text-gray-400 hover:text-gray-600 p-1 -ml-1"
+            className="shrink-0 text-gray-400 hover:text-gray-600 p-1 -ml-1"
             aria-label="Назад"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
           {/* Center: title + Lemonade-style step progress */}
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-sm font-semibold text-gray-900">Чат-помощник</span>
+          <div className="flex flex-1 flex-col items-center gap-1.5 min-w-0">
+            <span className="text-sm font-semibold text-gray-900 truncate">Чат-помощник</span>
             <FlowProgress activePct={progressPct} />
           </div>
 
           {/* Right: end */}
           <button
             onClick={() => router.push("/thank-you?abandoned=1")}
-            className="text-xs text-sber-green font-medium whitespace-nowrap"
+            className="shrink-0 text-xs text-sber-green font-medium whitespace-nowrap"
           >
             Завершить
           </button>
