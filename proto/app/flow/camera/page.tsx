@@ -669,6 +669,7 @@ export default function CameraPage() {
                 src={currentScene.illustrationSrc}
                 alt={currentScene.title}
                 className="w-full h-auto max-h-[60vh] object-contain"
+                style={{ opacity: 0.4 }}
                 draggable={false}
               />
             </div>
