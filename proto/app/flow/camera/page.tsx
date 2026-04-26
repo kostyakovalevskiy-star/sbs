@@ -665,16 +665,17 @@ export default function CameraPage() {
             </div>
 
             <div
-              className="w-72 h-72 mb-7 flex items-center justify-center"
+              className="w-full max-w-[520px] mb-7 flex items-center justify-center"
               style={{
                 animation: "introFloat 3s ease-in-out infinite",
+                maxHeight: "60vh",
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={currentScene.illustrationSrc}
                 alt={currentScene.title}
-                className="w-full h-full object-contain"
+                className="w-full h-auto max-h-[60vh] object-contain"
                 draggable={false}
               />
             </div>
