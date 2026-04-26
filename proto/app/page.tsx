@@ -107,8 +107,15 @@ export default function HomePage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
-        {/* Hero */}
-        <section className="bg-[#21A038] rounded-3xl px-6 sm:px-10 py-10 sm:py-14 text-white relative overflow-hidden">
+        {/* Hero — its content fades out as the user scrolls, handing the CTA
+            role over to the sticky header pill above. */}
+        <section
+          className={cn(
+            "bg-[#21A038] rounded-3xl px-6 sm:px-10 py-10 sm:py-14 text-white relative overflow-hidden transition-opacity duration-300",
+            collapsed ? "opacity-0" : "opacity-100"
+          )}
+          aria-hidden={collapsed}
+        >
           <div className="absolute -right-20 -bottom-20 w-72 h-72 rounded-full bg-white/10" />
           <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5" />
           <div className="relative max-w-2xl">
@@ -120,36 +127,15 @@ export default function HomePage() {
               Сфотографируйте повреждения — AI оценит ущерб и подготовит PDF-отчёт
               для страховой компании.
             </p>
-            {existingDraft ? (
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={continueDraft}
-                  size="xl"
-                  className="bg-white text-[#21A038] hover:bg-white/90 rounded-2xl shadow-lg font-semibold"
-                >
-                  Продолжить оформление
-                  <ArrowRight className="w-5 h-5 ml-1" />
-                </Button>
-                <button
-                  onClick={() => {
-                    localStorage.removeItem("claim_draft");
-                    setExistingDraft(null);
-                  }}
-                  className="px-6 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-medium transition-colors"
-                >
-                  Начать заново
-                </button>
-              </div>
-            ) : (
-              <Button
-                onClick={startNew}
-                size="xl"
-                className="bg-white text-[#21A038] hover:bg-white/90 rounded-2xl shadow-lg font-semibold px-7"
-              >
-                Оформить онлайн
-                <ArrowRight className="w-5 h-5 ml-1" />
-              </Button>
-            )}
+            <Button
+              onClick={ctaAction}
+              size="xl"
+              tabIndex={collapsed ? -1 : 0}
+              className="bg-white text-[#21A038] hover:bg-white/90 rounded-2xl shadow-lg font-semibold px-7"
+            >
+              {existingDraft ? "Продолжить оформление" : "Зафиксировать ущерб"}
+              <ArrowRight className="w-5 h-5 ml-1" />
+            </Button>
           </div>
         </section>
 
