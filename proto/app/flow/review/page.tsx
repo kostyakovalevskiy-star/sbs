@@ -136,7 +136,7 @@ export default function ReviewPage() {
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-gray-700">Данные об инциденте</h2>
             <button
-              onClick={() => router.push("/flow/intro")}
+              onClick={() => router.push("/flow/chat")}
               className="text-xs text-[#21A038] font-medium whitespace-nowrap"
             >
               Внести изменения

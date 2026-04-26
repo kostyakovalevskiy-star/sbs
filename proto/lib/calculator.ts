@@ -70,9 +70,12 @@ function getFinishFactor(finishLevel: string | undefined, calibration: Calibrati
 }
 
 // Compute volume of a work item. `A` = damaged area (user-declared), `P` = approx perimeter.
+// `heightFactor` = h / default_h, used to scale wall-bound surface works
+// (wallpaper, paint, prep, leveling) — their replacement area grows with
+// ceiling height, while floor / ceiling / linear works don't.
 // Area-based works (paint, level, wallpaper, floor) use A directly.
 // Linear works (plinths, door/window casings) use P. Doors use count.
-function computeVolume(code: string, A: number, P: number): number {
+function computeVolume(code: string, A: number, P: number, heightFactor: number): number {
   const category = code.split("-")[0];
 
   switch (category) {
@@ -85,8 +88,13 @@ function computeVolume(code: string, A: number, P: number): number {
     case "LEVEL":
     case "PAINT":
     case "WALL":
+      // Wall-bound works scale with ceiling height — taller walls = more
+      // surface to prep / paint / paper around the same damage spot.
+      return A * heightFactor;
+
     case "FLOOR":
     case "CEIL":
+      // Floor and ceiling areas are independent of ceiling height.
       return A;
 
     case "DOOR":
@@ -144,16 +152,17 @@ export function calculate(
 ): Report {
   const areaPick = pickAuthoritativeArea(claudeOutput, context.affected_area_m2, overridePriority);
   const S = areaPick.value;
-  const h = context.ceiling_height
-    ? typeof context.ceiling_height === "number"
-      ? context.ceiling_height
-      : calibration.default_ceiling_height_m
-    : calibration.default_ceiling_height_m;
+  const defaultH = calibration.default_ceiling_height_m;
+  const rawH =
+    typeof context.ceiling_height === "number" ? context.ceiling_height : defaultH;
+  // Clamp to a reasonable bracket so an outlier value (e.g., 5 m loft) doesn't
+  // explode the wall-works estimate by 80%.
+  const h = Math.min(Math.max(rawH, 2.2), 4.0);
+  const heightFactor = h / defaultH;
 
   // Approximate perimeter (for linear works: plinths, casings)
   // S here is the user-declared damaged area — we only need P for non-area works.
   const P = 2 * Math.sqrt(Math.max(S, 4) * 1.2);
-  void h;
 
   const regionKey = context.region || "moscow";
   const regionData = catalogs.regions.regions[regionKey] ?? catalogs.regions.regions["moscow"];
@@ -170,7 +179,7 @@ export function calculate(
     const catalogEntry = catalogs.works.find((w) => w.code === code);
     if (!catalogEntry) continue;
 
-    const volume = computeVolume(code, S, P);
+    const volume = computeVolume(code, S, P, heightFactor);
     const unitPrice = Math.round(catalogEntry.base_price_rub * worksCoef * finishFactor);
     const total = Math.round(volume * unitPrice);
 

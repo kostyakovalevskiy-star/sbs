@@ -30,22 +30,23 @@ export default function HomePage() {
     const draft: DraftState = {
       id: generateId(),
       created_at: new Date().toISOString(),
-      current_step: "intro",
+      current_step: "chat",
     };
     localStorage.setItem("claim_draft", JSON.stringify(draft));
-    router.push("/flow/intro");
+    router.push("/flow/chat");
   }
 
   function continueDraft() {
     if (!existingDraft) return;
     const stepRoutes: Record<string, string> = {
-      intro: "/flow/intro",
-      flood: "/flow/flood",
+      chat: "/flow/chat",
+      intro: "/flow/chat",
+      flood: "/flow/chat",
       camera: "/flow/camera",
       review: "/flow/review",
       result: `/result/${existingDraft.result?.id}`,
     };
-    router.push(stepRoutes[existingDraft.current_step] ?? "/flow/intro");
+    router.push(stepRoutes[existingDraft.current_step] ?? "/flow/chat");
   }
 
   return (

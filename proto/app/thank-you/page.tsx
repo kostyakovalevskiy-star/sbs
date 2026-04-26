@@ -65,13 +65,14 @@ function ThankYouContent() {
       return;
     }
     const stepRoutes: Record<string, string> = {
-      intro: "/flow/intro",
-      flood: "/flow/flood",
+      chat: "/flow/chat",
+      intro: "/flow/chat",
+      flood: "/flow/chat",
       camera: "/flow/camera",
       review: "/flow/review",
       result: `/result/${draft.result?.id ?? ""}`,
     };
-    router.push(stepRoutes[draft.current_step] ?? "/flow/intro");
+    router.push(stepRoutes[draft.current_step] ?? "/flow/chat");
   }
 
   // Abandoned flow — user hit "Завершить" before finishing

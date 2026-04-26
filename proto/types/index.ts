@@ -227,12 +227,42 @@ export interface CatalogAuditEntry {
   removed: string[];
 }
 
+export type FireSource = "kitchen" | "wiring" | "neighbors" | "other" | "unknown";
+export type MchsCalled = "with_protocol" | "without_protocol" | "no";
+export type EntryMethod = "door" | "window" | "balcony" | "unknown" | "other";
+export type PoliceFiled = "with_kusp" | "pending" | "no";
+export type DisasterType = "wind" | "hail" | "tree_fall" | "lightning" | "flood_natural" | "other";
+export type AffectedZone = "facade" | "windows" | "roof" | "yard" | "interior";
+
+export interface FireDetails {
+  event_date?: string;
+  fire_source?: FireSource;
+  mchs_called?: MchsCalled;
+  mchs_protocol_number?: string;
+}
+
+export interface TheftDetails {
+  event_date?: string;
+  entry_method?: EntryMethod;
+  police_filed?: PoliceFiled;
+  kusp_number?: string;
+}
+
+export interface NaturalDetails {
+  event_date?: string;
+  disaster_type?: DisasterType;
+  affected_zones?: AffectedZone[];
+}
+
 export interface DraftState {
   id: string;
   created_at: string;
-  current_step: "intro" | "flood" | "camera" | "review" | "result";
+  current_step: "intro" | "flood" | "camera" | "review" | "result" | "chat";
   intro?: Partial<IncidentContext>;
   flood?: Partial<IncidentContext>;
+  fire?: FireDetails;
+  theft?: TheftDetails;
+  natural?: NaturalDetails;
   photos?: Array<{ base64: string; exif: ExifData | null; laplacianVariance: number }>;
   result?: { id: string; report: Report };
 }
