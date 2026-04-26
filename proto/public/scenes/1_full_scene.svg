@@ -5,12 +5,8 @@
  width="2222.000000pt" height="1920.000000pt" viewBox="0 0 2222.000000 1920.000000"
  preserveAspectRatio="xMidYMid meet">
 
-<defs>
-<filter id="invertAlpha"><feComponentTransfer><feFuncA type="table" tableValues="1 0"/></feComponentTransfer></filter>
-</defs>
-
 <g transform="translate(0.000000,1920.000000) scale(0.100000,-0.100000)"
-fill="white" stroke="none" filter="url(#invertAlpha)">
+fill="#000000" stroke="none">
 <path d="M0 9600 l0 -9600 11110 0 11110 0 0 9600 0 9600 -11110 0 -11110 0 0
 -9600z m17955 5011 c3 -6 -41 -50 -97 -98 -87 -75 -888 -721 -1263 -1018 -62
 -49 -277 -223 -477 -386 -199 -162 -442 -358 -538 -434 -262 -207 -346 -276
