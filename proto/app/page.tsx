@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { generateId } from "@/lib/utils";
+import { cn, generateId } from "@/lib/utils";
 import type { DraftState } from "@/types";
 import { AlertTriangle, Settings, ArrowRight, FileEdit, Camera, FileText } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
   const [existingDraft, setExistingDraft] = useState<DraftState | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem("claim_draft");
@@ -25,6 +26,22 @@ export default function HomePage() {
       }
     }
   }, []);
+
+  // Collapse the green hero into a compact CTA in the sticky header once the
+  // user scrolls past ~half of the hero height.
+  useEffect(() => {
+    function onScroll() {
+      setCollapsed(window.scrollY > 160);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  function ctaAction() {
+    if (existingDraft) continueDraft();
+    else startNew();
+  }
 
   function startNew() {
     const draft: DraftState = {
@@ -50,19 +67,38 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f6f7] pt-safe">
-      {/* Top bar */}
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+    <main className="min-h-screen bg-[#f5f6f7]">
+      {/* Top bar — sticky, with collapsing CTA */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-gray-100 pt-safe">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 shrink-0">
             <div className="w-9 h-9 rounded-xl bg-[#21A038] flex items-center justify-center">
               <span className="text-white font-bold text-lg leading-none">S</span>
             </div>
-            <span className="font-display font-bold text-gray-900 text-lg">Claim Assistant</span>
+            <span className="font-display font-bold text-gray-900 text-lg hidden sm:inline">
+              Claim Assistant
+            </span>
           </div>
+
+          {/* Collapsing CTA — appears once user scrolls past the hero. */}
+          <button
+            onClick={ctaAction}
+            aria-hidden={!collapsed}
+            tabIndex={collapsed ? 0 : -1}
+            className={cn(
+              "flex items-center gap-1.5 rounded-2xl bg-[#21A038] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-[#1a8030]",
+              collapsed
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none -translate-y-1 opacity-0"
+            )}
+          >
+            Зафиксировать ущерб
+            <ArrowRight className="h-4 w-4" />
+          </button>
+
           <Link
             href="/admin"
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors shrink-0"
           >
             <Settings className="w-4 h-4" />
             <span className="hidden sm:inline">Админка</span>
