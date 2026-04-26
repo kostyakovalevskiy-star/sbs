@@ -65,27 +65,20 @@ const SCENES: Scene[] = [
     illustrationSrc: "/scenes/1_full_scene.svg",
   },
   {
-    id: "close",
+    id: "close_scale",
     index: 2,
-    title: "Крупный план",
-    hint: "Подойдите ближе — должна быть видна текстура повреждения",
-    description: "Подойдите ближе к повреждению, чтобы видеть текстуру и границы",
-    illustrationSrc: "/scenes/2_detailed_scene.svg",
-  },
-  {
-    id: "scale",
-    index: 3,
-    title: "С масштабом",
-    hint: "Положите карту или линейку рядом с повреждением",
-    description: "Положите карту или линейку рядом — AI определит размер точно",
+    title: "Крупный план с масштабом",
+    hint: "Подойдите ближе и положите карту или линейку рядом с повреждением",
+    description:
+      "Сделайте крупный кадр повреждения, рядом положите карту или линейку — AI точно определит размер",
     illustrationSrc: "/scenes/3_measure_scale.svg",
   },
   {
     id: "source",
-    index: 4,
-    title: "Источник",
-    hint: "Снимите место, откуда пошёл ущерб",
-    description: "Снимите источник: трубы, окно, потолок — место, откуда пошёл ущерб",
+    index: 3,
+    title: "Источник залива",
+    hint: "Снимите место, откуда пошла вода",
+    description: "Снимите источник: трубы, окно, потолок — место, откуда пошла вода",
     illustrationSrc: "/scenes/4_source.svg",
   },
 ];
@@ -626,7 +619,7 @@ export default function CameraPage() {
                     {brightnessAdjust > 0 ? `+${brightnessAdjust}` : brightnessAdjust}
                   </span>
                 </div>
-                {currentScene.id === "scale" && (
+                {currentScene.id === "close_scale" && (
                   <button
                     onClick={() => {
                       setShowAdjustments(false);
