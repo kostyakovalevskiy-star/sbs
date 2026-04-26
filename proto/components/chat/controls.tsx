@@ -1,7 +1,41 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check } from "lucide-react";
+import {
+  ArrowDownFromLine,
+  ArrowUp,
+  Bell,
+  Box,
+  Boxes,
+  Building,
+  ChefHat,
+  Check,
+  Clock,
+  Cloud,
+  Crown,
+  CircleHelp,
+  DoorOpen,
+  Droplets,
+  FileCheck,
+  Flame,
+  Home,
+  Layers,
+  LayoutGrid,
+  Leaf,
+  MoreHorizontal,
+  RectangleHorizontal,
+  ShieldAlert,
+  Sofa,
+  Sparkles,
+  TreePine,
+  Users,
+  Waves,
+  Wind,
+  Wrench,
+  X,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn, formatDate, formatPhone, formatRub, normalizePhoneDigits } from "@/lib/utils";
@@ -19,6 +53,117 @@ export interface ControlProps {
   step: Step;
   onSubmit: (payload: SubmitPayload) => void;
   onRevert?: (toStepId: string) => void;
+}
+
+// Map ChoiceOption.iconName → lucide icon. Add new entries here when the
+// script introduces a new icon name.
+const ICON_MAP: Record<string, LucideIcon> = {
+  // event types
+  droplets: Droplets,
+  flame: Flame,
+  shield: ShieldAlert,
+  wind: Wind,
+  cloud: Cloud,
+  tree: TreePine,
+  zap: Zap,
+  waves: Waves,
+  // finish levels
+  leaf: Leaf,
+  home: Home,
+  sparkles: Sparkles,
+  crown: Crown,
+  // wall materials
+  grid: LayoutGrid,
+  boxes: Boxes,
+  box: Box,
+  layers: Layers,
+  // sources / answers
+  "arrow-down": ArrowDownFromLine,
+  wrench: Wrench,
+  help: CircleHelp,
+  more: MoreHorizontal,
+  chef: ChefHat,
+  users: Users,
+  "file-check": FileCheck,
+  bell: Bell,
+  clock: Clock,
+  door: DoorOpen,
+  rectangle: RectangleHorizontal,
+  building: Building,
+  sofa: Sofa,
+  check: Check,
+  x: X,
+};
+
+// Per-tone classes — selected vs idle. Tones default to sber-green.
+const TONE_CLASSES: Record<
+  string,
+  { selected: string; idle: string }
+> = {
+  green: {
+    selected: "bg-sber-green text-white",
+    idle: "bg-sber-green-light/70 text-sber-green",
+  },
+  blue: {
+    selected: "bg-blue-500 text-white",
+    idle: "bg-blue-50 text-blue-500",
+  },
+  orange: {
+    selected: "bg-orange-500 text-white",
+    idle: "bg-orange-50 text-orange-500",
+  },
+  red: {
+    selected: "bg-red-500 text-white",
+    idle: "bg-red-50 text-red-500",
+  },
+  gray: {
+    selected: "bg-gray-500 text-white",
+    idle: "bg-gray-100 text-gray-500",
+  },
+};
+
+function ChoiceIcon({
+  name,
+  selected,
+  tone = "green",
+}: {
+  name?: string;
+  selected: boolean;
+  tone?: string;
+}) {
+  const Icon = name ? ICON_MAP[name] : undefined;
+  const palette = TONE_CLASSES[tone] ?? TONE_CLASSES.green;
+  return (
+    <div
+      className={cn(
+        "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
+        selected ? palette.selected : palette.idle
+      )}
+    >
+      {Icon ? <Icon className="h-5 w-5" strokeWidth={2} /> : null}
+    </div>
+  );
+}
+
+// Round Sber-green send button — used for single-line composer rows.
+function SendButton({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label="Отправить"
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sber-green text-white shadow-sm transition-colors hover:bg-sber-green-dark disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
+    </button>
+  );
 }
 
 // =================== Text ===================
@@ -40,9 +185,9 @@ export function TextControl({ step, onSubmit }: ControlProps) {
     setError(null);
   }
 
-  return (
-    <div className="flex flex-col gap-2">
-      {multiline ? (
+  if (multiline) {
+    return (
+      <div className="flex flex-col gap-2">
         <textarea
           value={value}
           onChange={(e) => {
@@ -57,7 +202,18 @@ export function TextControl({ step, onSubmit }: ControlProps) {
             error ? "border-red-400" : "border-gray-300"
           )}
         />
-      ) : (
+        {error && <p className="text-xs text-red-500">{error}</p>}
+        <Button onClick={submit} className="rounded-2xl" size="lg">
+          Продолжить
+        </Button>
+      </div>
+    );
+  }
+
+  // Single-line: composer row with input + send button on the right.
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-end gap-2">
         <Input
           value={value}
           onChange={(e) => {
@@ -65,15 +221,13 @@ export function TextControl({ step, onSubmit }: ControlProps) {
             if (error) setError(null);
           }}
           placeholder={placeholder}
-          className={error ? "border-red-400" : ""}
+          className={cn("flex-1", error ? "border-red-400" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
-      )}
+        <SendButton onClick={submit} disabled={!value.trim()} />
+      </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
-      <Button onClick={submit} className="rounded-2xl" size="lg">
-        Продолжить
-      </Button>
     </div>
   );
 }
@@ -101,24 +255,27 @@ export function PhoneControl({ step, onSubmit }: ControlProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        type="tel"
-        inputMode="tel"
-        value={value}
-        onChange={(e) => {
-          setValue(formatPhone(e.target.value));
-          if (error) setError(null);
-        }}
-        placeholder="+7 (999) 123-45-67"
-        maxLength={18}
-        className={error ? "border-red-400" : ""}
-        autoFocus
-        onKeyDown={(e) => e.key === "Enter" && submit()}
-      />
+      <div className="flex items-end gap-2">
+        <Input
+          type="tel"
+          inputMode="tel"
+          value={value}
+          onChange={(e) => {
+            setValue(formatPhone(e.target.value));
+            if (error) setError(null);
+          }}
+          placeholder="+7 (999) 123-45-67"
+          maxLength={18}
+          className={cn("flex-1", error ? "border-red-400" : "")}
+          autoFocus
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+        />
+        <SendButton
+          onClick={submit}
+          disabled={normalizePhoneDigits(value).length !== 10}
+        />
+      </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
-      <Button onClick={submit} className="rounded-2xl" size="lg">
-        Продолжить
-      </Button>
     </div>
   );
 }
@@ -164,39 +321,35 @@ export function NumericControl({ step, onSubmit }: ControlProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <Input
-        type="text"
-        inputMode={integer ? "numeric" : "decimal"}
-        pattern={integer ? "[0-9]*" : "[0-9.,]*"}
-        value={value}
-        onChange={(e) => {
-          // Strip non-numeric input as user types, allow comma as decimal sep.
-          const raw = e.target.value.replace(",", ".");
-          const cleaned = integer ? raw.replace(/[^0-9]/g, "") : raw.replace(/[^0-9.]/g, "");
-          setValue(cleaned);
-          if (error) setError(null);
-        }}
-        placeholder={placeholder}
-        className={cn("appearance-none", error ? "border-red-400" : "")}
-        autoFocus
-        onKeyDown={(e) => e.key === "Enter" && submit()}
-      />
-      {error && <p className="text-xs text-red-500">{error}</p>}
-      <div className="flex gap-2">
-        {optional && (
-          <Button
-            onClick={skip}
-            variant="outline"
-            className="flex-1 rounded-2xl"
-            size="lg"
-          >
-            Пропустить
-          </Button>
-        )}
-        <Button onClick={submit} className="flex-1 rounded-2xl" size="lg">
-          Продолжить
-        </Button>
+      <div className="flex items-end gap-2">
+        <Input
+          type="text"
+          inputMode={integer ? "numeric" : "decimal"}
+          pattern={integer ? "[0-9]*" : "[0-9.,]*"}
+          value={value}
+          onChange={(e) => {
+            const raw = e.target.value.replace(",", ".");
+            const cleaned = integer ? raw.replace(/[^0-9]/g, "") : raw.replace(/[^0-9.]/g, "");
+            setValue(cleaned);
+            if (error) setError(null);
+          }}
+          placeholder={placeholder}
+          className={cn("flex-1 appearance-none", error ? "border-red-400" : "")}
+          autoFocus
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+        />
+        <SendButton onClick={submit} disabled={!value.trim()} />
       </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {optional && (
+        <button
+          type="button"
+          onClick={skip}
+          className="self-start text-[14px] text-gray-500 underline-offset-2 hover:text-sber-green hover:underline"
+        >
+          Пропустить
+        </button>
+      )}
     </div>
   );
 }
@@ -290,7 +443,7 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
   if (step.kind !== "choice") return null;
   const { field, options } = step;
   return (
-    <div className="grid grid-cols-1 gap-2">
+    <div className="grid auto-rows-fr grid-cols-2 gap-2.5">
       {options.map((opt: ChoiceOption) => (
         <button
           key={opt.value}
@@ -300,14 +453,17 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
               displayText: opt.label,
             })
           }
-          className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 text-left transition-colors hover:border-sber-green active:bg-sber-green-light"
+          className="group flex flex-col items-start gap-2.5 rounded-2xl border border-gray-200 bg-white px-3.5 py-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-sber-green hover:shadow-md active:translate-y-0 active:scale-[0.98]"
         >
+          <ChoiceIcon name={opt.iconName} selected={false} tone={opt.iconTone} />
           <div className="flex flex-1 flex-col">
-            <span className="text-[15px] font-medium text-gray-900">
+            <span className="text-[15px] font-semibold leading-tight text-gray-900">
               {opt.label}
             </span>
             {opt.hint && (
-              <span className="text-xs text-gray-500">{opt.hint}</span>
+              <span className="mt-0.5 text-xs leading-snug text-gray-500">
+                {opt.hint}
+              </span>
             )}
           </div>
         </button>
@@ -349,7 +505,7 @@ export function MultiChoiceControl({ step, onSubmit }: ControlProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid auto-rows-fr grid-cols-2 gap-2.5">
         {options.map((opt: ChoiceOption) => {
           const isSel = selected.has(opt.value);
           return (
@@ -357,22 +513,32 @@ export function MultiChoiceControl({ step, onSubmit }: ControlProps) {
               key={opt.value}
               onClick={() => toggle(opt.value)}
               className={cn(
-                "flex items-center justify-between gap-3 rounded-2xl border bg-white px-4 py-4 text-left transition-colors",
+                "group relative flex flex-col items-start gap-2.5 rounded-2xl border px-3.5 py-3.5 text-left shadow-sm transition-all active:scale-[0.98]",
                 isSel
-                  ? "border-sber-green bg-sber-green-light"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-sber-green bg-sber-green-light shadow-md"
+                  : "border-gray-200 bg-white hover:-translate-y-0.5 hover:border-sber-green hover:shadow-md"
               )}
             >
-              <span className="text-[15px] font-medium text-gray-900">
-                {opt.label}
-              </span>
-              <div
-                className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-md border",
-                  isSel ? "border-sber-green bg-sber-green" : "border-gray-300"
+              {isSel && (
+                <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-sber-green text-white shadow-sm">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                </span>
+              )}
+              <ChoiceIcon name={opt.iconName} selected={isSel} tone={opt.iconTone} />
+              <div className="flex flex-1 flex-col">
+                <span
+                  className={cn(
+                    "text-[15px] font-semibold leading-tight",
+                    isSel ? "text-sber-green-dark" : "text-gray-900"
+                  )}
+                >
+                  {opt.label}
+                </span>
+                {opt.hint && (
+                  <span className="mt-0.5 text-xs leading-snug text-gray-500">
+                    {opt.hint}
+                  </span>
                 )}
-              >
-                {isSel && <Check className="h-4 w-4 text-white" />}
               </div>
             </button>
           );
@@ -460,22 +626,35 @@ export function AddressControl({ step, onSubmit }: ControlProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Single bubble: input on top, DaData suggestions list below. */}
+      {/* Single bubble: composer row (input + send) on top, DaData
+          suggestions list below. */}
       <div
         className={cn(
           "overflow-hidden rounded-2xl border bg-white shadow-sm",
           error ? "border-red-400" : "border-gray-300"
         )}
       >
-        <input
-          value={value}
-          onChange={(e) => handleChange(e.target.value)}
-          onFocus={() => suggestions.length > 0 && setShowSugg(true)}
-          placeholder="Москва, ул. Ленина, 5, кв. 12"
-          autoComplete="off"
-          autoFocus
-          className="w-full border-0 bg-transparent px-4 py-3 text-[15px] text-gray-900 outline-none placeholder:text-gray-400"
-        />
+        <div className="flex items-stretch">
+          <input
+            value={value}
+            onChange={(e) => handleChange(e.target.value)}
+            onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+            placeholder="Москва, ул. Ленина, 5, кв. 12"
+            autoComplete="off"
+            autoFocus
+            onKeyDown={(e) => e.key === "Enter" && commit(value)}
+            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-[15px] text-gray-900 outline-none placeholder:text-gray-400"
+          />
+          <button
+            type="button"
+            onClick={() => commit(value)}
+            disabled={!value.trim()}
+            aria-label="Отправить"
+            className="flex w-12 shrink-0 items-center justify-center bg-sber-green text-white transition-colors hover:bg-sber-green-dark disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
+          </button>
+        </div>
         {showSugg && suggestions.length > 0 && (
           <>
             <div className="border-t border-gray-200" />
@@ -499,14 +678,6 @@ export function AddressControl({ step, onSubmit }: ControlProps) {
         )}
       </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
-      <Button
-        onClick={() => commit(value)}
-        disabled={!value.trim()}
-        className="rounded-2xl"
-        size="lg"
-      >
-        Продолжить
-      </Button>
     </div>
   );
 }

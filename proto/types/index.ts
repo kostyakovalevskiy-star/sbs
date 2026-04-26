@@ -263,6 +263,11 @@ export interface DraftState {
   fire?: FireDetails;
   theft?: TheftDetails;
   natural?: NaturalDetails;
-  photos?: Array<{ base64: string; exif: ExifData | null; laplacianVariance: number }>;
+  photos?: Array<{
+    base64: string;
+    exif: ExifData | null;
+    laplacianVariance: number;
+    sceneId?: string;
+  }>;
   result?: { id: string; report: Report };
 }

@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 export type StepKind =
   | "text"
   | "phone"
@@ -12,11 +10,17 @@ export type StepKind =
   | "compound"
   | "gosuslugi";
 
+export type IconTone = "green" | "blue" | "orange" | "red" | "gray";
+
 export interface ChoiceOption {
   value: string;
   label: string;
   hint?: string;
-  icon?: ReactNode;
+  // Identifier resolved to a lucide-react icon by the renderer; keeps the
+  // script as a pure data file (no JSX).
+  iconName?: string;
+  // Optional accent color for the icon chip — defaults to sber green.
+  iconTone?: IconTone;
 }
 
 interface BaseStep {

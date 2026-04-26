@@ -78,7 +78,7 @@ export default function HomePage() {
           <div className="relative max-w-2xl">
             <p className="text-sm sm:text-base opacity-80 mb-3 font-medium">Страхование имущества</p>
             <h1 className="font-display text-3xl sm:text-5xl font-bold leading-tight mb-4">
-              Зафиксируйте страховое событие за&nbsp;15&nbsp;минут
+              Зафиксируйте ущерб за&nbsp;15&nbsp;мин и&nbsp;получите выплату
             </h1>
             <p className="text-base sm:text-lg opacity-90 leading-relaxed mb-7 max-w-xl">
               Сфотографируйте повреждения — AI оценит ущерб и подготовит PDF-отчёт
