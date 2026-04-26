@@ -198,7 +198,7 @@ export function TextControl({ step, onSubmit }: ControlProps) {
           rows={4}
           autoFocus
           className={cn(
-            "w-full resize-none rounded-2xl border bg-white px-4 py-3 text-[15px] text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-sber-green/30",
+            "w-full resize-none rounded-2xl border bg-white px-4 py-3 text-[16px] text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-sber-green/30",
             error ? "border-red-400" : "border-gray-300"
           )}
         />
@@ -221,7 +221,7 @@ export function TextControl({ step, onSubmit }: ControlProps) {
             if (error) setError(null);
           }}
           placeholder={placeholder}
-          className={cn("flex-1", error ? "border-red-400" : "")}
+          className={cn("flex-1 text-base", error ? "border-red-400" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
@@ -266,7 +266,7 @@ export function PhoneControl({ step, onSubmit }: ControlProps) {
           }}
           placeholder="+7 (999) 123-45-67"
           maxLength={18}
-          className={cn("flex-1", error ? "border-red-400" : "")}
+          className={cn("flex-1 text-base", error ? "border-red-400" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
@@ -334,7 +334,7 @@ export function NumericControl({ step, onSubmit }: ControlProps) {
             if (error) setError(null);
           }}
           placeholder={placeholder}
-          className={cn("flex-1 appearance-none", error ? "border-red-400" : "")}
+          className={cn("flex-1 appearance-none text-base", error ? "border-red-400" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
@@ -406,7 +406,7 @@ export function DateControl({ step, onSubmit }: ControlProps) {
           setValue(e.target.value);
           if (error) setError(null);
         }}
-        className={error ? "border-red-400" : ""}
+        className={cn("text-base", error ? "border-red-400" : "")}
       />
       {error && <p className="text-xs text-red-500">{error}</p>}
       <Button
@@ -643,7 +643,7 @@ export function AddressControl({ step, onSubmit }: ControlProps) {
             autoComplete="off"
             autoFocus
             onKeyDown={(e) => e.key === "Enter" && commit(value)}
-            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-[15px] text-gray-900 outline-none placeholder:text-gray-400"
+            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-[16px] text-gray-900 outline-none placeholder:text-gray-400"
           />
           <button
             type="button"

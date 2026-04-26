@@ -305,8 +305,11 @@ export default function ChatFlowPage() {
     state.messages[state.messages.length - 1].role !== "bot";
 
   return (
-    <main className="min-h-screen bg-[#f5f6f7] flex flex-col">
-      <div className="sticky top-0 z-20 bg-white pt-safe">
+    <main
+      className="bg-[#f5f6f7] flex flex-col overflow-hidden"
+      style={{ height: "100dvh" }}
+    >
+      <div className="shrink-0 sticky top-0 z-20 bg-white pt-safe">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-gray-100 px-4 py-3">
           {/* Left: back */}
           <button
