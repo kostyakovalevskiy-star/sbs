@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback, type ReactElement } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -14,6 +14,8 @@ import {
   Info,
   AlertTriangle,
   Smartphone,
+  Flashlight,
+  FlashlightOff,
 } from "lucide-react";
 import type { DraftState } from "@/types";
 import {
@@ -48,8 +50,8 @@ interface Scene {
   title: string;
   hint: string;
   description: string;
-  // line-art SVG showing what to capture (white stroke on dark)
-  illustration: ReactElement;
+  // Path to the illustration (PNG in /public/scenes).
+  illustrationSrc: string;
 }
 
 const SCENES: Scene[] = [
@@ -60,33 +62,7 @@ const SCENES: Scene[] = [
     hint: "Пройдите подальше — должна быть видна вся стена",
     description:
       "Сделайте фото всего помещения, чтобы было видно повреждённую зону",
-    illustration: (
-      <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden>
-        <g
-          fill="none"
-          stroke="white"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.92"
-        >
-          <rect x="20" y="40" width="160" height="100" strokeWidth="1" opacity="0.35" />
-          <line x1="20" y1="100" x2="180" y2="100" strokeWidth="1" opacity="0.35" />
-          <path
-            d="M50 60 Q60 55 75 62 Q85 68 70 78 Q55 82 50 70 Z"
-            strokeWidth="1"
-            opacity="0.5"
-          />
-          <rect x="68" y="60" width="64" height="110" rx="8" />
-          <rect x="76" y="72" width="48" height="86" rx="2" strokeWidth="1" opacity="0.6" />
-          <circle cx="100" cy="166" r="2" strokeWidth="1" />
-          <line x1="92" y1="68" x2="108" y2="68" strokeWidth="1" />
-          <path d="M58 130 Q52 132 50 138 L50 175 Q52 184 60 186 L78 186 Q85 184 86 178 L86 170" />
-          <path d="M58 138 Q56 142 56 148 L56 158" opacity="0.6" />
-          <path d="M52 145 Q48 150 50 158" opacity="0.6" />
-        </g>
-      </svg>
-    ),
+    illustrationSrc: "/scenes/scene-1.png",
   },
   {
     id: "close",
@@ -94,27 +70,7 @@ const SCENES: Scene[] = [
     title: "Крупный план",
     hint: "Подойдите ближе — должна быть видна текстура повреждения",
     description: "Подойдите ближе к повреждению, чтобы видеть текстуру и границы",
-    illustration: (
-      <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden>
-        <g
-          fill="none"
-          stroke="white"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.92"
-        >
-          <path d="M20 90 Q40 70 75 80 Q105 90 95 115 Q75 130 45 122 Q20 110 20 90 Z" />
-          <path d="M35 95 Q45 88 60 95" strokeWidth="1" opacity="0.5" />
-          <path d="M40 105 Q52 100 65 106" strokeWidth="1" opacity="0.5" />
-          <rect x="110" y="55" width="55" height="100" rx="7" />
-          <rect x="118" y="65" width="39" height="78" rx="2" strokeWidth="1" opacity="0.55" />
-          <circle cx="137" cy="150" r="1.8" strokeWidth="1" />
-          <path d="M95 110 Q90 113 88 118 L88 165 Q90 175 100 177 L120 177 Q126 175 127 170 L127 160" />
-          <path d="M148 100 L162 100 M162 100 L156 94 M162 100 L156 106" strokeWidth="1.2" />
-        </g>
-      </svg>
-    ),
+    illustrationSrc: "/scenes/scene-2.png",
   },
   {
     id: "scale",
@@ -122,28 +78,7 @@ const SCENES: Scene[] = [
     title: "С масштабом",
     hint: "Положите карту или линейку рядом с повреждением",
     description: "Положите карту или линейку рядом — AI определит размер точно",
-    illustration: (
-      <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden>
-        <g
-          fill="none"
-          stroke="white"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.92"
-        >
-          <path d="M22 110 Q40 90 75 100 Q100 108 88 130 Q70 142 45 138 Q22 128 22 110 Z" />
-          <rect x="92" y="118" width="42" height="26" rx="3" />
-          <line x1="100" y1="127" x2="120" y2="127" strokeWidth="1" />
-          <line x1="100" y1="132" x2="125" y2="132" strokeWidth="1" />
-          <line x1="100" y1="137" x2="115" y2="137" strokeWidth="1" />
-          <rect x="115" y="44" width="55" height="100" rx="7" />
-          <rect x="123" y="54" width="39" height="78" rx="2" strokeWidth="1" opacity="0.55" />
-          <circle cx="142" cy="139" r="1.8" strokeWidth="1" />
-          <path d="M100 100 Q95 103 93 108 L93 158 Q95 168 105 170 L125 170 Q131 168 132 163 L132 152" />
-        </g>
-      </svg>
-    ),
+    illustrationSrc: "/scenes/scene-3.png",
   },
   {
     id: "source",
@@ -151,29 +86,7 @@ const SCENES: Scene[] = [
     title: "Источник",
     hint: "Снимите место, откуда пошёл ущерб",
     description: "Снимите источник: трубы, окно, потолок — место, откуда пошёл ущерб",
-    illustration: (
-      <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden>
-        <g
-          fill="none"
-          stroke="white"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.92"
-        >
-          <path d="M44 50 L44 120 M58 50 L58 120 M44 50 L58 50" />
-          <circle cx="51" cy="130" r="7" />
-          <path d="M51 138 L51 150" strokeWidth="1" opacity="0.7" />
-          <path d="M44 156 L58 156" strokeWidth="1" opacity="0.6" />
-          <path d="M42 144 Q39 152 43 158" strokeWidth="1" opacity="0.6" />
-          <path d="M60 144 Q63 152 59 158" strokeWidth="1" opacity="0.6" />
-          <rect x="115" y="55" width="55" height="100" rx="7" />
-          <rect x="123" y="65" width="39" height="78" rx="2" strokeWidth="1" opacity="0.55" />
-          <circle cx="142" cy="150" r="1.8" strokeWidth="1" />
-          <path d="M100 110 Q95 113 93 118 L93 168 Q95 178 105 180 L125 180 Q131 178 132 173 L132 162" />
-        </g>
-      </svg>
-    ),
+    illustrationSrc: "/scenes/scene-4.png",
   },
 ];
 
@@ -226,6 +139,8 @@ export default function CameraPage() {
   const [zoomValue, setZoomValue] = useState(1);
   const [brightnessAdjust, setBrightnessAdjust] = useState(0);
   const [showAdjustments, setShowAdjustments] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
 
   const [showMeasureHelp, setShowMeasureHelp] = useState(false);
 
@@ -316,6 +231,7 @@ export default function CameraPage() {
         if (caps?.zoom) {
           setZoomCap({ min: caps.zoom.min, max: caps.zoom.max, step: caps.zoom.step || 0.1 });
         }
+        if (caps?.torch) setTorchSupported(true);
 
         type IOSDOEvent = { requestPermission?: () => Promise<"granted" | "denied"> };
         const IOSDOEventCtor = DeviceOrientationEvent as unknown as IOSDOEvent;
@@ -331,10 +247,34 @@ export default function CameraPage() {
       });
 
     return () => {
+      const track = trackRef.current;
+      // Best-effort: turn the torch off before the track stops so the LED
+      // doesn't stay on after unmount on some Android devices.
+      if (track) {
+        track
+          .applyConstraints({
+            advanced: [{ torch: false } as unknown as MediaTrackConstraintSet],
+          })
+          .catch(() => {});
+      }
       if (streamRef.current) stopCamera(streamRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function toggleTorch() {
+    const track = trackRef.current;
+    if (!track || !torchSupported) return;
+    const next = !torchOn;
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: next } as unknown as MediaTrackConstraintSet],
+      });
+      setTorchOn(next);
+    } catch (err) {
+      console.warn("Torch toggle failed:", err);
+    }
+  }
 
   // Brightness sampling
   useEffect(() => {
@@ -560,7 +500,8 @@ export default function CameraPage() {
               style={{ filter: `brightness(${brightnessMultiplier})` }}
             />
 
-            {/* Frame corners (no full border) */}
+            {/* Frame corners — thin and subtle, vector-effect keeps stroke
+                width constant regardless of viewport size. */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 100 100"
@@ -569,14 +510,13 @@ export default function CameraPage() {
               <g
                 fill="none"
                 stroke="rgba(255,255,255,0.55)"
-                strokeWidth="0.4"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
               >
-                <path d="M10,22 L10,16 L16,16" strokeWidth="2" />
-                <path d="M84,16 L90,16 L90,22" strokeWidth="2" />
-                <path d="M10,78 L10,84 L16,84" strokeWidth="2" />
-                <path d="M84,84 L90,84 L90,78" strokeWidth="2" />
+                <path d="M10,20 L10,15 L15,15" strokeWidth="1" />
+                <path d="M85,15 L90,15 L90,20" strokeWidth="1" />
+                <path d="M10,80 L10,85 L15,85" strokeWidth="1" />
+                <path d="M85,85 L90,85 L90,80" strokeWidth="1" />
               </g>
             </svg>
 
@@ -627,6 +567,27 @@ export default function CameraPage() {
             >
               <Sun className="w-3.5 h-3.5 text-white/70" strokeWidth={1.8} />
             </button>
+
+            {/* Top-left (next to settings): torch toggle — only if the device
+                exposes the capability via MediaTrack constraints. */}
+            {torchSupported && (
+              <button
+                onClick={toggleTorch}
+                aria-label={torchOn ? "Выключить вспышку" : "Включить вспышку"}
+                aria-pressed={torchOn}
+                className={`absolute top-3 left-12 backdrop-blur border rounded-full p-1.5 active:opacity-70 transition-colors ${
+                  torchOn
+                    ? "bg-yellow-300/90 border-yellow-200 text-black"
+                    : "bg-black/40 border-white/15 text-white/70"
+                }`}
+              >
+                {torchOn ? (
+                  <Flashlight className="w-3.5 h-3.5" strokeWidth={2} />
+                ) : (
+                  <FlashlightOff className="w-3.5 h-3.5" strokeWidth={1.8} />
+                )}
+              </button>
+            )}
 
             {/* Adjustments panel — only when toggled */}
             {showAdjustments && (
@@ -704,12 +665,18 @@ export default function CameraPage() {
             </div>
 
             <div
-              className="w-44 h-44 mb-7 flex items-center justify-center"
+              className="w-72 h-72 mb-7 flex items-center justify-center"
               style={{
                 animation: "introFloat 3s ease-in-out infinite",
               }}
             >
-              {currentScene.illustration}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentScene.illustrationSrc}
+                alt={currentScene.title}
+                className="w-full h-full object-contain"
+                draggable={false}
+              />
             </div>
 
             <div
