@@ -62,7 +62,7 @@ const SCENES: Scene[] = [
     hint: "Пройдите подальше — должна быть видна вся стена",
     description:
       "Сделайте фото всего помещения, чтобы было видно повреждённую зону",
-    illustrationSrc: "/scenes/scene-1.png",
+    illustrationSrc: "/scenes/1_full_scene.png",
   },
   {
     id: "close",
@@ -70,7 +70,7 @@ const SCENES: Scene[] = [
     title: "Крупный план",
     hint: "Подойдите ближе — должна быть видна текстура повреждения",
     description: "Подойдите ближе к повреждению, чтобы видеть текстуру и границы",
-    illustrationSrc: "/scenes/scene-2.png",
+    illustrationSrc: "/scenes/2_detailed_scene.png",
   },
   {
     id: "scale",
@@ -78,7 +78,7 @@ const SCENES: Scene[] = [
     title: "С масштабом",
     hint: "Положите карту или линейку рядом с повреждением",
     description: "Положите карту или линейку рядом — AI определит размер точно",
-    illustrationSrc: "/scenes/scene-3.png",
+    illustrationSrc: "/scenes/3_measure_scale.png",
   },
   {
     id: "source",
@@ -86,7 +86,7 @@ const SCENES: Scene[] = [
     title: "Источник",
     hint: "Снимите место, откуда пошёл ущерб",
     description: "Снимите источник: трубы, окно, потолок — место, откуда пошёл ущерб",
-    illustrationSrc: "/scenes/scene-4.png",
+    illustrationSrc: "/scenes/4_source.png",
   },
 ];
 
