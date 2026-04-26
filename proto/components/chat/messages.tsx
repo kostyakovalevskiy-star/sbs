@@ -39,7 +39,9 @@ export function BotMessage({
           <span className="text-xs text-gray-500">{BOT_NAME}</span>
         </div>
       )}
-      <div className="text-[16px] leading-snug text-gray-900 max-w-[88%]">
+      <div
+        className="max-w-[88%] rounded-2xl bg-sber-green-light px-4 py-2.5 text-[16px] leading-snug text-gray-900 [overflow-wrap:anywhere]"
+      >
         {text}
       </div>
     </div>
@@ -51,7 +53,7 @@ export function UserMessage({ text }: { text: string }) {
     <div className="flex justify-end">
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl border border-gray-300 bg-white px-4 py-2.5 text-[15px] text-gray-900 shadow-sm"
+          "max-w-[80%] rounded-2xl border border-gray-300 bg-white px-4 py-2.5 text-[15px] text-gray-900 shadow-sm [overflow-wrap:anywhere]"
         )}
       >
         {text}
@@ -69,7 +71,7 @@ export function TypingIndicator({ showAvatar }: { showAvatar: boolean }) {
           <span className="text-xs text-gray-500">{BOT_NAME}</span>
         </div>
       )}
-      <div className="flex items-center gap-1.5 rounded-2xl border border-gray-300 bg-white px-4 py-3 w-fit shadow-sm">
+      <div className="flex items-center gap-1.5 rounded-2xl bg-sber-green-light px-4 py-3 w-fit">
         <span
           className="inline-block h-2 w-2 rounded-full bg-gray-400 animate-bounce"
           style={{ animationDuration: "1s", animationDelay: "0ms" }}
