@@ -9,6 +9,8 @@ import type {
   WorkItem,
   MaterialItem,
   AreaEstimate,
+  WorkSpec,
+  Surface,
 } from "@/types";
 
 // Authoritative area source, priority-ordered: measure > reference > declared > visual
@@ -69,38 +71,75 @@ function getFinishFactor(finishLevel: string | undefined, calibration: Calibrati
   }
 }
 
-// tier_multiplier применяется к ЦЕНЕ материала на основании клиентского
-// finish_level. material.finish_class может «занижать» итоговый тир, если
-// материал — категория эконом/премиум по своей природе (силикон, паркет
-// массив и т.п.) — в этом случае берётся минимум из tier клиента и tier
-// материала, чтобы премиум-клиент не платил премиум-надбавку за дешёвую
-// расходку, и наоборот эконом-клиент получал хотя бы базу.
+type Tier = "econom" | "standard" | "comfort" | "premium";
+const TIER_RANK: Record<Tier, number> = { econom: 0, standard: 1, comfort: 2, premium: 3 };
+
+// Heuristic: bucketize a free-form material_predicted (from Claude) into a tier.
+// Used so a premium-керамогранит у эконом-клиента не считается по эконом-цене.
+function inferTierFromPredicted(p: string | undefined): Tier {
+  if (!p) return "standard";
+  const s = p.toLowerCase();
+  if (/керамогранит|массив|мозаика|паркет.*массив|текстил/.test(s)) return "premium";
+  if (/паркет.*доска|винил.*spc|spc/.test(s)) return "comfort";
+  if (/бумаж|пвх.*панел|линолеум.*эконом|побелк/.test(s)) return "econom";
+  return "standard";
+}
+
+function tierFromFinishLevel(finishLevel: string | undefined): Tier {
+  if (finishLevel === "econom" || finishLevel === "comfort" || finishLevel === "premium") {
+    return finishLevel;
+  }
+  return "standard";
+}
+
+function tierFromMaterialClass(materialClass: string | undefined): Tier | null {
+  if (materialClass === "econom" || materialClass === "comfort" || materialClass === "premium" || materialClass === "standard") {
+    return materialClass;
+  }
+  return null;
+}
+
+// tier_multiplier применяется к ЦЕНЕ материала. Берём максимум из:
+//   1) тир клиента (finish_level),
+//   2) тир, выведенный из material_predicted на фото (Claude распознал керамогранит → premium),
+//   3) тир самого материала из каталога (finish_class).
+// Логика «макс»: если AI увидел премиум-керамогранит, эконом-клиент всё равно
+// получит премиум-цену, потому что чинить надо то, что было. Аналогично, если
+// клиент premium, а в каталоге standard — берём premium.
 function getTierMultiplier(
   finishLevel: string | undefined,
-  materialClass: string | undefined,
+  matEntry: MaterialCatalogEntry,
+  workSpec: WorkSpec,
   calibration: CalibrationValues
 ): number {
-  const tier = (materialClass === "premium" || finishLevel === "premium") && finishLevel === "premium"
-    ? "premium"
-    : (materialClass === "econom" || finishLevel === "econom")
-    ? "econom"
-    : finishLevel || "standard";
-  switch (tier) {
+  const aiTier = inferTierFromPredicted(workSpec.material_predicted);
+  const clientTier = tierFromFinishLevel(finishLevel);
+  const materialTier = tierFromMaterialClass(matEntry.finish_class);
+  const candidates: Tier[] = [aiTier, clientTier, materialTier ?? "standard"];
+  const winner = candidates.reduce<Tier>(
+    (acc, t) => (TIER_RANK[t] > TIER_RANK[acc] ? t : acc),
+    "econom"
+  );
+  switch (winner) {
     case "econom": return calibration.tier_econom_multiplier;
     case "standard": return calibration.tier_standard_multiplier;
     case "comfort": return calibration.tier_comfort_multiplier;
     case "premium": return calibration.tier_premium_multiplier;
-    default: return calibration.tier_standard_multiplier;
   }
 }
 
-// Compute volume of a work item. `A` = damaged area (user-declared), `P` = approx perimeter.
-// `heightFactor` = h / default_h, used to scale wall-bound surface works
-// (wallpaper, paint, prep, leveling) — their replacement area grows with
-// ceiling height, while floor / ceiling / linear works don't.
-// Area-based works (paint, level, wallpaper, floor) use A directly.
-// Linear works (plinths, door/window casings) use P. Doors use count.
-function computeVolume(code: string, A: number, P: number, heightFactor: number): number {
+// Compute volume of a work item. `A` = площадь именно этой работы (per-WorkSpec).
+// `P` = approx perimeter (для линейных работ).
+// `heightFactor` = h / default_h, скейлит только СТЕННЫЕ PREP/LEVEL/PAINT/WALL.
+// Потолочные LEVEL-003/005/007 + PAINT-002 не должны умножаться на heightFactor:
+// высота потолка не делает потолок больше. Поэтому теперь смотрим на surface.
+function computeVolume(
+  code: string,
+  A: number,
+  P: number,
+  heightFactor: number,
+  surface?: Surface
+): number {
   const category = code.split("-")[0];
 
   switch (category) {
@@ -113,8 +152,9 @@ function computeVolume(code: string, A: number, P: number, heightFactor: number)
     case "LEVEL":
     case "PAINT":
     case "WALL":
-      // Wall-bound works scale with ceiling height — taller walls = more
-      // surface to prep / paint / paper around the same damage spot.
+      // Только стены / двери / окна растут с высотой потолка. Потолочные и
+      // напольные работы — нет (потолок остаётся той же площади, пол тоже).
+      if (surface === "ceiling" || surface === "floor") return A;
       return A * heightFactor;
 
     case "FLOOR":
@@ -133,6 +173,7 @@ function computeVolume(code: string, A: number, P: number, heightFactor: number)
     case "ELEC":
       return 1;
 
+    // PIPE/WATERPROOF/SCREED/SEALANT/WINDOW/PARTITION — площадь по WorkSpec.
     default:
       return A;
   }
@@ -142,6 +183,7 @@ function computeVolume(code: string, A: number, P: number, heightFactor: number)
 const WORK_TO_MATERIALS: Record<string, string[]> = {
   "PREP-001": ["MAT-ANTI-01", "MAT-PRIMER-01"],
   "PREP-002": ["MAT-PRIMER-01"],
+  "PREP-003": ["MAT-PRIMER-01"],
   "LEVEL-001": ["MAT-PLAST-01"],
   "LEVEL-002": ["MAT-PLAST-01"],
   "LEVEL-003": ["MAT-PLAST-01"],
@@ -152,6 +194,8 @@ const WORK_TO_MATERIALS: Record<string, string[]> = {
   "WALL-001":  ["MAT-WALL-01"],
   "WALL-002":  ["MAT-WALL-01"],
   "WALL-003":  ["MAT-TILE-WALL-01", "MAT-TILE-GLUE-01"],
+  "WALL-004":  ["MAT-PANEL-PVC-01"],
+  "WALL-005":  ["MAT-PANEL-MDF-01"],
   "FLOOR-001": ["MAT-LAM-01", "MAT-UNDER-01"],
   "FLOOR-002": ["MAT-LINO-01"],
   "FLOOR-003": ["MAT-TILE-01", "MAT-TILE-GLUE-01"],
@@ -166,6 +210,30 @@ const WORK_TO_MATERIALS: Record<string, string[]> = {
   "CEIL-002":  ["MAT-PROFILE-CEIL-01"],
   "CEIL-003":  ["MAT-GKL-CEIL-01"],
   "CEIL-004":  ["MAT-GKL-JOINT-01"],
+
+  // Гидроизоляция санузла: обмазочная смесь + лента в углах
+  "WATERPROOF-001": ["MAT-WATERPROOF-01", "MAT-WATERPROOF-TAPE-01"],
+  "WATERPROOF-002": ["MAT-WATERPROOF-01"],
+
+  // Стяжка: ЦПС с фиброй + грунт-бетоконтакт; самовыравнивание — отдельная смесь
+  "SCREED-001": ["MAT-SCREED-CEMENT-01", "MAT-FIBER-PP-01", "MAT-PRIMER-FLOOR-01"],
+  "SCREED-002": ["MAT-SCREED-LEVEL-01", "MAT-PRIMER-FLOOR-01"],
+
+  // Сантехтрубы
+  "PIPE-001": ["MAT-PIPE-PEX-20", "MAT-FITTINGS-PEX-01", "MAT-VALVE-BALL-01"],
+  "PIPE-002": ["MAT-PIPE-PP-32", "MAT-FITTINGS-PEX-01"],
+  "PIPE-003": ["MAT-PIPE-SEWER-50", "MAT-PIPE-SEWER-110"],
+
+  // Перегородка ГКЛ: профили + лист + минвата
+  "PARTITION-001": ["MAT-PROFILE-WALL-01", "MAT-GKL-CEIL-01", "MAT-INSUL-MIN-50"],
+
+  // Окна
+  "WINDOW-001": ["MAT-WINDOW-SILL-PVC-01", "MAT-FOAM-PU-01"],
+  "WINDOW-002": ["MAT-SLOPES-PVC-01", "MAT-FOAM-PU-01"],
+
+  // Герметизация швов
+  "SEALANT-001": ["MAT-SEALANT-SILICONE-01"],
+  // DEM-010..055 — только труд, материалов не требуют (мусорные мешки в смете не учитываем).
 };
 
 export function calculate(
@@ -198,68 +266,81 @@ export function calculate(
   const currentYear = new Date().getFullYear();
   const renovationAge = currentYear - (context.last_renovation_year ?? currentYear - 10);
 
-  // Build work items
+  // Build work items. Each WorkSpec carries its own area/surface/material_predicted.
+  // We keep the parallel `workSpecs` array so the material loop can read
+  // material_predicted (для tier-селектора) и не зависеть от строкового кода.
   const workItems: WorkItem[] = [];
-  for (const code of claudeOutput.recommended_works) {
-    const catalogEntry = catalogs.works.find((w) => w.code === code);
+  const workSpecsForItems: WorkSpec[] = [];
+  for (const ws of claudeOutput.recommended_works) {
+    const catalogEntry = catalogs.works.find((w) => w.code === ws.code);
     if (!catalogEntry) continue;
 
-    const volume = computeVolume(code, S, P, heightFactor);
+    // Per-work area: ws.area_m2 если AI его дал, иначе общая S как fallback.
+    const A = ws.area_m2 && ws.area_m2 > 0 ? ws.area_m2 : S;
+    const volume = computeVolume(ws.code, A, P, heightFactor, ws.surface);
     const unitPrice = Math.round(catalogEntry.base_price_rub * worksCoef * finishFactor);
     const total = Math.round(volume * unitPrice);
 
     workItems.push({
-      code,
+      code: ws.code,
       name: catalogEntry.name,
       unit: catalogEntry.unit,
       volume: Math.round(volume * 100) / 100,
       unit_price: unitPrice,
       total,
     });
+    workSpecsForItems.push(ws);
   }
 
-  // Build material items — volume derived from each linked work's computed volume
-  const materialItems: MaterialItem[] = [];
-  const usedMaterialCodes = new Set<string>();
-
-  for (const work of workItems) {
-    const matCodes = WORK_TO_MATERIALS[work.code] ?? [];
-    for (const matCode of matCodes) {
-      if (usedMaterialCodes.has(matCode)) continue;
-      usedMaterialCodes.add(matCode);
-
-      const matEntry = catalogs.materials.find((m) => m.code === matCode);
-      if (!matEntry) continue;
-
-      // consumption_m2_per_package: coverage per 1 package
-      // (field name is historical — also means "п.м. на упаковку" for плинтус, "шт" for двери)
-      const coveredPerPackage = matEntry.consumption_m2_per_package ?? 1;
-      const packages = Math.max(1, Math.ceil(work.volume / coveredPerPackage));
-      const volume = packages;
-      const tierMult = getTierMultiplier(
-        context.finish_level,
-        matEntry.finish_class,
-        calibration
-      );
-      let unitPrice = Math.round(matEntry.base_price_rub * materialsCoef * tierMult);
-      let total = Math.round(volume * unitPrice);
-
-      // Apply wear coefficient per ВСН 53-86(р)
-      if (calibration.wear_apply && matEntry.service_life_years > 0) {
-        const wearK = Math.min(1, renovationAge / matEntry.service_life_years);
-        total = Math.round(total * (1 - wearK));
-        unitPrice = volume > 0 ? Math.round(total / volume) : unitPrice;
+  // Aggregate per-material work volumes across ALL linked works (раньше дедуп
+  // глобально по matCode давал недосчёт: PREP-001 для потолка 0.5 м² + PREP-002
+  // для стены 3 м² → один MAT-PRIMER-01 по объёму первой работы). Сейчас
+  // суммируем объёмы и берём WorkSpec с самым высоким тиром для tier-селектора.
+  const matAgg = new Map<string, { volume: number; ws: WorkSpec }>();
+  for (let i = 0; i < workItems.length; i++) {
+    for (const matCode of WORK_TO_MATERIALS[workItems[i].code] ?? []) {
+      const prev = matAgg.get(matCode);
+      const ws = workSpecsForItems[i];
+      const tier = TIER_RANK[inferTierFromPredicted(ws.material_predicted)];
+      if (!prev) {
+        matAgg.set(matCode, { volume: workItems[i].volume, ws });
+      } else {
+        const prevTier = TIER_RANK[inferTierFromPredicted(prev.ws.material_predicted)];
+        matAgg.set(matCode, {
+          volume: prev.volume + workItems[i].volume,
+          ws: tier > prevTier ? ws : prev.ws,
+        });
       }
-
-      materialItems.push({
-        code: matCode,
-        name: matEntry.name,
-        unit: matEntry.package_unit,
-        volume: Math.round(volume * 100) / 100,
-        unit_price: unitPrice,
-        total,
-      });
     }
+  }
+
+  const materialItems: MaterialItem[] = [];
+  for (const [matCode, agg] of matAgg) {
+    const matEntry = catalogs.materials.find((m) => m.code === matCode);
+    if (!matEntry) continue;
+    // consumption_m2_per_package: coverage per 1 package
+    // (field name is historical — also means "п.м. на упаковку" for плинтус, "шт" for двери)
+    const coveredPerPackage = matEntry.consumption_m2_per_package ?? 1;
+    const volume = Math.max(1, Math.ceil(agg.volume / coveredPerPackage));
+    const tierMult = getTierMultiplier(context.finish_level, matEntry, agg.ws, calibration);
+    let unitPrice = Math.round(matEntry.base_price_rub * materialsCoef * tierMult);
+    let total = Math.round(volume * unitPrice);
+
+    // Apply wear coefficient per ВСН 53-86(р)
+    if (calibration.wear_apply && matEntry.service_life_years > 0) {
+      const wearK = Math.min(1, renovationAge / matEntry.service_life_years);
+      total = Math.round(total * (1 - wearK));
+      unitPrice = volume > 0 ? Math.round(total / volume) : unitPrice;
+    }
+
+    materialItems.push({
+      code: matCode,
+      name: matEntry.name,
+      unit: matEntry.package_unit,
+      volume: Math.round(volume * 100) / 100,
+      unit_price: unitPrice,
+      total,
+    });
   }
 
   const worksTotal = workItems.reduce((acc, w) => acc + w.total, 0);

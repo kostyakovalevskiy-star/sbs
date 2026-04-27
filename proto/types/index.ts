@@ -64,9 +64,21 @@ export interface AreaEstimate {
   source: string;
 }
 
+// Per-work specification returned by Claude. Replaces the legacy `string[]` form
+// of recommended_works so the calculator can:
+//   1) split S per work (потолок 3 м² ≠ пол 8 м² ≠ стена 6 м²),
+//   2) pass surface to computeVolume → не множит потолочные работы на heightFactor,
+//   3) пробросить material_predicted в tier-селектор материала.
+export interface WorkSpec {
+  code: string;
+  surface?: Surface;
+  material_predicted?: string;
+  area_m2?: number;
+}
+
 export interface ClaudeOutput {
   photos: ClaudePhotoAnalysis[];
-  recommended_works: string[];
+  recommended_works: WorkSpec[];
   summary: string;
   average_confidence: number;
   // Four possible sources, priority-ordered: measure > reference > declared > visual
