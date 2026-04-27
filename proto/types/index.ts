@@ -146,6 +146,10 @@ export interface CalibrationConfig {
     mold_area_threshold_m2: CalibrationWeight;
     wear_apply: CalibrationWeight;
     default_ceiling_height_m: CalibrationWeight;
+    tier_econom_multiplier?: CalibrationWeight;
+    tier_standard_multiplier?: CalibrationWeight;
+    tier_comfort_multiplier?: CalibrationWeight;
+    tier_premium_multiplier?: CalibrationWeight;
   };
 }
 
@@ -161,6 +165,10 @@ export interface CalibrationValues {
   mold_area_threshold_m2: number;
   wear_apply: boolean;
   default_ceiling_height_m: number;
+  tier_econom_multiplier: number;
+  tier_standard_multiplier: number;
+  tier_comfort_multiplier: number;
+  tier_premium_multiplier: number;
 }
 
 export interface WorkCatalogEntry {

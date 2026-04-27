@@ -69,6 +69,31 @@ function getFinishFactor(finishLevel: string | undefined, calibration: Calibrati
   }
 }
 
+// tier_multiplier применяется к ЦЕНЕ материала на основании клиентского
+// finish_level. material.finish_class может «занижать» итоговый тир, если
+// материал — категория эконом/премиум по своей природе (силикон, паркет
+// массив и т.п.) — в этом случае берётся минимум из tier клиента и tier
+// материала, чтобы премиум-клиент не платил премиум-надбавку за дешёвую
+// расходку, и наоборот эконом-клиент получал хотя бы базу.
+function getTierMultiplier(
+  finishLevel: string | undefined,
+  materialClass: string | undefined,
+  calibration: CalibrationValues
+): number {
+  const tier = (materialClass === "premium" || finishLevel === "premium") && finishLevel === "premium"
+    ? "premium"
+    : (materialClass === "econom" || finishLevel === "econom")
+    ? "econom"
+    : finishLevel || "standard";
+  switch (tier) {
+    case "econom": return calibration.tier_econom_multiplier;
+    case "standard": return calibration.tier_standard_multiplier;
+    case "comfort": return calibration.tier_comfort_multiplier;
+    case "premium": return calibration.tier_premium_multiplier;
+    default: return calibration.tier_standard_multiplier;
+  }
+}
+
 // Compute volume of a work item. `A` = damaged area (user-declared), `P` = approx perimeter.
 // `heightFactor` = h / default_h, used to scale wall-bound surface works
 // (wallpaper, paint, prep, leveling) — their replacement area grows with
@@ -211,7 +236,12 @@ export function calculate(
       const coveredPerPackage = matEntry.consumption_m2_per_package ?? 1;
       const packages = Math.max(1, Math.ceil(work.volume / coveredPerPackage));
       const volume = packages;
-      let unitPrice = Math.round(matEntry.base_price_rub * materialsCoef);
+      const tierMult = getTierMultiplier(
+        context.finish_level,
+        matEntry.finish_class,
+        calibration
+      );
+      let unitPrice = Math.round(matEntry.base_price_rub * materialsCoef * tierMult);
       let total = Math.round(volume * unitPrice);
 
       // Apply wear coefficient per ВСН 53-86(р)

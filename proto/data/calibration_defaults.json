@@ -1,6 +1,6 @@
 {
-  "version": "2026.04.1",
-  "updated_at": "2026-04-22",
+  "version": "2026.04.2",
+  "updated_at": "2026-04-27",
   "description": "Дефолтные калибровочные веса прототипа. Изменяются в /admin (страница «Калибровка»). Сохраняются в localStorage браузера администратора.",
   "weights": {
     "range_sigma": {
@@ -23,7 +23,7 @@
     "finish_standard_factor": {
       "label": "Множитель отделки «Стандарт»",
       "type": "multiplier",
-      "default": 1.00,
+      "default": 1.0,
       "min": 0.8,
       "max": 1.4,
       "step": 0.05
@@ -39,7 +39,7 @@
     "finish_premium_factor": {
       "label": "Множитель отделки «Премиум»",
       "type": "multiplier",
-      "default": 2.20,
+      "default": 2.2,
       "min": 1.2,
       "max": 4.0,
       "step": 0.1
@@ -90,6 +90,42 @@
       "min": 2.2,
       "max": 4.5,
       "step": 0.1
+    },
+    "tier_econom_multiplier": {
+      "label": "Множитель тира материалов «Эконом»",
+      "type": "multiplier",
+      "default": 0.6,
+      "min": 0.4,
+      "max": 1.0,
+      "step": 0.05,
+      "description": "Применяется к base_price_rub материала на основании tier (см. finish_class) при расчёте сметы."
+    },
+    "tier_standard_multiplier": {
+      "label": "Множитель тира материалов «Стандарт»",
+      "type": "multiplier",
+      "default": 1.0,
+      "min": 0.8,
+      "max": 1.4,
+      "step": 0.05,
+      "description": "Применяется к base_price_rub материала на основании tier (см. finish_class) при расчёте сметы."
+    },
+    "tier_comfort_multiplier": {
+      "label": "Множитель тира материалов «Комфорт»",
+      "type": "multiplier",
+      "default": 1.5,
+      "min": 1.0,
+      "max": 2.5,
+      "step": 0.05,
+      "description": "Применяется к base_price_rub материала на основании tier (см. finish_class) при расчёте сметы."
+    },
+    "tier_premium_multiplier": {
+      "label": "Множитель тира материалов «Премиум»",
+      "type": "multiplier",
+      "default": 2.5,
+      "min": 1.5,
+      "max": 4.0,
+      "step": 0.05,
+      "description": "Применяется к base_price_rub материала на основании tier (см. finish_class) при расчёте сметы."
     }
   }
 }

@@ -21,6 +21,10 @@ export async function GET() {
     mold_area_threshold_m2: w.mold_area_threshold_m2.default as number,
     wear_apply: w.wear_apply.default as boolean,
     default_ceiling_height_m: w.default_ceiling_height_m.default as number,
+    tier_econom_multiplier: (w.tier_econom_multiplier?.default as number | undefined) ?? 0.6,
+    tier_standard_multiplier: (w.tier_standard_multiplier?.default as number | undefined) ?? 1.0,
+    tier_comfort_multiplier: (w.tier_comfort_multiplier?.default as number | undefined) ?? 1.5,
+    tier_premium_multiplier: (w.tier_premium_multiplier?.default as number | undefined) ?? 2.5,
   };
   return NextResponse.json(defaults);
 }

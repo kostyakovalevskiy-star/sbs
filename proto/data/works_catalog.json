@@ -1,15 +1,30 @@
 {
-  "version": "2026.04.1",
-  "updated_at": "2026-04-22",
+  "version": "2026.04.2",
+  "updated_at": "2026-04-27",
   "currency": "RUB",
   "region_baseline": "moscow",
   "description": "Справочник цен на отделочные и ремонтные работы. Цены — средние арифметические по 3+ источникам в Москве на апрель 2026. Для регионов применяется коэффициент region_coefficient (см. region_coefficients.json).",
   "sources_aggregated": [
-    {"name": "Профи Ремонтник", "url": "https://profiremontnik.ru/tseny/shtukaturno-malyarnye-raboty/"},
-    {"name": "Домашний Мастерок", "url": "https://domashniy-masterok.ru/price/prays-na-otdelochnye-raboty/"},
-    {"name": "СтройРемДизайн", "url": "https://stroyremdizayn.ru/rascenki-na-otdelochnye-raboty"},
-    {"name": "Remont DMB", "url": "https://remont-dmb.ru/price/prajs-list-na-uslugi-3/"},
-    {"name": "RemontProfi", "url": "https://www.remontprofi.ru/ceny-na-uslugi/ceny-na-uslugi/"}
+    {
+      "name": "Профи Ремонтник",
+      "url": "https://profiremontnik.ru/tseny/shtukaturno-malyarnye-raboty/"
+    },
+    {
+      "name": "Домашний Мастерок",
+      "url": "https://domashniy-masterok.ru/price/prays-na-otdelochnye-raboty/"
+    },
+    {
+      "name": "СтройРемДизайн",
+      "url": "https://stroyremdizayn.ru/rascenki-na-otdelochnye-raboty"
+    },
+    {
+      "name": "Remont DMB",
+      "url": "https://remont-dmb.ru/price/prajs-list-na-uslugi-3/"
+    },
+    {
+      "name": "RemontProfi",
+      "url": "https://www.remontprofi.ru/ceny-na-uslugi/ceny-na-uslugi/"
+    }
   ],
   "categories": {
     "demolition": "Демонтажные работы",
@@ -32,7 +47,11 @@
       "base_price_rub": 80,
       "min_price_rub": 60,
       "max_price_rub": 110,
-      "samples": [70, 80, 95]
+      "samples": [
+        70,
+        80,
+        95
+      ]
     },
     {
       "code": "DEM-002",
@@ -42,7 +61,11 @@
       "base_price_rub": 90,
       "min_price_rub": 70,
       "max_price_rub": 130,
-      "samples": [75, 90, 105]
+      "samples": [
+        75,
+        90,
+        105
+      ]
     },
     {
       "code": "DEM-003",
@@ -52,7 +75,11 @@
       "base_price_rub": 950,
       "min_price_rub": 800,
       "max_price_rub": 1200,
-      "samples": [850, 950, 1100]
+      "samples": [
+        850,
+        950,
+        1100
+      ]
     },
     {
       "code": "DEM-004",
@@ -62,7 +89,11 @@
       "base_price_rub": 180,
       "min_price_rub": 130,
       "max_price_rub": 250,
-      "samples": [160, 180, 220]
+      "samples": [
+        160,
+        180,
+        220
+      ]
     },
     {
       "code": "DEM-005",
@@ -72,7 +103,11 @@
       "base_price_rub": 480,
       "min_price_rub": 350,
       "max_price_rub": 650,
-      "samples": [400, 480, 580]
+      "samples": [
+        400,
+        480,
+        580
+      ]
     },
     {
       "code": "DEM-006",
@@ -82,7 +117,11 @@
       "base_price_rub": 200,
       "min_price_rub": 150,
       "max_price_rub": 280,
-      "samples": [170, 200, 240]
+      "samples": [
+        170,
+        200,
+        240
+      ]
     },
     {
       "code": "DEM-007",
@@ -92,7 +131,11 @@
       "base_price_rub": 130,
       "min_price_rub": 90,
       "max_price_rub": 180,
-      "samples": [110, 130, 160]
+      "samples": [
+        110,
+        130,
+        160
+      ]
     },
     {
       "code": "DEM-008",
@@ -102,7 +145,11 @@
       "base_price_rub": 520,
       "min_price_rub": 380,
       "max_price_rub": 720,
-      "samples": [450, 520, 620]
+      "samples": [
+        450,
+        520,
+        620
+      ]
     },
     {
       "code": "DEM-009",
@@ -112,7 +159,11 @@
       "base_price_rub": 540,
       "min_price_rub": 400,
       "max_price_rub": 740,
-      "samples": [470, 540, 640]
+      "samples": [
+        470,
+        540,
+        640
+      ]
     },
     {
       "code": "PREP-001",
@@ -122,7 +173,11 @@
       "base_price_rub": 165,
       "min_price_rub": 130,
       "max_price_rub": 220,
-      "samples": [140, 165, 190],
+      "samples": [
+        140,
+        165,
+        190
+      ],
       "notes": "Стандартно — 2 слоя в 2 цикла (после демонтажа и перед финишем)"
     },
     {
@@ -133,7 +188,11 @@
       "base_price_rub": 155,
       "min_price_rub": 120,
       "max_price_rub": 200,
-      "samples": [130, 155, 180],
+      "samples": [
+        130,
+        155,
+        180
+      ],
       "notes": "Применяется после каждого цикла выравнивающих работ"
     },
     {
@@ -144,7 +203,11 @@
       "base_price_rub": 210,
       "min_price_rub": 160,
       "max_price_rub": 280,
-      "samples": [180, 210, 240]
+      "samples": [
+        180,
+        210,
+        240
+      ]
     },
     {
       "code": "LEVEL-001",
@@ -154,7 +217,11 @@
       "base_price_rub": 480,
       "min_price_rub": 380,
       "max_price_rub": 620,
-      "samples": [420, 480, 560],
+      "samples": [
+        420,
+        480,
+        560
+      ],
       "notes": "Цена за один слой; обычно требуется 2-3 слоя"
     },
     {
@@ -165,7 +232,11 @@
       "base_price_rub": 850,
       "min_price_rub": 700,
       "max_price_rub": 1100,
-      "samples": [780, 850, 980]
+      "samples": [
+        780,
+        850,
+        980
+      ]
     },
     {
       "code": "LEVEL-003",
@@ -175,7 +246,11 @@
       "base_price_rub": 950,
       "min_price_rub": 780,
       "max_price_rub": 1200,
-      "samples": [860, 950, 1080]
+      "samples": [
+        860,
+        950,
+        1080
+      ]
     },
     {
       "code": "LEVEL-004",
@@ -185,7 +260,11 @@
       "base_price_rub": 200,
       "min_price_rub": 150,
       "max_price_rub": 270,
-      "samples": [170, 200, 230],
+      "samples": [
+        170,
+        200,
+        230
+      ],
       "notes": "Стандартно — 4 слоя для подготовки под покраску, 2 слоя под обои"
     },
     {
@@ -196,7 +275,11 @@
       "base_price_rub": 240,
       "min_price_rub": 180,
       "max_price_rub": 320,
-      "samples": [200, 240, 280]
+      "samples": [
+        200,
+        240,
+        280
+      ]
     },
     {
       "code": "LEVEL-006",
@@ -206,7 +289,11 @@
       "base_price_rub": 145,
       "min_price_rub": 110,
       "max_price_rub": 200,
-      "samples": [120, 145, 170]
+      "samples": [
+        120,
+        145,
+        170
+      ]
     },
     {
       "code": "LEVEL-007",
@@ -216,7 +303,11 @@
       "base_price_rub": 175,
       "min_price_rub": 130,
       "max_price_rub": 240,
-      "samples": [150, 175, 200]
+      "samples": [
+        150,
+        175,
+        200
+      ]
     },
     {
       "code": "PAINT-001",
@@ -226,7 +317,11 @@
       "base_price_rub": 180,
       "min_price_rub": 140,
       "max_price_rub": 240,
-      "samples": [150, 180, 210],
+      "samples": [
+        150,
+        180,
+        210
+      ],
       "notes": "Стандартно — 2 слоя"
     },
     {
@@ -237,7 +332,11 @@
       "base_price_rub": 210,
       "min_price_rub": 160,
       "max_price_rub": 280,
-      "samples": [180, 210, 240]
+      "samples": [
+        180,
+        210,
+        240
+      ]
     },
     {
       "code": "WALL-001",
@@ -247,7 +346,11 @@
       "base_price_rub": 360,
       "min_price_rub": 280,
       "max_price_rub": 480,
-      "samples": [320, 360, 420]
+      "samples": [
+        320,
+        360,
+        420
+      ]
     },
     {
       "code": "WALL-002",
@@ -257,7 +360,11 @@
       "base_price_rub": 480,
       "min_price_rub": 380,
       "max_price_rub": 620,
-      "samples": [420, 480, 560]
+      "samples": [
+        420,
+        480,
+        560
+      ]
     },
     {
       "code": "WALL-003",
@@ -267,7 +374,11 @@
       "base_price_rub": 1650,
       "min_price_rub": 1250,
       "max_price_rub": 2200,
-      "samples": [1450, 1650, 1900]
+      "samples": [
+        1450,
+        1650,
+        1900
+      ]
     },
     {
       "code": "FLOOR-001",
@@ -277,7 +388,11 @@
       "base_price_rub": 620,
       "min_price_rub": 480,
       "max_price_rub": 850,
-      "samples": [550, 620, 720]
+      "samples": [
+        550,
+        620,
+        720
+      ]
     },
     {
       "code": "FLOOR-002",
@@ -287,7 +402,11 @@
       "base_price_rub": 380,
       "min_price_rub": 280,
       "max_price_rub": 520,
-      "samples": [320, 380, 460]
+      "samples": [
+        320,
+        380,
+        460
+      ]
     },
     {
       "code": "FLOOR-003",
@@ -297,7 +416,11 @@
       "base_price_rub": 1450,
       "min_price_rub": 1100,
       "max_price_rub": 1900,
-      "samples": [1280, 1450, 1680]
+      "samples": [
+        1280,
+        1450,
+        1680
+      ]
     },
     {
       "code": "FLOOR-004",
@@ -307,7 +430,11 @@
       "base_price_rub": 420,
       "min_price_rub": 320,
       "max_price_rub": 580,
-      "samples": [360, 420, 500]
+      "samples": [
+        360,
+        420,
+        500
+      ]
     },
     {
       "code": "FLOOR-005",
@@ -317,7 +444,11 @@
       "base_price_rub": 280,
       "min_price_rub": 200,
       "max_price_rub": 400,
-      "samples": [220, 280, 350]
+      "samples": [
+        220,
+        280,
+        350
+      ]
     },
     {
       "code": "DOOR-001",
@@ -327,7 +458,11 @@
       "base_price_rub": 5400,
       "min_price_rub": 4200,
       "max_price_rub": 7500,
-      "samples": [4800, 5400, 6300]
+      "samples": [
+        4800,
+        5400,
+        6300
+      ]
     },
     {
       "code": "TRIM-001",
@@ -337,7 +472,11 @@
       "base_price_rub": 320,
       "min_price_rub": 240,
       "max_price_rub": 450,
-      "samples": [280, 320, 380]
+      "samples": [
+        280,
+        320,
+        380
+      ]
     },
     {
       "code": "TRIM-002",
@@ -347,7 +486,11 @@
       "base_price_rub": 380,
       "min_price_rub": 290,
       "max_price_rub": 520,
-      "samples": [320, 380, 450]
+      "samples": [
+        320,
+        380,
+        450
+      ]
     },
     {
       "code": "TRIM-003",
@@ -357,7 +500,11 @@
       "base_price_rub": 160,
       "min_price_rub": 120,
       "max_price_rub": 220,
-      "samples": [130, 160, 190]
+      "samples": [
+        130,
+        160,
+        190
+      ]
     },
     {
       "code": "ELEC-001",
@@ -367,7 +514,11 @@
       "base_price_rub": 1100,
       "min_price_rub": 800,
       "max_price_rub": 1500,
-      "samples": [950, 1100, 1280]
+      "samples": [
+        950,
+        1100,
+        1280
+      ]
     },
     {
       "code": "ELEC-002",
@@ -377,7 +528,11 @@
       "base_price_rub": 1450,
       "min_price_rub": 1100,
       "max_price_rub": 2000,
-      "samples": [1250, 1450, 1700]
+      "samples": [
+        1250,
+        1450,
+        1700
+      ]
     },
     {
       "code": "DEM-008",
@@ -387,7 +542,11 @@
       "base_price_rub": 340,
       "min_price_rub": 250,
       "max_price_rub": 450,
-      "samples": [280, 340, 420]
+      "samples": [
+        280,
+        340,
+        420
+      ]
     },
     {
       "code": "DEM-009",
@@ -397,7 +556,11 @@
       "base_price_rub": 430,
       "min_price_rub": 320,
       "max_price_rub": 580,
-      "samples": [370, 430, 510]
+      "samples": [
+        370,
+        430,
+        510
+      ]
     },
     {
       "code": "CEIL-001",
@@ -407,7 +570,11 @@
       "base_price_rub": 780,
       "min_price_rub": 600,
       "max_price_rub": 1050,
-      "samples": [680, 780, 920],
+      "samples": [
+        680,
+        780,
+        920
+      ],
       "notes": "Цена за работу «под ключ»: монтаж багета, раскрой и нагрев полотна. Полотно и багет — отдельные материалы."
     },
     {
@@ -418,7 +585,11 @@
       "base_price_rub": 580,
       "min_price_rub": 450,
       "max_price_rub": 750,
-      "samples": [500, 580, 680]
+      "samples": [
+        500,
+        580,
+        680
+      ]
     },
     {
       "code": "CEIL-003",
@@ -428,7 +599,11 @@
       "base_price_rub": 470,
       "min_price_rub": 360,
       "max_price_rub": 620,
-      "samples": [400, 470, 550]
+      "samples": [
+        400,
+        470,
+        550
+      ]
     },
     {
       "code": "CEIL-004",
@@ -438,7 +613,837 @@
       "base_price_rub": 170,
       "min_price_rub": 130,
       "max_price_rub": 220,
-      "samples": [150, 170, 200]
+      "samples": [
+        150,
+        170,
+        200
+      ]
+    },
+    {
+      "code": "WATERPROOF-001",
+      "name": "Гидроизоляция пола санузла обмазочная (за м²)",
+      "category": "waterproofing",
+      "unit": "м²",
+      "base_price_rub": 480,
+      "min_price_rub": 380,
+      "max_price_rub": 650,
+      "samples": [
+        400,
+        480,
+        600
+      ]
+    },
+    {
+      "code": "WATERPROOF-002",
+      "name": "Гидроизоляция стен санузла на 30 см от пола",
+      "category": "waterproofing",
+      "unit": "м²",
+      "base_price_rub": 350,
+      "min_price_rub": 280,
+      "max_price_rub": 480,
+      "samples": [
+        300,
+        350,
+        450
+      ]
+    },
+    {
+      "code": "SCREED-001",
+      "name": "Стяжка ЦПС толщиной до 50 мм (за м²)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 750,
+      "min_price_rub": 520,
+      "max_price_rub": 950,
+      "samples": [
+        600,
+        750,
+        900
+      ]
+    },
+    {
+      "code": "SCREED-002",
+      "name": "Самовыравнивающаяся стяжка (за м²)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 1100,
+      "min_price_rub": 850,
+      "max_price_rub": 1400,
+      "samples": [
+        900,
+        1100,
+        1350
+      ]
+    },
+    {
+      "code": "PIPE-001",
+      "name": "Замена разводки ХВС/ГВС в санузле/кухне (PEX, по точкам)",
+      "category": "plumbing",
+      "unit": "точка",
+      "base_price_rub": 4200,
+      "min_price_rub": 3500,
+      "max_price_rub": 5500,
+      "samples": [
+        3500,
+        4200,
+        5000
+      ]
+    },
+    {
+      "code": "PIPE-002",
+      "name": "Замена стояка ППР Ø32 (1.5–3 м, за п.м.)",
+      "category": "plumbing",
+      "unit": "п.м.",
+      "base_price_rub": 2200,
+      "min_price_rub": 1500,
+      "max_price_rub": 3000,
+      "samples": [
+        1800,
+        2200,
+        2700
+      ]
+    },
+    {
+      "code": "PIPE-003",
+      "name": "Замена канализационной разводки (за п.м.)",
+      "category": "plumbing",
+      "unit": "п.м.",
+      "base_price_rub": 850,
+      "min_price_rub": 600,
+      "max_price_rub": 1200,
+      "samples": [
+        700,
+        850,
+        1100
+      ]
+    },
+    {
+      "code": "WALL-004",
+      "name": "Облицовка стен ПВХ-панелями (эконом)",
+      "category": "wallpaper",
+      "unit": "м²",
+      "base_price_rub": 480,
+      "min_price_rub": 350,
+      "max_price_rub": 650,
+      "samples": [
+        400,
+        480,
+        600
+      ]
+    },
+    {
+      "code": "WALL-005",
+      "name": "Облицовка стен МДФ-панелями (стандарт)",
+      "category": "wallpaper",
+      "unit": "м²",
+      "base_price_rub": 720,
+      "min_price_rub": 580,
+      "max_price_rub": 950,
+      "samples": [
+        600,
+        720,
+        880
+      ]
+    },
+    {
+      "code": "PARTITION-001",
+      "name": "Возведение перегородки ГКЛ на CW/UW (1 слой ГКЛ с 2 сторон)",
+      "category": "leveling",
+      "unit": "м²",
+      "base_price_rub": 1750,
+      "min_price_rub": 1500,
+      "max_price_rub": 2200,
+      "samples": [
+        1500,
+        1750,
+        2100
+      ]
+    },
+    {
+      "code": "WINDOW-001",
+      "name": "Замена подоконника ПВХ (за п.м.)",
+      "category": "trim",
+      "unit": "п.м.",
+      "base_price_rub": 850,
+      "min_price_rub": 600,
+      "max_price_rub": 1200,
+      "samples": [
+        700,
+        850,
+        1100
+      ]
+    },
+    {
+      "code": "WINDOW-002",
+      "name": "Замена откосов оконных ПВХ-сэндвич (за окно)",
+      "category": "trim",
+      "unit": "шт.",
+      "base_price_rub": 2400,
+      "min_price_rub": 1800,
+      "max_price_rub": 3500,
+      "samples": [
+        1800,
+        2400,
+        3200
+      ]
+    },
+    {
+      "code": "SEALANT-001",
+      "name": "Герметизация швов плитки/стыков силиконом (за п.м.)",
+      "category": "trim",
+      "unit": "п.м.",
+      "base_price_rub": 320,
+      "min_price_rub": 250,
+      "max_price_rub": 450,
+      "samples": [
+        280,
+        320,
+        400
+      ]
+    },
+    {
+      "code": "DEM-010",
+      "name": "Демонтаж керамической плитки с пола",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 480,
+      "min_price_rub": 360,
+      "max_price_rub": 650,
+      "samples": [
+        400,
+        480,
+        600
+      ]
+    },
+    {
+      "code": "DEM-011",
+      "name": "Демонтаж линолеума / ковролина",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 90,
+      "min_price_rub": 60,
+      "max_price_rub": 130,
+      "samples": [
+        70,
+        90,
+        120
+      ]
+    },
+    {
+      "code": "DEM-012",
+      "name": "Демонтаж цементно-песчаной стяжки (до 50 мм)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 350,
+      "min_price_rub": 250,
+      "max_price_rub": 480,
+      "samples": [
+        300,
+        350,
+        450
+      ]
+    },
+    {
+      "code": "DEM-013",
+      "name": "Демонтаж бетонной (армированной) стяжки",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 600,
+      "min_price_rub": 450,
+      "max_price_rub": 850,
+      "samples": [
+        500,
+        600,
+        800
+      ]
+    },
+    {
+      "code": "DEM-014",
+      "name": "Демонтаж деревянного пола (доска по лагам)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 250,
+      "min_price_rub": 180,
+      "max_price_rub": 350,
+      "samples": [
+        200,
+        250,
+        320
+      ]
+    },
+    {
+      "code": "DEM-015",
+      "name": "Демонтаж водяного тёплого пола",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 380,
+      "min_price_rub": 280,
+      "max_price_rub": 520,
+      "samples": [
+        300,
+        380,
+        480
+      ]
+    },
+    {
+      "code": "DEM-016",
+      "name": "Демонтаж кирпичной перегородки (½ кирпича)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 700,
+      "min_price_rub": 550,
+      "max_price_rub": 950,
+      "samples": [
+        600,
+        700,
+        900
+      ]
+    },
+    {
+      "code": "DEM-017",
+      "name": "Демонтаж пеноблочной / газобетонной перегородки",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 450,
+      "min_price_rub": 350,
+      "max_price_rub": 650,
+      "samples": [
+        380,
+        450,
+        600
+      ]
+    },
+    {
+      "code": "DEM-018",
+      "name": "Демонтаж пазогребневой перегородки (ПГП)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 400,
+      "min_price_rub": 300,
+      "max_price_rub": 580,
+      "samples": [
+        340,
+        400,
+        540
+      ]
+    },
+    {
+      "code": "DEM-019",
+      "name": "Демонтаж перегородки из ГКЛ на каркасе",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 320,
+      "min_price_rub": 230,
+      "max_price_rub": 450,
+      "samples": [
+        270,
+        320,
+        420
+      ]
+    },
+    {
+      "code": "DEM-020",
+      "name": "Демонтаж штукатурки со стен",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 280,
+      "min_price_rub": 200,
+      "max_price_rub": 400,
+      "samples": [
+        240,
+        280,
+        360
+      ]
+    },
+    {
+      "code": "DEM-021",
+      "name": "Демонтаж шпаклёвки и краски со стен",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 220,
+      "min_price_rub": 160,
+      "max_price_rub": 320,
+      "samples": [
+        180,
+        220,
+        290
+      ]
+    },
+    {
+      "code": "DEM-022",
+      "name": "Демонтаж стеновых панелей (ПВХ / МДФ / вагонка)",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 180,
+      "min_price_rub": 130,
+      "max_price_rub": 250,
+      "samples": [
+        150,
+        180,
+        230
+      ]
+    },
+    {
+      "code": "DEM-023",
+      "name": "Расширение / пробивка проёма в ненесущей стене",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 3500,
+      "min_price_rub": 2500,
+      "max_price_rub": 5000,
+      "samples": [
+        3000,
+        3500,
+        4500
+      ]
+    },
+    {
+      "code": "DEM-024",
+      "name": "Демонтаж побелки / краски с потолка",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 200,
+      "min_price_rub": 140,
+      "max_price_rub": 280,
+      "samples": [
+        170,
+        200,
+        260
+      ]
+    },
+    {
+      "code": "DEM-025",
+      "name": "Демонтаж штукатурки с потолка",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 350,
+      "min_price_rub": 250,
+      "max_price_rub": 480,
+      "samples": [
+        300,
+        350,
+        450
+      ]
+    },
+    {
+      "code": "DEM-026",
+      "name": "Демонтаж реечного / Армстронг потолка",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 240,
+      "min_price_rub": 180,
+      "max_price_rub": 340,
+      "samples": [
+        200,
+        240,
+        320
+      ]
+    },
+    {
+      "code": "DEM-027",
+      "name": "Демонтаж оконного блока ПВХ (с подоконником и отливом)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 1800,
+      "min_price_rub": 1300,
+      "max_price_rub": 2500,
+      "samples": [
+        1500,
+        1800,
+        2300
+      ]
+    },
+    {
+      "code": "DEM-028",
+      "name": "Демонтаж деревянного оконного блока",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 2200,
+      "min_price_rub": 1600,
+      "max_price_rub": 3000,
+      "samples": [
+        1800,
+        2200,
+        2800
+      ]
+    },
+    {
+      "code": "DEM-029",
+      "name": "Демонтаж балконного блока (окно + дверь)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 3500,
+      "min_price_rub": 2500,
+      "max_price_rub": 4800,
+      "samples": [
+        2900,
+        3500,
+        4400
+      ]
+    },
+    {
+      "code": "DEM-030",
+      "name": "Демонтаж входной двери в сборе",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 2500,
+      "min_price_rub": 1800,
+      "max_price_rub": 3500,
+      "samples": [
+        2100,
+        2500,
+        3200
+      ]
+    },
+    {
+      "code": "DEM-031",
+      "name": "Демонтаж дверной коробки (отдельно от полотна)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 600,
+      "min_price_rub": 450,
+      "max_price_rub": 850,
+      "samples": [
+        500,
+        600,
+        800
+      ]
+    },
+    {
+      "code": "DEM-032",
+      "name": "Демонтаж откосов (штукатурных / ПВХ / ГКЛ)",
+      "category": "demolition",
+      "unit": "п.м.",
+      "base_price_rub": 150,
+      "min_price_rub": 100,
+      "max_price_rub": 220,
+      "samples": [
+        120,
+        150,
+        200
+      ]
+    },
+    {
+      "code": "DEM-033",
+      "name": "Демонтаж подоконника",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 350,
+      "min_price_rub": 250,
+      "max_price_rub": 500,
+      "samples": [
+        280,
+        350,
+        450
+      ]
+    },
+    {
+      "code": "DEM-034",
+      "name": "Демонтаж ванны (стальной / акриловой)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 1500,
+      "min_price_rub": 1100,
+      "max_price_rub": 2200,
+      "samples": [
+        1200,
+        1500,
+        2000
+      ]
+    },
+    {
+      "code": "DEM-035",
+      "name": "Демонтаж чугунной ванны (с распилом)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 3000,
+      "min_price_rub": 2200,
+      "max_price_rub": 4500,
+      "samples": [
+        2400,
+        3000,
+        4000
+      ]
+    },
+    {
+      "code": "DEM-036",
+      "name": "Демонтаж душевой кабины",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 2500,
+      "min_price_rub": 1800,
+      "max_price_rub": 3500,
+      "samples": [
+        2000,
+        2500,
+        3200
+      ]
+    },
+    {
+      "code": "DEM-037",
+      "name": "Демонтаж унитаза",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 1000,
+      "min_price_rub": 700,
+      "max_price_rub": 1500,
+      "samples": [
+        800,
+        1000,
+        1300
+      ]
+    },
+    {
+      "code": "DEM-038",
+      "name": "Демонтаж раковины / мойки (с тумбой)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 800,
+      "min_price_rub": 600,
+      "max_price_rub": 1200,
+      "samples": [
+        650,
+        800,
+        1100
+      ]
+    },
+    {
+      "code": "DEM-039",
+      "name": "Демонтаж смесителя",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 500,
+      "min_price_rub": 350,
+      "max_price_rub": 750,
+      "samples": [
+        400,
+        500,
+        700
+      ]
+    },
+    {
+      "code": "DEM-040",
+      "name": "Демонтаж полотенцесушителя",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 1000,
+      "min_price_rub": 750,
+      "max_price_rub": 1400,
+      "samples": [
+        800,
+        1000,
+        1300
+      ]
+    },
+    {
+      "code": "DEM-041",
+      "name": "Демонтаж сантехнических труб (стояк / разводка)",
+      "category": "demolition",
+      "unit": "п.м.",
+      "base_price_rub": 250,
+      "min_price_rub": 180,
+      "max_price_rub": 380,
+      "samples": [
+        200,
+        250,
+        350
+      ]
+    },
+    {
+      "code": "DEM-042",
+      "name": "Демонтаж розетки / выключателя",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 100,
+      "min_price_rub": 70,
+      "max_price_rub": 150,
+      "samples": [
+        80,
+        100,
+        130
+      ]
+    },
+    {
+      "code": "DEM-043",
+      "name": "Демонтаж распаечной коробки",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 150,
+      "min_price_rub": 100,
+      "max_price_rub": 220,
+      "samples": [
+        120,
+        150,
+        200
+      ]
+    },
+    {
+      "code": "DEM-044",
+      "name": "Демонтаж проводки (открытой / в штробе)",
+      "category": "electrical_minor",
+      "unit": "п.м.",
+      "base_price_rub": 60,
+      "min_price_rub": 40,
+      "max_price_rub": 90,
+      "samples": [
+        50,
+        60,
+        80
+      ]
+    },
+    {
+      "code": "DEM-045",
+      "name": "Демонтаж электрощита",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 1500,
+      "min_price_rub": 1100,
+      "max_price_rub": 2200,
+      "samples": [
+        1200,
+        1500,
+        2000
+      ]
+    },
+    {
+      "code": "DEM-046",
+      "name": "Демонтаж люстры / потолочного светильника",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 400,
+      "min_price_rub": 280,
+      "max_price_rub": 600,
+      "samples": [
+        320,
+        400,
+        550
+      ]
+    },
+    {
+      "code": "DEM-047",
+      "name": "Демонтаж точечного светильника",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 150,
+      "min_price_rub": 100,
+      "max_price_rub": 220,
+      "samples": [
+        120,
+        150,
+        200
+      ]
+    },
+    {
+      "code": "DEM-048",
+      "name": "Демонтаж кондиционера (внутр. + внешний блок)",
+      "category": "electrical_minor",
+      "unit": "шт.",
+      "base_price_rub": 3500,
+      "min_price_rub": 2500,
+      "max_price_rub": 5000,
+      "samples": [
+        2800,
+        3500,
+        4500
+      ]
+    },
+    {
+      "code": "DEM-049",
+      "name": "Демонтаж кухонного гарнитура",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 4000,
+      "min_price_rub": 2800,
+      "max_price_rub": 6000,
+      "samples": [
+        3200,
+        4000,
+        5500
+      ]
+    },
+    {
+      "code": "DEM-050",
+      "name": "Демонтаж встроенной техники (за единицу)",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 600,
+      "min_price_rub": 400,
+      "max_price_rub": 900,
+      "samples": [
+        480,
+        600,
+        850
+      ]
+    },
+    {
+      "code": "DEM-051",
+      "name": "Демонтаж встроенного шкафа / антресоли",
+      "category": "demolition",
+      "unit": "м²",
+      "base_price_rub": 350,
+      "min_price_rub": 250,
+      "max_price_rub": 500,
+      "samples": [
+        280,
+        350,
+        450
+      ]
+    },
+    {
+      "code": "DEM-052",
+      "name": "Демонтаж радиатора отопления",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 1200,
+      "min_price_rub": 850,
+      "max_price_rub": 1800,
+      "samples": [
+        950,
+        1200,
+        1600
+      ]
+    },
+    {
+      "code": "DEM-053",
+      "name": "Демонтаж вентрешётки / короба / вытяжки",
+      "category": "demolition",
+      "unit": "шт.",
+      "base_price_rub": 400,
+      "min_price_rub": 280,
+      "max_price_rub": 600,
+      "samples": [
+        320,
+        400,
+        550
+      ]
+    },
+    {
+      "code": "DEM-054",
+      "name": "Вынос и упаковка строительного мусора в мешки",
+      "category": "demolition",
+      "unit": "мешок",
+      "base_price_rub": 80,
+      "min_price_rub": 60,
+      "max_price_rub": 120,
+      "samples": [
+        70,
+        80,
+        110
+      ]
+    },
+    {
+      "code": "DEM-055",
+      "name": "Погрузка мусора в контейнер / газель",
+      "category": "demolition",
+      "unit": "м³",
+      "base_price_rub": 1200,
+      "min_price_rub": 900,
+      "max_price_rub": 1800,
+      "samples": [
+        1000,
+        1200,
+        1600
+      ]
     }
   ]
 }
