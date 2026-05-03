@@ -404,6 +404,24 @@ export function calculate(
   // section for the report renderer to show as "Прочее".
   const roomsBreakdown = buildRoomsBreakdown(workItems, context);
 
+  // Reliability gate: if Claude OCR'd a competent-authority act and
+  // confirmed the event, bypass expert routing — this case can pay out
+  // automatically. Otherwise fall back to the standard threshold check.
+  const actConfirmed =
+    claudeOutput.act_document?.found === true &&
+    claudeOutput.act_document?.event_confirmed === true;
+  const aboveThreshold = base > calibration.stp_threshold_rub;
+  const reliability: import("@/types").Reliability = actConfirmed
+    ? "high"
+    : aboveThreshold
+      ? "low"
+      : "standard";
+  const reliabilityReason = actConfirmed
+    ? `Подтверждено актом ${claudeOutput.act_document?.issuing_authority || "компетентного органа"}`
+    : aboveThreshold
+      ? "Сумма выше порога автовыплаты — нужна экспертиза"
+      : "AI-расчёт по фото";
+
   return {
     range: {
       min: Math.round(base * (1 - sigma)),
@@ -413,10 +431,13 @@ export function calculate(
     sigma,
     works: workItems,
     materials: materialItems,
-    routed_to_expert: base > calibration.stp_threshold_rub,
+    // High reliability skips routing even when above the threshold.
+    routed_to_expert: !actConfirmed && aboveThreshold,
     claude_output: claudeOutput,
     area_pick: areaPick,
     rooms_breakdown: roomsBreakdown.length ? roomsBreakdown : undefined,
+    reliability,
+    reliability_reason: reliabilityReason,
   };
 }
 

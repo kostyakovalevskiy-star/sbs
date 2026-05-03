@@ -59,7 +59,7 @@ interface Scene {
 // chat (if any), then append a single "extras" stage for movable property /
 // receipts / overflow shots. When no rooms were captured the template runs
 // once as a single-room legacy flow.
-type SceneKind = "wide" | "close_scale" | "source" | "extras";
+type SceneKind = "wide" | "close_scale" | "source" | "act_document" | "extras";
 
 interface SceneTemplate {
   kind: SceneKind;
@@ -94,6 +94,15 @@ const ROOM_SCENE_TEMPLATE: SceneTemplate[] = [
     illustrationSrc: "/scenes/4_source.svg",
   },
 ];
+
+const ACT_DOCUMENT_SCENE: SceneTemplate = {
+  kind: "act_document",
+  titleSuffix: "акт от УК / компетентного органа",
+  hint: "Документ должен быть читаемым: AI распознает текст для подтверждения события",
+  description:
+    "Сфотографируйте акт от управляющей компании, МЧС, полиции или другого компетентного органа. Если AI распознает в нём факт события — кейс получит высокую надёжность и сможет быть выплачен без независимой экспертизы.",
+  illustrationSrc: "/scenes/4_source.svg",
+};
 
 const EXTRAS_SCENE: SceneTemplate = {
   kind: "extras",
@@ -133,6 +142,15 @@ function buildScenes(rooms?: { id: string; name: string }[]): Scene[] {
       });
     }
   }
+  // act_document — обязательный этап перед extras. Один на весь кейс.
+  list.push({
+    id: "act_document",
+    index: index++,
+    title: "Акт от УК",
+    hint: ACT_DOCUMENT_SCENE.hint,
+    description: ACT_DOCUMENT_SCENE.description,
+    illustrationSrc: ACT_DOCUMENT_SCENE.illustrationSrc,
+  });
   list.push({
     id: "extras",
     index: index,

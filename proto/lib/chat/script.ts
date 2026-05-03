@@ -161,16 +161,10 @@ export const FLOOD_STEPS: Step[] = [
       { value: "drywall", label: "Гипсокартон", hint: "Перегородки из ГКЛ", iconName: "layers" },
     ],
   },
-  {
-    kind: "choice",
-    id: "B6",
-    field: "has_uk_act",
-    question: "Получили акт от управляющей компании?",
-    options: [
-      { value: "yes", label: "Да, есть", hint: "Документ на руках", iconName: "check" },
-      { value: "no", label: "Нет", hint: "Ещё не оформили", iconName: "x" },
-    ],
-  },
+  // B6 («акт от УК») перенесён в /flow/camera как отдельный обязательный
+  // этап с фотографией документа. Если AI распознаёт текст акта и факт
+  // события подтверждается — кейсу присваивается высокая надёжность и он
+  // не уходит на ручную экспертизу.
 ];
 
 // === Block P — Post-branch (always last, common to all branches) ===

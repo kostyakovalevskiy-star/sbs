@@ -43,7 +43,7 @@ function extractCalibrationValues(config: CalibrationConfig): CalibrationValues 
 async function callClaude(
   client: Anthropic,
   context: IncidentContext,
-  photos: Array<{ base64: string }>,
+  photos: Array<{ base64: string; sceneId?: string }>,
   workCodes: Array<{ code: string; name: string }>
 ): Promise<string> {
   const userContent = buildUserMessage(context, photos, workCodes);
@@ -89,13 +89,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Maximum 10 photos" }, { status: 400 });
     }
 
+    // Optional parallel array of sceneIds (one per photo, in order). Used
+    // by the prompt to single out the act_document photo for OCR.
+    const sceneIdsRaw = formData.get("scene_ids");
+    let sceneIds: string[] = [];
+    if (typeof sceneIdsRaw === "string") {
+      try {
+        sceneIds = JSON.parse(sceneIdsRaw);
+        if (!Array.isArray(sceneIds)) sceneIds = [];
+      } catch {
+        sceneIds = [];
+      }
+    }
+
     // Convert photos to base64
-    const photos: Array<{ base64: string }> = [];
+    const photos: Array<{ base64: string; sceneId?: string }> = [];
     const photosBase64: string[] = [];
-    for (const file of photoFiles) {
+    for (let i = 0; i < photoFiles.length; i++) {
+      const file = photoFiles[i];
       const buffer = await file.arrayBuffer();
       const base64 = Buffer.from(buffer).toString("base64");
-      photos.push({ base64 });
+      const sceneId = sceneIds[i] || undefined;
+      photos.push({ base64, sceneId });
       photosBase64.push(base64);
     }
 

@@ -103,6 +103,21 @@ export interface WorkSpec {
   area_m2?: number;
 }
 
+export interface ActDocumentFinding {
+  // True when at least one photo was tagged sceneId="act_document" AND it
+  // visually looks like an official document (header, stamp, signature).
+  found: boolean;
+  // Whether OCR-extracted text confirms the insurance event (e.g. "залив",
+  // "затопление", "пожар", "взлом", date, address). Drives reliability.
+  event_confirmed: boolean;
+  // Cleaned-up extract of the document body — useful for downstream review
+  // and for the admin to verify Claude's interpretation. Truncated to
+  // ~600 chars in the prompt response.
+  ocr_text: string;
+  // Free-text label like "ТСЖ", "МЧС", "Полиция", "ЖЭК". Empty if unclear.
+  issuing_authority: string;
+}
+
 export interface ClaudeOutput {
   photos: ClaudePhotoAnalysis[];
   recommended_works: WorkSpec[];
@@ -112,6 +127,11 @@ export interface ClaudeOutput {
   area_from_measure: AreaEstimate | null;     // measurements read from Measure-app screenshot
   area_from_reference: AreaEstimate | null;   // scaled via bank card / coin / known object in frame
   area_visual: AreaEstimate;                  // rough visual estimate (always populated)
+  // Populated when the user uploaded a photo of the УК / МЧС / police /
+  // другого компетентного органа act on the camera screen. When
+  // event_confirmed is true the calculator skips expert routing and the
+  // case gets a high-reliability flag.
+  act_document?: ActDocumentFinding;
 }
 
 export interface WorkItem {
@@ -146,6 +166,8 @@ export interface RoomBreakdown {
   subtotal: number;
 }
 
+export type Reliability = "high" | "standard" | "low";
+
 export interface Report {
   range: {
     min: number;
@@ -165,6 +187,10 @@ export interface Report {
   // Populated when the calculator distributed works across rooms/surfaces;
   // used by the report renderer to display "комната → поверхность → работа".
   rooms_breakdown?: RoomBreakdown[];
+  // High when act_document.event_confirmed; standard otherwise. High
+  // reliability cases skip expert routing and can pay out automatically.
+  reliability?: Reliability;
+  reliability_reason?: string;
 }
 
 export interface CaseRecord {

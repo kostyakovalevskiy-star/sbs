@@ -217,6 +217,26 @@ ENUM material_predicted (используй ТОЛЬКО эти значения
 Few-shot примеры:
 ${FEW_SHOT_CASES}
 
+5. act_document — отдельный анализ фотографии акта от компетентного органа.
+   Если в подписи фото указан sceneId="act_document", это специальная фотография
+   документа (акт от УК / МЧС / полиции / ЖЭК / ТСЖ и т.п.). По нему:
+   - found: true если фото действительно похоже на официальный документ (бланк,
+     печать, подпись, реквизиты органа). false если это фото повреждения, а не
+     документа.
+   - event_confirmed: true ТОЛЬКО если в тексте акта явно описан факт страхового
+     события — слова «залив», «затопление», «протечка», «пожар», «возгорание»,
+     «взлом», «кража», «хищение», «ущерб», «авария», «повреждение» в контексте
+     адреса или конкретного помещения. false если документ есть, но события не
+     подтверждает (например, просто справка о составе семьи).
+   - ocr_text: обрезанная до ~600 символов выжимка из распознанного текста
+     документа. Только то, что относится к событию: дата, адрес, описание,
+     подпись, орган. Без повторов и шума.
+   - issuing_authority: краткий ярлык органа («ТСЖ», «УК», «МЧС», «Полиция»,
+     «ЖЭК», «Иное»). Если из документа невозможно определить — пустая строка.
+   Если sceneId="act_document" фото нет среди приложенных, верни
+   { "found": false, "event_confirmed": false, "ocr_text": "", "issuing_authority": "" }.
+   Не путай: фотография повреждения с аккуратным углом — это НЕ акт.
+
 Верни СТРОГО валидный JSON по схеме ниже. БЕЗ markdown-обёртки, БЕЗ объяснений, ТОЛЬКО JSON:
 {
   "photos": [
@@ -243,12 +263,18 @@ ${FEW_SHOT_CASES}
   "average_confidence": 0.0,
   "area_from_measure": { "value": 0.0, "source": "..." } | null,
   "area_from_reference": { "value": 0.0, "source": "..." } | null,
-  "area_visual": { "value": 0.0, "source": "визуальная оценка" }
+  "area_visual": { "value": 0.0, "source": "визуальная оценка" },
+  "act_document": {
+    "found": false,
+    "event_confirmed": false,
+    "ocr_text": "",
+    "issuing_authority": ""
+  }
 }`;
 
 export function buildUserMessage(
   context: IncidentContext,
-  photos: Array<{ base64: string }>,
+  photos: Array<{ base64: string; sceneId?: string }>,
   workCodes: Array<{ code: string; name: string }>
 ): Array<{ type: string; text?: string; source?: unknown }> {
   const worksList = workCodes.map((w) => `- ${w.code}: ${w.name}`).join("\n");
@@ -274,9 +300,10 @@ ${worksList}
   ];
 
   for (let i = 0; i < photos.length; i++) {
+    const sceneTag = photos[i].sceneId ? ` [sceneId="${photos[i].sceneId}"]` : "";
     content.push({
       type: "text",
-      text: `Фото ${i + 1}:`,
+      text: `Фото ${i + 1}${sceneTag}:`,
     });
     content.push({
       type: "image",

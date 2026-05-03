@@ -183,12 +183,21 @@ export default function ChatFlowPage() {
 
     persistDraft(newAnswers);
 
-    if (nextIdx >= flat.length) {
+    // Expert short-circuit: at A7 ("event_type") if the user picks anything
+    // other than flood, we skip the rest of the chat (branch + post-steps)
+    // and hand off to the expert immediately. AI auto-flow is only built
+    // out for floods today.
+    const justPickedNonFlood =
+      currentId === "A7" &&
+      newAnswers.event_type !== undefined &&
+      newAnswers.event_type !== "flood";
+
+    if (nextIdx >= flat.length || justPickedNonFlood) {
       const eventType = newAnswers.event_type as EventType | undefined;
-      const finalText =
-        eventType === "flood"
-          ? "Готово! Теперь сделаем фотографии повреждений."
-          : "Передаём заявку эксперту. С вами свяжутся в течение часа.";
+      const isFlood = eventType === "flood";
+      const finalText = isFlood
+        ? "Готово! Теперь сделаем фотографии повреждений."
+        : "Ваше обращение переведено на эксперта. С вами свяжутся в течение 8 рабочих часов.";
       const finalMsg: ChatMessage = { role: "bot", id: makeMsgId(), text: finalText };
 
       // Phase 1: append user msg, hide controls, show typing.
@@ -209,9 +218,9 @@ export default function ChatFlowPage() {
           finished: true,
         }));
         setTimeout(() => {
-          if (eventType === "flood") router.push("/flow/camera");
-          else router.push("/thank-you");
-        }, 800);
+          if (isFlood) router.push("/flow/camera");
+          else router.push("/thank-you?routed=expert");
+        }, 1500);
       }, pickTypingDelay());
       return;
     }

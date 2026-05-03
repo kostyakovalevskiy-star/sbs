@@ -53,13 +53,18 @@ export default function ReviewPage() {
       const formData = new FormData();
       formData.append("context", JSON.stringify(context));
 
+      // Capture sceneIds parallel to photos so the analyze endpoint can
+      // identify the act-document photo for OCR / reliability boost.
+      const sceneIds: string[] = [];
       for (const photo of draft.photos ?? []) {
         const blob = await (async () => {
           const res = await fetch(`data:image/jpeg;base64,${photo.base64}`);
           return res.blob();
         })();
         formData.append("photos", blob, "photo.jpg");
+        sceneIds.push(photo.sceneId ?? "");
       }
+      formData.append("scene_ids", JSON.stringify(sceneIds));
 
       const res = await fetch("/api/analyze", { method: "POST", body: formData });
       const data = await res.json();

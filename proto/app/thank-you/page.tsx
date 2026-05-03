@@ -17,6 +17,7 @@ function ThankYouContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const abandoned = searchParams.get("abandoned") === "1";
+  const routedToExpert = searchParams.get("routed") === "expert";
 
   const [draft, setDraft] = useState<DraftState | null>(null);
 
@@ -133,9 +134,13 @@ function ThankYouContent() {
           </div>
         </div>
         <div>
-          <h1 className="font-display text-2xl font-bold text-gray-900">Спасибо! Заявка принята</h1>
+          <h1 className="font-display text-2xl font-bold text-gray-900">
+            {routedToExpert ? "Заявка передана эксперту" : "Спасибо! Заявка принята"}
+          </h1>
           <p className="mt-2 text-gray-500 text-sm leading-relaxed">
-            Для данного типа события автоматический расчёт пока недоступен. Эксперт рассмотрит ваш кейс в ближайшее время.
+            {routedToExpert
+              ? "Ваше обращение переведено на эксперта. Мы свяжемся с вами в течение 8 рабочих часов."
+              : "Для данного типа события автоматический расчёт пока недоступен. Эксперт рассмотрит ваш кейс в ближайшее время."}
           </p>
         </div>
 
