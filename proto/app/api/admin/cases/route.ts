@@ -4,7 +4,13 @@ import { listCorrectionsForCase } from "@/lib/corrections";
 import type { CaseRecord, CorrectionStatus } from "@/types";
 
 export type CaseListItem = Omit<CaseRecord, "photos"> & {
-  correction: { id: string; status: CorrectionStatus } | null;
+  correction: {
+    id: string;
+    status: CorrectionStatus;
+    // Only set when status === "fixed" — used by the history table to show
+    // the corrected estimate instead of the original.
+    correctedTotal?: number;
+  } | null;
 };
 
 export async function GET() {
@@ -23,7 +29,7 @@ export async function GET() {
     const correction = draft
       ? { id: draft.id, status: draft.status }
       : fixed
-        ? { id: fixed.id, status: fixed.status }
+        ? { id: fixed.id, status: fixed.status, correctedTotal: fixed.summary.total }
         : null;
 
     const { photos: _photos, ...recordWithoutPhotos } = record;

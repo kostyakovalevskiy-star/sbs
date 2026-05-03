@@ -9,7 +9,11 @@ import type { CaseRecord, CorrectionStatus } from "@/types";
 import { Download } from "lucide-react";
 
 type CaseRow = CaseRecord & {
-  correction: { id: string; status: CorrectionStatus } | null;
+  correction: {
+    id: string;
+    status: CorrectionStatus;
+    correctedTotal?: number;
+  } | null;
 };
 
 const EVENT_LABELS: Record<string, string> = {
@@ -69,10 +73,16 @@ export default function HistoryPage() {
   });
 
   function exportCSV() {
-    const header = "ID,Дата,Тип,Описание,Оценка,Статус\n";
+    const header = "ID,Дата,Тип,Описание,Оценка_оригинал,Оценка_итог,Статус_корректировки,Статус\n";
     const rows = filtered.map((c) => {
       const desc = (c.report?.claude_output?.summary ?? "").replace(/[\r\n"]/g, " ").trim();
-      return `${c.id.slice(0, 8)},${formatDate(c.created_at)},${EVENT_LABELS[c.context.event_type] ?? c.context.event_type},"${desc}",${c.report?.range.base ?? ""},${c.status}`;
+      const orig = c.report?.range.base ?? "";
+      const finalEstimate =
+        c.correction?.status === "fixed" && typeof c.correction.correctedTotal === "number"
+          ? c.correction.correctedTotal
+          : orig;
+      const corrStatus = c.correction?.status ?? "оригинал";
+      return `${c.id.slice(0, 8)},${formatDate(c.created_at)},${EVENT_LABELS[c.context.event_type] ?? c.context.event_type},"${desc}",${orig},${finalEstimate},${corrStatus},${c.status}`;
     }).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -177,7 +187,20 @@ export default function HistoryPage() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right font-medium">
-                        {c.report ? formatRub(c.report.range.base) : "—"}
+                        {c.correction?.status === "fixed" && typeof c.correction.correctedTotal === "number" ? (
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span className="text-emerald-700">{formatRub(c.correction.correctedTotal)}</span>
+                            {c.report && c.correction.correctedTotal !== c.report.range.base && (
+                              <span className="text-[11px] text-gray-400 line-through font-normal">
+                                {formatRub(c.report.range.base)}
+                              </span>
+                            )}
+                          </div>
+                        ) : c.report ? (
+                          formatRub(c.report.range.base)
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <Badge variant={c.status === "complete" ? "success" : "warning"}>
