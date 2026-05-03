@@ -54,34 +54,95 @@ interface Scene {
   illustrationSrc: string;
 }
 
-const SCENES: Scene[] = [
+// Per-room scene template. The actual scene list is built dynamically
+// inside the component: we multiply the template by the rooms captured in
+// chat (if any), then append a single "extras" stage for movable property /
+// receipts / overflow shots. When no rooms were captured the template runs
+// once as a single-room legacy flow.
+type SceneKind = "wide" | "close_scale" | "source" | "extras";
+
+interface SceneTemplate {
+  kind: SceneKind;
+  titleSuffix: string;
+  hint: string;
+  description: string;
+  illustrationSrc: string;
+}
+
+const ROOM_SCENE_TEMPLATE: SceneTemplate[] = [
   {
-    id: "wide",
-    index: 1,
-    title: "Общий план",
+    kind: "wide",
+    titleSuffix: "общий план",
     hint: "Пройдите подальше — должна быть видна вся стена",
     description:
       "Сделайте фото всего помещения, чтобы было видно повреждённую зону",
     illustrationSrc: "/scenes/1_full_scene.svg",
   },
   {
-    id: "close_scale",
-    index: 2,
-    title: "Крупный план с масштабом",
+    kind: "close_scale",
+    titleSuffix: "крупный план с масштабом",
     hint: "Подойдите ближе и положите карту или линейку рядом с повреждением",
     description:
       "Сделайте крупный кадр повреждения, рядом положите карту или линейку — AI точно определит размер",
     illustrationSrc: "/scenes/3_measure_scale.svg",
   },
   {
-    id: "source",
-    index: 3,
-    title: "Источник залива",
-    hint: "Снимите место, откуда пошла вода",
-    description: "Снимите источник: трубы, окно, потолок — место, откуда пошла вода",
+    kind: "source",
+    titleSuffix: "источник проблемы",
+    hint: "Снимите место, откуда пошла вода / поднялся огонь",
+    description: "Снимите источник: трубы, окно, потолок — место, откуда пошла проблема",
     illustrationSrc: "/scenes/4_source.svg",
   },
 ];
+
+const EXTRAS_SCENE: SceneTemplate = {
+  kind: "extras",
+  titleSuffix: "дополнительные фото",
+  hint: "Имущество, чеки, любые ракурсы повреждений",
+  description:
+    "Сфотографируйте пострадавшее имущество (бытовую технику, мебель), чеки на покупку и любые дополнительные ракурсы.",
+  illustrationSrc: "/scenes/1_full_scene.svg",
+};
+
+function buildScenes(rooms?: { id: string; name: string }[]): Scene[] {
+  const list: Scene[] = [];
+  let index = 1;
+  if (rooms && rooms.length > 0) {
+    for (const r of rooms) {
+      for (const t of ROOM_SCENE_TEMPLATE) {
+        list.push({
+          id: `${r.id}::${t.kind}`,
+          index: index++,
+          title: `${r.name} — ${t.titleSuffix}`,
+          hint: t.hint,
+          description: t.description,
+          illustrationSrc: t.illustrationSrc,
+        });
+      }
+    }
+  } else {
+    // Legacy single-room flow.
+    for (const t of ROOM_SCENE_TEMPLATE) {
+      list.push({
+        id: t.kind,
+        index: index++,
+        title: t.titleSuffix.charAt(0).toUpperCase() + t.titleSuffix.slice(1),
+        hint: t.hint,
+        description: t.description,
+        illustrationSrc: t.illustrationSrc,
+      });
+    }
+  }
+  list.push({
+    id: "extras",
+    index: index,
+    title: "Дополнительные фото",
+    hint: EXTRAS_SCENE.hint,
+    description: EXTRAS_SCENE.description,
+    illustrationSrc: EXTRAS_SCENE.illustrationSrc,
+  });
+  return list;
+}
 
 const INTRO_DURATION_MS = 2500;
 const INTRO_MOTION_THRESHOLD = 1.2; // m/s² — accel above this = user moving
@@ -116,7 +177,8 @@ export default function CameraPage() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [capturing, setCapturing] = useState(false);
 
-  // Scenario flow
+  // Scenario flow — `scenes` is built once on mount from chat-captured rooms.
+  const [scenes, setScenes] = useState<Scene[]>(() => buildScenes());
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [introFading, setIntroFading] = useState(false);
@@ -137,8 +199,12 @@ export default function CameraPage() {
 
   const [showMeasureHelp, setShowMeasureHelp] = useState(false);
 
-  const currentScene = SCENES[currentSceneIdx];
-  const sceneCompleted = SCENES.map((s) => photos.some((p) => p.sceneId === s.id));
+  const currentScene = scenes[currentSceneIdx] ?? scenes[0];
+  // The "extras" scene is unbounded — it's never marked "incomplete" because
+  // it serves as overflow for movable property / receipts / extra angles.
+  const sceneCompleted = scenes.map((s) =>
+    s.id === "extras" ? true : photos.some((p) => p.sceneId === s.id)
+  );
   const allScenesCovered = sceneCompleted.every(Boolean);
 
   function showToast(msg: string) {
@@ -192,11 +258,17 @@ export default function CameraPage() {
     return () => window.removeEventListener("devicemotion", onMotion);
   }, [showIntro, dismissIntro]);
 
-  // Load saved photos
+  // Load saved photos + rebuild dynamic scenes from chat-captured rooms.
   useEffect(() => {
     const raw = localStorage.getItem("claim_draft");
     if (raw) {
       const draft = JSON.parse(raw) as DraftState;
+      const rooms = (draft.flood?.rooms ?? draft.intro?.rooms)?.map((r) => ({
+        id: r.id,
+        name: r.name,
+      }));
+      setScenes(buildScenes(rooms));
+
       if (draft.photos?.length) {
         setPhotos(
           draft.photos.map((p) => ({
@@ -360,12 +432,18 @@ export default function CameraPage() {
       setPhotos(updated);
       saveDraft(updated);
 
-      // Auto-advance to next uncovered scene
-      const nextIdx = SCENES.findIndex(
-        (s, i) => i > currentSceneIdx && !updated.some((p) => p.sceneId === s.id)
-      );
-      if (nextIdx !== -1) {
-        setTimeout(() => setCurrentSceneIdx(nextIdx), 600);
+      // Auto-advance to next uncovered scene (skip the unbounded "extras"
+      // scene — user advances it manually when they're done).
+      if (currentScene.id !== "extras") {
+        const nextIdx = scenes.findIndex(
+          (s, i) =>
+            i > currentSceneIdx &&
+            s.id !== "extras" &&
+            !updated.some((p) => p.sceneId === s.id)
+        );
+        if (nextIdx !== -1) {
+          setTimeout(() => setCurrentSceneIdx(nextIdx), 600);
+        }
       }
     } catch (err) {
       showToast("Ошибка захвата фото");
@@ -436,11 +514,11 @@ export default function CameraPage() {
           <ChevronLeft className="w-5 h-5" />
         </button>
 
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center min-w-0 px-2">
           <span className="text-[10px] tracking-wider text-white/50 uppercase">
-            Этап {currentScene.index} из {SCENES.length}
+            Этап {currentScene.index} из {scenes.length}
           </span>
-          <span className="text-sm font-medium text-white">{currentScene.title}</span>
+          <span className="text-sm font-medium text-white truncate max-w-[60vw] text-center">{currentScene.title}</span>
         </div>
 
         <button
@@ -452,17 +530,17 @@ export default function CameraPage() {
       </div>
 
       {/* ============ SCENE PROGRESS BAR ============ */}
-      <div className="shrink-0 flex items-center gap-1 px-4 pb-2 bg-black/80">
-        {SCENES.map((scene, i) => {
+      <div className="shrink-0 flex items-center gap-1 px-4 pb-2 bg-black/80 overflow-x-auto">
+        {scenes.map((scene, i) => {
           const done = sceneCompleted[i];
           const active = i === currentSceneIdx;
           return (
             <button
               key={scene.id}
               onClick={() => setCurrentSceneIdx(i)}
-              className="flex-1 h-1 rounded-full transition-colors"
+              className="flex-1 min-w-[12px] h-1 rounded-full transition-colors"
               style={{
-                background: done
+                background: done && !active
                   ? SBER_GREEN
                   : active
                   ? "rgba(255,255,255,0.6)"
@@ -650,7 +728,7 @@ export default function CameraPage() {
             }}
           >
             <div className="text-[10px] tracking-[1.5px] text-white/55 uppercase mb-1.5">
-              Этап {currentScene.index} из {SCENES.length}
+              Этап {currentScene.index} из {scenes.length}
             </div>
             <div className="text-xl font-medium text-white mb-1.5">{currentScene.title}</div>
             <div className="text-xs text-white/65 text-center max-w-[260px] leading-relaxed mb-7">
@@ -706,7 +784,7 @@ export default function CameraPage() {
         <div className="bg-black px-4 py-2 shrink-0">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {photos.map((p, i) => {
-              const scene = SCENES.find((s) => s.id === p.sceneId);
+              const scene = scenes.find((s) => s.id === p.sceneId);
               return (
                 <div key={i} className="relative shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
