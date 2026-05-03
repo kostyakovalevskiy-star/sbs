@@ -5,8 +5,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRub, formatDate } from "@/lib/utils";
-import type { CaseRecord } from "@/types";
-import { Download, ExternalLink } from "lucide-react";
+import type { CaseRecord, CorrectionStatus } from "@/types";
+import { Download } from "lucide-react";
+
+type CaseRow = CaseRecord & {
+  correction: { id: string; status: CorrectionStatus } | null;
+};
 
 const EVENT_LABELS: Record<string, string> = {
   flood: "Залив",
@@ -15,12 +19,33 @@ const EVENT_LABELS: Record<string, string> = {
   natural: "Стихийное",
 };
 
+function CorrectionPill({ correction }: { correction: CaseRow["correction"] }) {
+  if (!correction) {
+    return (
+      <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-600 px-2 py-0.5 text-[11px] font-medium">
+        оригинал
+      </span>
+    );
+  }
+  if (correction.status === "draft") {
+    return (
+      <span className="inline-flex items-center rounded-full bg-amber-50 text-amber-700 px-2 py-0.5 text-[11px] font-medium">
+        в корректировке
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-[11px] font-medium">
+      зафиксирован
+    </span>
+  );
+}
+
 export default function HistoryPage() {
-  const [cases, setCases] = useState<CaseRecord[]>([]);
+  const [cases, setCases] = useState<CaseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [selectedCase, setSelectedCase] = useState<CaseRecord | null>(null);
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
 
   function showTooltip(e: React.MouseEvent<HTMLElement>, text: string) {
@@ -36,11 +61,6 @@ export default function HistoryPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
-
-  async function openCase(id: string) {
-    const res = await fetch(`/api/admin/cases/${id}`);
-    if (res.ok) setSelectedCase(await res.json());
-  }
 
   const filtered = cases.filter((c) => {
     if (filterType !== "all" && c.context.event_type !== filterType) return false;
@@ -76,59 +96,6 @@ export default function HistoryPage() {
             AI-заключение
           </p>
           <p className="whitespace-pre-wrap">{tooltip.text}</p>
-        </div>
-      )}
-
-      {/* Case detail modal */}
-      {selectedCase && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b px-5 py-4 flex items-center justify-between">
-              <h2 className="font-semibold">Кейс {selectedCase.id.slice(0, 8).toUpperCase()}</h2>
-              <button onClick={() => setSelectedCase(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <span className="text-gray-500">ФИО</span><span>{selectedCase.context.name}</span>
-                <span className="text-gray-500">Телефон</span><span>{selectedCase.context.phone}</span>
-                <span className="text-gray-500">Регион</span><span>{selectedCase.context.region}</span>
-                <span className="text-gray-500">Дата события</span><span>{selectedCase.context.event_date ?? "—"}</span>
-              </div>
-              {selectedCase.report && (
-                <>
-                  <div className="bg-green-50 rounded-xl p-3">
-                    <p className="text-xs text-gray-500">Базовая оценка</p>
-                    <p className="text-2xl font-bold text-[#21A038]">{formatRub(selectedCase.report.range.base)}</p>
-                    <p className="text-xs text-gray-500 mt-1">{selectedCase.report.claude_output.summary}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-gray-600">Работы ({selectedCase.report.works.length})</p>
-                    {selectedCase.report.works.map((w, i) => (
-                      <div key={i} className="flex justify-between text-xs">
-                        <span className="text-gray-600">{w.name}</span>
-                        <span className="font-medium">{formatRub(w.total)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-              {selectedCase.photos && selectedCase.photos.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold text-gray-600 mb-2">Фото ({selectedCase.photos.length})</p>
-                  <div className="grid grid-cols-3 gap-1">
-                    {selectedCase.photos.slice(0, 6).map((p, i) => (
-                      <img key={i} src={`data:image/jpeg;base64,${p}`} alt="" className="aspect-square object-cover rounded-lg" />
-                    ))}
-                  </div>
-                </div>
-              )}
-              <Link href={`/result/${selectedCase.id}`} target="_blank">
-                <Button variant="outline" className="w-full gap-2">
-                  <ExternalLink className="w-4 h-4" /> Открыть отчёт
-                </Button>
-              </Link>
-            </div>
-          </div>
         </div>
       )}
 
@@ -184,6 +151,7 @@ export default function HistoryPage() {
                     <th className="text-left px-4 py-3 text-gray-500 font-medium">Описание инцидента</th>
                     <th className="text-right px-4 py-3 text-gray-500 font-medium">Оценка</th>
                     <th className="text-center px-4 py-3 text-gray-500 font-medium">Статус</th>
+                    <th className="text-center px-4 py-3 text-gray-500 font-medium">Корректировка</th>
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
@@ -216,13 +184,16 @@ export default function HistoryPage() {
                           {c.status === "complete" ? "Завершён" : "Эксперт"}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => openCase(c.id)}
+                      <td className="px-4 py-3 text-center">
+                        <CorrectionPill correction={c.correction} />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Link
+                          href={`/admin/cases/${c.id}`}
                           className="text-xs text-[#21A038] hover:underline font-medium"
                         >
-                          Открыть
-                        </button>
+                          Открыть →
+                        </Link>
                       </td>
                     </tr>
                     );

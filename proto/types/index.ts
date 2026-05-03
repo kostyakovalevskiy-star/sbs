@@ -274,6 +274,64 @@ export interface NaturalDetails {
   affected_zones?: AffectedZone[];
 }
 
+// =================== Admin corrections ===================
+// Immutable copy of a Report's works/materials/areas that an administrator
+// can edit. Original report stays read-only; every change is captured per
+// item via `changeType` + `originalItemId`. Designed for a "before / стало"
+// diff view and for "чистовик" / "черновик" exports.
+
+export type ChangeType = "unchanged" | "edited" | "added" | "removed";
+export type CorrectionStatus = "draft" | "fixed" | "cancelled";
+export type CorrectionSection = "work" | "material" | "area";
+
+export interface CorrectionItem {
+  id: string;
+  section: CorrectionSection;
+  // Snapshot fields (current correction values).
+  name: string;
+  unit: string;
+  qty: number;
+  price: number;
+  amount: number;
+  // Pointer back to the row in the original report (null if added).
+  originalItemId: string | null;
+  changeType: ChangeType;
+  reason?: string;
+  // For section="area": ties value to a surface (стены / пол / потолок) so
+  // multiple area rows can share one logical room.
+  room?: string;
+  surface?: Surface;
+  // Frozen original snapshot for diff rendering — set on creation, never
+  // mutated. Null for added rows.
+  originalSnapshot?: {
+    name: string;
+    unit: string;
+    qty: number;
+    price: number;
+    amount: number;
+  } | null;
+}
+
+export interface CorrectionSummary {
+  total: number;
+  originalTotal: number;
+  deltaAbs: number;
+  deltaPct: number;
+  edited: number;
+  added: number;
+  removed: number;
+}
+
+export interface Correction {
+  id: string;
+  caseId: string;
+  status: CorrectionStatus;
+  createdAt: string;
+  fixedAt?: string;
+  items: CorrectionItem[];
+  summary: CorrectionSummary;
+}
+
 export interface DraftState {
   id: string;
   created_at: string;

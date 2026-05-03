@@ -18,6 +18,12 @@ const config: Config = {
           orange: "#FF6B47",
           "orange-light": "#fff1ec",
         },
+        diff: {
+          "old-bg": "#fdebe5",
+          "old-ink": "#b9381a",
+          "new-bg": "#e8f6ed",
+          "new-ink": "#0b6d33",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
