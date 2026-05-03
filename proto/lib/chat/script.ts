@@ -92,14 +92,6 @@ export const FLOOD_STEPS: Step[] = [
     question: "Расскажу подробнее, чтобы передать эксперту полный контекст.",
     subSteps: [
       {
-        kind: "text",
-        id: "B0.1",
-        field: "B0_when",
-        question: "Когда вы заметили залив?",
-        placeholder: "Например: вчера вечером",
-        minLength: 3,
-      },
-      {
         kind: "choice",
         id: "B0.2",
         field: "B0_source",
@@ -140,7 +132,7 @@ export const FLOOD_STEPS: Step[] = [
       };
       const src = sourceLabels[parts.B0_source] ?? parts.B0_source;
       const freeform = parts.B0_freeform?.trim();
-      const base = `Заметил: ${parts.B0_when}. Источник: ${src}. Пострадало: ${parts.B0_damage}.`;
+      const base = `Источник: ${src}. Пострадало: ${parts.B0_damage}.`;
       return freeform ? `${base} Подробности: ${freeform}` : base;
     },
   },

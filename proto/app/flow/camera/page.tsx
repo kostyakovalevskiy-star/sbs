@@ -143,7 +143,7 @@ export default function CameraPage() {
 
   function showToast(msg: string) {
     setToast(msg);
-    setTimeout(() => setToast(null), 2500);
+    setTimeout(() => setToast(null), 5000);
   }
 
   // Dismiss intro: with fade animation
