@@ -112,9 +112,22 @@ export default function HistoryPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-5">
         <div className="flex items-center justify-between px-1">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-gray-900">История кейсов</h1>
-          <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 rounded-xl">
-            <Download className="w-4 h-4" /> CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 rounded-xl">
+              <Download className="w-4 h-4" /> CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                window.location.href = "/api/admin/cases/export-detailed";
+              }}
+              title="Все работы и материалы по кейсам, с пометкой оригинал / корректировка — для калибровки"
+              className="gap-1.5 rounded-xl"
+            >
+              <Download className="w-4 h-4" /> Детальный CSV
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -156,6 +169,7 @@ export default function HistoryPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b">
+                    <th className="text-left px-4 py-3 text-gray-500 font-medium">№</th>
                     <th className="text-left px-4 py-3 text-gray-500 font-medium">Дата</th>
                     <th className="text-left px-4 py-3 text-gray-500 font-medium">Тип</th>
                     <th className="text-left px-4 py-3 text-gray-500 font-medium">Описание инцидента</th>
@@ -171,6 +185,9 @@ export default function HistoryPage() {
                     const short = summary.length > 30 ? summary.slice(0, 30) + "…" : summary;
                     return (
                     <tr key={c.id} className="border-b last:border-0 hover:bg-gray-50">
+                      <td className="px-4 py-3 font-mono text-[12px] text-gray-700 whitespace-nowrap">
+                        K-{c.id.slice(0, 8).toUpperCase()}
+                      </td>
                       <td className="px-4 py-3 text-gray-600">{formatDate(c.created_at)}</td>
                       <td className="px-4 py-3">{EVENT_LABELS[c.context.event_type] ?? c.context.event_type}</td>
                       <td className="px-4 py-3 text-gray-600 max-w-[240px]">
