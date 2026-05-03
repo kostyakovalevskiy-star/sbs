@@ -53,17 +53,35 @@ export function BotMessage({
   );
 }
 
-export function UserMessage({ text }: { text: string }) {
+export function UserMessage({
+  text,
+  onEdit,
+}: {
+  text: string;
+  onEdit?: () => void;
+}) {
+  const baseClasses = cn(
+    "bg-sber-green text-white font-medium text-[15px] leading-[22px] px-4 py-[11px] max-w-[75%]",
+    "rounded-[18px_18px_4px_18px] [overflow-wrap:anywhere]"
+  );
+  if (onEdit) {
+    return (
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={onEdit}
+          className={cn(baseClasses, "text-left transition-colors hover:bg-sber-green-dark cursor-pointer")}
+          title="Нажмите, чтобы изменить ответ"
+          aria-label="Изменить этот ответ"
+        >
+          {text}
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="flex justify-end">
-      <div
-        className={cn(
-          "bg-sber-green text-white font-medium text-[15px] leading-[22px] px-4 py-[11px] max-w-[75%]",
-          "rounded-[18px_18px_4px_18px] [overflow-wrap:anywhere]"
-        )}
-      >
-        {text}
-      </div>
+      <div className={baseClasses}>{text}</div>
     </div>
   );
 }

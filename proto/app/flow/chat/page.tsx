@@ -357,7 +357,20 @@ export default function ChatFlowPage() {
           style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
         >
           {state.messages.map((m, i) => {
-            if (m.role === "user") return <UserMessage key={m.id} text={m.text} />;
+            if (m.role === "user") {
+              return (
+                <UserMessage
+                  key={m.id}
+                  text={m.text}
+                  onEdit={() => {
+                    const ok = window.confirm(
+                      "Изменить этот ответ? Все следующие шаги будут сброшены — их нужно будет пройти заново."
+                    );
+                    if (ok) handleRevert(m.stepId);
+                  }}
+                />
+              );
+            }
             const attachRef = i === lastBotIdx ? lastBotMsgRef : undefined;
             return (
               <div
