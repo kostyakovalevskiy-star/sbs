@@ -361,11 +361,15 @@ export default function ChatFlowPage() {
           </button>
         </div>
 
-        {/* 5-segment claim-journey progress bar (chat = segment 1) */}
-        <FlowProgress activePct={progressPct} />
+        {/* Chat-only progress: one continuous bar that fills as the user
+            answers questions. Total adapts to the current branch (e.g. flood
+            has more steps than the post-block alone). */}
+        <ChatProgress pct={progressPct} />
 
         <div className="px-[18px] pt-2 pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-chat-muted tabular-nums">
-          ШАГ 1 ИЗ 5 · ОПРОС
+          {totalVisible > 0
+            ? `ШАГ ${state.finished ? totalVisible : Math.min(answeredCount + 1, totalVisible)} ИЗ ${totalVisible} · ОПРОС`
+            : "ОПРОС"}
         </div>
       </div>
 
@@ -458,31 +462,19 @@ export default function ChatFlowPage() {
   );
 }
 
-// Five equal 4px segments — claim journey overview. Chat is segment 1; the
-// progressPct fills the active segment so the user can see in-segment
-// progress without losing the wider 5-step navigation context.
-function FlowProgress({ activePct }: { activePct: number }) {
-  const TOTAL = 5;
-  const ACTIVE_INDEX = 0;
-  const fill = Math.max(8, Math.min(100, activePct));
+// Single 4px progress bar tracking only the chat itself: width = answered
+// questions / total visible questions. Total adapts to the current branch
+// (intro → flood → post-block, or just intro for the expert short-circuit).
+function ChatProgress({ pct }: { pct: number }) {
+  const fill = Math.max(0, Math.min(100, pct));
   return (
-    <div className="flex items-center gap-1 px-[18px]">
-      {Array.from({ length: TOTAL }).map((_, i) => {
-        if (i < ACTIVE_INDEX) {
-          return <span key={i} className="flex-1 h-1 rounded-sm bg-sber-green" />;
-        }
-        if (i === ACTIVE_INDEX) {
-          return (
-            <span key={i} className="flex-1 h-1 rounded-sm bg-[#E1E4DE] overflow-hidden">
-              <span
-                className="block h-full rounded-sm bg-sber-green transition-all duration-300"
-                style={{ width: `${fill}%` }}
-              />
-            </span>
-          );
-        }
-        return <span key={i} className="flex-1 h-1 rounded-sm bg-[#E1E4DE]" />;
-      })}
+    <div className="px-[18px]">
+      <div className="h-1 rounded-sm bg-[#E1E4DE] overflow-hidden">
+        <div
+          className="h-full rounded-sm bg-sber-green transition-all duration-300"
+          style={{ width: `${fill}%` }}
+        />
+      </div>
     </div>
   );
 }
