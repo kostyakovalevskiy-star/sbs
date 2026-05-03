@@ -24,6 +24,19 @@ const config: Config = {
           "new-bg": "#e8f6ed",
           "new-ink": "#0b6d33",
         },
+        // Chat-specific tokens — match :root vars in globals.css. Used by
+        // /flow/chat per the redesign spec; keep hex values in sync.
+        chat: {
+          canvas: "#F4F5F2",
+          surface: "#FFFFFF",
+          line: "#E6E8E3",
+          "line-2": "#ECEEEA",
+          ink: "#1A1D1B",
+          "ink-2": "#3A423D",
+          muted: "#6B736D",
+          warn: "#E5A823",
+          danger: "#E5523A",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -79,10 +92,16 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        // Chat typing dots — opacity 0.3 ↔ 1 with staggered delay.
+        "chat-typing": {
+          "0%, 60%, 100%": { opacity: "0.3" },
+          "30%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "chat-typing": "chat-typing 1.4s ease-in-out infinite",
       },
     },
   },

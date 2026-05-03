@@ -1,27 +1,27 @@
 "use client";
 
+import { Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/lib/chat/types";
 
 const BOT_NAME = "Станислав";
-const AVATAR_SRC = "/avatars/stanislav.svg";
 
+// Filled green circle with a white linear bot glyph — per redesign §05.
+// Avatar shown only for the first bubble in a bot group; following bubbles
+// in the same run align via an invisible spacer of the same width.
 function BotAvatar({ size = 32 }: { size?: number }) {
   return (
     <span
-      className="inline-block overflow-hidden rounded-full bg-sber-green-light ring-1 ring-sber-green/20"
+      className="inline-flex shrink-0 items-center justify-center rounded-full bg-sber-green"
       style={{ width: size, height: size }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={AVATAR_SRC}
-        alt={BOT_NAME}
-        width={size}
-        height={size}
-        className="h-full w-full object-cover"
-      />
+      <Bot className="text-white" style={{ width: size * 0.5, height: size * 0.5 }} strokeWidth={1.6} />
     </span>
   );
+}
+
+function AvatarSpacer({ size = 32 }: { size?: number }) {
+  return <span style={{ width: size, height: size }} className="inline-block shrink-0" aria-hidden />;
 }
 
 export function BotMessage({
@@ -32,17 +32,22 @@ export function BotMessage({
   showAvatar: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col">
       {showAvatar && (
-        <div className="flex items-center gap-2 mb-0.5">
-          <BotAvatar size={24} />
-          <span className="text-xs text-gray-500">{BOT_NAME}</span>
+        <div className="mb-1 ml-[40px] text-[12px] font-medium leading-4 text-chat-muted tracking-[0.1px]">
+          {BOT_NAME}
         </div>
       )}
-      <div
-        className="max-w-[88%] rounded-2xl bg-sber-green-light px-4 py-2.5 text-[16px] leading-snug text-gray-900 [overflow-wrap:anywhere]"
-      >
-        {text}
+      <div className="flex items-end gap-2">
+        {showAvatar ? <BotAvatar size={32} /> : <AvatarSpacer size={32} />}
+        <div
+          className={cn(
+            "bg-chat-surface text-chat-ink text-[15px] leading-[22px] px-[14px] py-[12px] max-w-[85%]",
+            "rounded-[4px_18px_18px_18px] [overflow-wrap:anywhere]"
+          )}
+        >
+          {text}
+        </div>
       </div>
     </div>
   );
@@ -53,7 +58,8 @@ export function UserMessage({ text }: { text: string }) {
     <div className="flex justify-end">
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl border border-gray-300 bg-white px-4 py-2.5 text-[15px] text-gray-900 shadow-sm [overflow-wrap:anywhere]"
+          "bg-sber-green text-white font-medium text-[15px] leading-[22px] px-4 py-[11px] max-w-[75%]",
+          "rounded-[18px_18px_4px_18px] [overflow-wrap:anywhere]"
         )}
       >
         {text}
@@ -64,32 +70,26 @@ export function UserMessage({ text }: { text: string }) {
 
 export function TypingIndicator({ showAvatar }: { showAvatar: boolean }) {
   return (
-    <div className="flex flex-col gap-1.5" aria-label={`${BOT_NAME} печатает`}>
+    <div className="flex flex-col" aria-label={`${BOT_NAME} печатает`}>
       {showAvatar && (
-        <div className="flex items-center gap-2 mb-0.5">
-          <BotAvatar size={24} />
-          <span className="text-xs text-gray-500">{BOT_NAME}</span>
+        <div className="mb-1 ml-[40px] text-[12px] font-medium leading-4 text-chat-muted tracking-[0.1px]">
+          {BOT_NAME}
         </div>
       )}
-      <div className="flex items-center gap-1.5 rounded-2xl bg-sber-green-light px-4 py-3 w-fit">
-        <span
-          className="inline-block h-2 w-2 rounded-full bg-gray-400 animate-bounce"
-          style={{ animationDuration: "1s", animationDelay: "0ms" }}
-        />
-        <span
-          className="inline-block h-2 w-2 rounded-full bg-gray-400 animate-bounce"
-          style={{ animationDuration: "1s", animationDelay: "150ms" }}
-        />
-        <span
-          className="inline-block h-2 w-2 rounded-full bg-gray-400 animate-bounce"
-          style={{ animationDuration: "1s", animationDelay: "300ms" }}
-        />
+      <div className="flex items-end gap-2">
+        {showAvatar ? <BotAvatar size={32} /> : <AvatarSpacer size={32} />}
+        <div className="bg-chat-surface px-[14px] py-[10px] rounded-[18px] flex items-center gap-1.5 w-fit">
+          <span className="inline-block h-1 w-1 rounded-full bg-chat-muted animate-chat-typing" style={{ animationDelay: "0ms" }} />
+          <span className="inline-block h-1 w-1 rounded-full bg-chat-muted animate-chat-typing" style={{ animationDelay: "200ms" }} />
+          <span className="inline-block h-1 w-1 rounded-full bg-chat-muted animate-chat-typing" style={{ animationDelay: "400ms" }} />
+        </div>
       </div>
     </div>
   );
 }
 
-// Determine if a bot message is the first of a series (different from previous role).
+// First bubble of a bot group gets an avatar + name above; subsequent ones in
+// the same group hide both for visual cohesion.
 export function shouldShowAvatar(
   messages: ChatMessage[],
   index: number

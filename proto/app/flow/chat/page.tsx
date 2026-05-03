@@ -306,33 +306,46 @@ export default function ChatFlowPage() {
 
   return (
     <main
-      className="bg-[#f5f6f7] flex flex-col overflow-hidden"
+      className="bg-chat-canvas flex flex-col overflow-hidden text-chat-ink [font-feature-settings:'ss01','tnum']"
       style={{ height: "100dvh" }}
     >
-      <div className="shrink-0 sticky top-0 z-20 bg-white pt-safe">
-        <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 min-h-[60px]">
-          {/* Left: back */}
+      <div className="shrink-0 sticky top-0 z-20 bg-chat-canvas pt-safe">
+        <div className="flex items-center justify-between gap-3 px-[18px] pt-[14px] pb-3">
+          {/* Left: round back button (per design §04) */}
           <button
             onClick={() => router.push("/")}
-            className="shrink-0 text-gray-400 hover:text-gray-600 p-1 -ml-1"
+            className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-chat-surface border border-chat-line text-chat-ink hover:bg-white"
             aria-label="Назад"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-[18px] w-[18px]" strokeWidth={1.6} />
           </button>
 
-          {/* Center: title + Lemonade-style step progress */}
-          <div className="flex flex-1 flex-col items-center gap-1.5 min-w-0">
-            <span className="text-sm font-semibold text-gray-900 truncate">Чат-помощник</span>
-            <FlowProgress activePct={progressPct} />
+          {/* Center: title + online status */}
+          <div className="flex flex-1 flex-col items-center min-w-0">
+            <span className="text-[20px] font-bold leading-[26px] text-chat-ink tracking-[-0.3px] truncate">
+              Чат-помощник
+            </span>
+            <span className="mt-0.5 text-[12px] leading-4 font-medium text-sber-green flex items-center gap-1.5">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-sber-green" />
+              онлайн
+            </span>
           </div>
 
-          {/* Right: end */}
+          {/* Right: exit (preserving "Завершить" semantics from prior UX) */}
           <button
             onClick={() => router.push("/thank-you?abandoned=1")}
-            className="shrink-0 text-xs text-sber-green font-medium whitespace-nowrap"
+            className="shrink-0 flex h-9 px-3 items-center justify-center rounded-full bg-chat-surface border border-chat-line text-[12px] font-medium text-chat-muted hover:text-chat-ink hover:bg-white"
+            aria-label="Завершить"
           >
             Завершить
           </button>
+        </div>
+
+        {/* 5-segment claim-journey progress bar (chat = segment 1) */}
+        <FlowProgress activePct={progressPct} />
+
+        <div className="px-[18px] pt-2 pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-chat-muted tabular-nums">
+          ШАГ 1 ИЗ 5 · ОПРОС
         </div>
       </div>
 
@@ -380,43 +393,30 @@ export default function ChatFlowPage() {
   );
 }
 
-// Lemonade-style stepper: 5 segments, the first is the chat-flow itself
-// (filled proportionally to progressPct), the remaining 4 are upcoming
-// pages of the broader claim journey (camera, review, etc).
+// Five equal 4px segments — claim journey overview. Chat is segment 1; the
+// progressPct fills the active segment so the user can see in-segment
+// progress without losing the wider 5-step navigation context.
 function FlowProgress({ activePct }: { activePct: number }) {
   const TOTAL = 5;
   const ACTIVE_INDEX = 0;
+  const fill = Math.max(8, Math.min(100, activePct));
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1 px-[18px]">
       {Array.from({ length: TOTAL }).map((_, i) => {
         if (i < ACTIVE_INDEX) {
-          // already-completed sections — solid pill.
-          return (
-            <span
-              key={i}
-              className="inline-block h-1.5 w-6 rounded-full bg-sber-green"
-            />
-          );
+          return <span key={i} className="flex-1 h-1 rounded-sm bg-sber-green" />;
         }
         if (i === ACTIVE_INDEX) {
           return (
-            <span
-              key={i}
-              className="inline-block h-1.5 w-12 overflow-hidden rounded-full bg-gray-200"
-            >
+            <span key={i} className="flex-1 h-1 rounded-sm bg-[#E1E4DE] overflow-hidden">
               <span
-                className="block h-full rounded-full bg-sber-green transition-all duration-300"
-                style={{ width: `${Math.max(8, Math.min(100, activePct))}%` }}
+                className="block h-full rounded-sm bg-sber-green transition-all duration-300"
+                style={{ width: `${fill}%` }}
               />
             </span>
           );
         }
-        return (
-          <span
-            key={i}
-            className="inline-block h-1.5 w-1.5 rounded-full bg-gray-300"
-          />
-        );
+        return <span key={i} className="flex-1 h-1 rounded-sm bg-[#E1E4DE]" />;
       })}
     </div>
   );

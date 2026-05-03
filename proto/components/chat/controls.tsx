@@ -1,42 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowDownFromLine,
-  ArrowUp,
-  Bell,
-  Box,
-  Boxes,
-  Building,
-  ChefHat,
-  Check,
-  ChevronRight,
-  Clock,
-  Cloud,
-  Crown,
-  CircleHelp,
-  DoorOpen,
-  Droplets,
-  FileCheck,
-  Flame,
-  Home,
-  Layers,
-  LayoutGrid,
-  Leaf,
-  MoreHorizontal,
-  RectangleHorizontal,
-  ShieldAlert,
-  Sofa,
-  Sparkles,
-  TreePine,
-  Users,
-  Waves,
-  Wind,
-  Wrench,
-  X,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowUp, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn, formatDate, formatPhone, formatRub, normalizePhoneDigits } from "@/lib/utils";
@@ -54,108 +19,6 @@ export interface ControlProps {
   step: Step;
   onSubmit: (payload: SubmitPayload) => void;
   onRevert?: (toStepId: string) => void;
-}
-
-// Map ChoiceOption.iconName → lucide icon. Add new entries here when the
-// script introduces a new icon name.
-const ICON_MAP: Record<string, LucideIcon> = {
-  // event types
-  droplets: Droplets,
-  flame: Flame,
-  shield: ShieldAlert,
-  wind: Wind,
-  cloud: Cloud,
-  tree: TreePine,
-  zap: Zap,
-  waves: Waves,
-  // finish levels
-  leaf: Leaf,
-  home: Home,
-  sparkles: Sparkles,
-  crown: Crown,
-  // wall materials
-  grid: LayoutGrid,
-  boxes: Boxes,
-  box: Box,
-  layers: Layers,
-  // sources / answers
-  "arrow-down": ArrowDownFromLine,
-  wrench: Wrench,
-  help: CircleHelp,
-  more: MoreHorizontal,
-  chef: ChefHat,
-  users: Users,
-  "file-check": FileCheck,
-  bell: Bell,
-  clock: Clock,
-  door: DoorOpen,
-  rectangle: RectangleHorizontal,
-  building: Building,
-  sofa: Sofa,
-  check: Check,
-  x: X,
-};
-
-// Per-tone classes — selected vs idle. Idle uses a soft radial gradient
-// to mimic the reference design's "bubble" illustrations.
-const TONE_CLASSES: Record<
-  string,
-  { selected: string; idle: string }
-> = {
-  green: {
-    selected: "bg-sber-green text-white",
-    idle: "bg-gradient-to-br from-emerald-100 via-sber-green-light to-emerald-50 text-sber-green",
-  },
-  blue: {
-    selected: "bg-blue-500 text-white",
-    idle: "bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-50 text-blue-500",
-  },
-  orange: {
-    selected: "bg-sber-orange text-white",
-    idle: "bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-50 text-sber-orange",
-  },
-  red: {
-    selected: "bg-red-500 text-white",
-    idle: "bg-gradient-to-br from-rose-100 via-red-50 to-pink-50 text-red-500",
-  },
-  gray: {
-    selected: "bg-gray-500 text-white",
-    idle: "bg-gradient-to-br from-gray-100 via-gray-50 to-white text-gray-500",
-  },
-  purple: {
-    selected: "bg-violet-500 text-white",
-    idle: "bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-50 text-violet-500",
-  },
-};
-
-function ChoiceIcon({
-  name,
-  selected,
-  tone = "green",
-  size = "md",
-}: {
-  name?: string;
-  selected: boolean;
-  tone?: string;
-  size?: "sm" | "md" | "lg";
-}) {
-  const Icon = name ? ICON_MAP[name] : undefined;
-  const palette = TONE_CLASSES[tone] ?? TONE_CLASSES.green;
-  const dims =
-    size === "lg" ? "h-14 w-14" : size === "sm" ? "h-9 w-9" : "h-11 w-11";
-  const iconDims =
-    size === "lg" ? "h-7 w-7" : size === "sm" ? "h-5 w-5" : "h-5 w-5";
-  return (
-    <div
-      className={cn(
-        "flex shrink-0 items-center justify-center rounded-full transition-colors",
-        dims,
-        selected ? palette.selected : palette.idle
-      )}
-    >
-      {Icon ? <Icon className={iconDims} strokeWidth={2} /> : null}
-    </div>
-  );
 }
 
 // Soft-fill input look used across chat composer rows / textareas / date pickers.
@@ -464,11 +327,16 @@ function ShortcutButton({
 }
 
 // =================== Choice cards (single) ===================
+//
+// Per the Sber chat redesign (§05): each option renders as a green
+// user-style bubble-button right-aligned in the message stream. Click sends
+// the choice and lets the engine produce a static user message + typing
+// indicator below.
 export function ChoiceControl({ step, onSubmit }: ControlProps) {
   if (step.kind !== "choice") return null;
   const { field, options } = step;
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col items-end gap-2">
       {options.map((opt: ChoiceOption) => (
         <button
           key={opt.value}
@@ -478,20 +346,19 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
               displayText: opt.label,
             })
           }
-          className="group flex items-center gap-3.5 rounded-2xl border border-gray-100 bg-white px-3.5 py-3 text-left shadow-sm transition-all hover:border-sber-green/40 hover:shadow-md active:scale-[0.99]"
+          className={cn(
+            "group max-w-[85%] rounded-[18px_18px_4px_18px]",
+            "bg-sber-green text-white text-[15px] font-medium leading-[22px]",
+            "px-4 py-[11px] text-right transition-colors",
+            "hover:bg-sber-green-dark active:scale-[0.99]"
+          )}
         >
-          <ChoiceIcon name={opt.iconName} selected={false} tone={opt.iconTone} />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="text-[15px] font-semibold leading-tight text-gray-900">
-              {opt.label}
+          <span>{opt.label}</span>
+          {opt.hint && (
+            <span className="block text-[12px] font-normal leading-4 text-white/80 mt-0.5">
+              {opt.hint}
             </span>
-            {opt.hint && (
-              <span className="mt-0.5 text-xs leading-snug text-gray-500">
-                {opt.hint}
-              </span>
-            )}
-          </div>
-          <ChevronRight className="h-5 w-5 shrink-0 text-sber-green" strokeWidth={2.25} />
+          )}
         </button>
       ))}
     </div>
@@ -530,62 +397,51 @@ export function MultiChoiceControl({ step, onSubmit }: ControlProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-2.5">
-        {options.map((opt: ChoiceOption) => {
-          const isSel = selected.has(opt.value);
-          return (
-            <button
-              key={opt.value}
-              onClick={() => toggle(opt.value)}
-              className={cn(
-                "group flex items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-all active:scale-[0.99]",
-                isSel
-                  ? "border-sber-green bg-sber-green-light/40 shadow-md"
-                  : "border-gray-100 bg-white hover:border-sber-green/40 hover:shadow-md"
-              )}
-            >
-              {opt.iconName && (
-                <ChoiceIcon name={opt.iconName} selected={isSel} tone={opt.iconTone} />
-              )}
-              <div className="flex min-w-0 flex-1 flex-col">
-                <span
-                  className={cn(
-                    "text-[15px] font-semibold leading-tight",
-                    isSel ? "text-sber-green-dark" : "text-gray-900"
-                  )}
-                >
-                  {opt.label}
-                </span>
-                {opt.hint && (
-                  <span className="mt-0.5 text-xs leading-snug text-gray-500">
-                    {opt.hint}
-                  </span>
-                )}
-              </div>
+    <div className="flex flex-col items-end gap-2">
+      {options.map((opt: ChoiceOption) => {
+        const isSel = selected.has(opt.value);
+        return (
+          <button
+            key={opt.value}
+            onClick={() => toggle(opt.value)}
+            className={cn(
+              "max-w-[85%] rounded-[18px_18px_4px_18px] px-4 py-[11px]",
+              "text-[15px] font-medium leading-[22px] transition-colors active:scale-[0.99]",
+              isSel
+                ? "bg-sber-green text-white"
+                : "bg-chat-surface text-chat-ink border border-chat-line hover:bg-sber-green-light/40"
+            )}
+          >
+            <span className="flex items-center gap-2 justify-end">
+              {opt.label}
+              {isSel && <Check className="h-4 w-4" strokeWidth={2.5} />}
+            </span>
+            {opt.hint && (
               <span
                 className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  isSel
-                    ? "border-sber-green bg-sber-green text-white"
-                    : "border-gray-300 bg-white"
+                  "block text-[12px] font-normal leading-4 mt-0.5",
+                  isSel ? "text-white/80" : "text-chat-muted"
                 )}
               >
-                {isSel && <Check className="h-3.5 w-3.5" strokeWidth={3.5} />}
+                {opt.hint}
               </span>
-            </button>
-          );
-        })}
-      </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
-      <Button
+            )}
+          </button>
+        );
+      })}
+      {error && <p className="text-xs text-chat-danger self-end">{error}</p>}
+      <button
+        type="button"
         onClick={submit}
-        className="rounded-2xl"
-        size="lg"
         disabled={selected.size === 0}
+        className={cn(
+          "rounded-full px-5 py-2.5 text-[14px] font-semibold transition-colors",
+          "bg-sber-green text-white hover:bg-sber-green-dark",
+          "disabled:opacity-40 disabled:cursor-not-allowed"
+        )}
       >
         Готово
-      </Button>
+      </button>
     </div>
   );
 }
