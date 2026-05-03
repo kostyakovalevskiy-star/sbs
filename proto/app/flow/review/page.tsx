@@ -43,6 +43,7 @@ export default function ReviewPage() {
         source_floor: draft.flood?.source_floor,
         event_date: draft.flood?.event_date,
         affected_area_m2: draft.flood?.affected_area_m2,
+        rooms: draft.flood?.rooms ?? draft.intro?.rooms,
         ceiling_height: draft.flood?.ceiling_height,
         finish_level: (draft.intro?.finish_level ?? draft.flood?.finish_level) as "econom" | "standard" | "comfort" | "premium",
         wall_material: draft.flood?.wall_material,

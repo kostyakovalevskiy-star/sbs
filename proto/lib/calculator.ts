@@ -24,10 +24,22 @@ export interface AreaPick {
 export function pickAuthoritativeArea(
   claude: ClaudeOutput,
   declaredAreaM2: number | undefined,
+  surfaceAreaM2?: number,
   overridePriority?: number
 ): AreaPick {
   const candidates: Array<AreaEstimate & { priority: number; used: boolean }> = [];
 
+  // Priority 0 — sum of damaged-surface areas (rooms × selected surfaces).
+  // Ranked above measure/reference because the user is repairing the entire
+  // surface, not just the visible damaged spot.
+  if (surfaceAreaM2 && surfaceAreaM2 > 0) {
+    candidates.push({
+      value: surfaceAreaM2,
+      source: "сумма поверхностей по комнатам",
+      priority: 0,
+      used: false,
+    });
+  }
   if (claude.area_from_measure && claude.area_from_measure.value > 0) {
     candidates.push({ ...claude.area_from_measure, priority: 1, used: false });
   }
@@ -41,7 +53,7 @@ export function pickAuthoritativeArea(
     candidates.push({ ...claude.area_visual, priority: 4, used: false });
   }
 
-  // Sort by priority ascending (1 wins)
+  // Sort by priority ascending (0 wins)
   candidates.sort((a, b) => a.priority - b.priority);
   if (candidates.length === 0) {
     return { value: 1, source: "нет данных (fallback 1 м²)", candidates: [] };
@@ -53,6 +65,29 @@ export function pickAuthoritativeArea(
       : undefined) ?? candidates[0];
   winner.used = true;
   return { value: winner.value, source: winner.source, candidates };
+}
+
+// Sum of damaged-surface areas across the rooms array. Floor/ceiling
+// contribute length×width; walls contribute 2·(length+width)·height.
+export function computeRoomsSurfaceArea(
+  rooms: Array<{
+    length_m: number;
+    width_m: number;
+    height_m: number;
+    affected_surfaces?: ("ceiling" | "wall" | "floor")[];
+  }> | undefined
+): number {
+  if (!rooms?.length) return 0;
+  return rooms.reduce((sum, r) => {
+    const surfaces = r.affected_surfaces ?? [];
+    const floorCeil = r.length_m * r.width_m;
+    const wallArea = 2 * (r.length_m + r.width_m) * r.height_m;
+    let area = 0;
+    if (surfaces.includes("ceiling")) area += floorCeil;
+    if (surfaces.includes("floor")) area += floorCeil;
+    if (surfaces.includes("wall")) area += wallArea;
+    return sum + area;
+  }, 0);
 }
 
 interface Catalogs {
@@ -243,7 +278,13 @@ export function calculate(
   catalogs: Catalogs,
   overridePriority?: number
 ): Report {
-  const areaPick = pickAuthoritativeArea(claudeOutput, context.affected_area_m2, overridePriority);
+  const surfaceArea = computeRoomsSurfaceArea(context.rooms);
+  const areaPick = pickAuthoritativeArea(
+    claudeOutput,
+    context.affected_area_m2,
+    surfaceArea > 0 ? Math.round(surfaceArea * 10) / 10 : undefined,
+    overridePriority
+  );
   const S = areaPick.value;
   const defaultH = calibration.default_ceiling_height_m;
   const rawH =

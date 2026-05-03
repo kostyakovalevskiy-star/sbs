@@ -8,7 +8,8 @@ export type StepKind =
   | "choice"
   | "multi_choice"
   | "compound"
-  | "gosuslugi";
+  | "gosuslugi"
+  | "rooms";
 
 export type IconTone = "green" | "blue" | "orange" | "red" | "gray";
 
@@ -57,7 +58,8 @@ export type Step =
       combine: (parts: Record<string, string>) => string;
     })
   | (BaseStep & { kind: "gosuslugi" })
-  | (BaseStep & { kind: "policy_found" });
+  | (BaseStep & { kind: "policy_found" })
+  | (BaseStep & { kind: "rooms"; minRooms?: number; maxRooms?: number });
 
 export interface BotMessageItem {
   role: "bot";

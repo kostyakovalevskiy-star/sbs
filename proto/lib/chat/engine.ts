@@ -90,6 +90,7 @@ import type {
   PoliceFiled,
   DisasterType,
   AffectedZone,
+  RoomDimensions,
 } from "@/types";
 import { normalizePhoneDigits } from "@/lib/utils";
 
@@ -104,6 +105,7 @@ interface AnswerMap {
   finish_level?: string;
   event_type?: string;
   incident_description?: string;
+  policy_number_manual?: string;
   // flood
   event_date?: string;
   floor?: string;
@@ -126,6 +128,14 @@ interface AnswerMap {
   natural_event_date?: string;
   natural_disaster_type?: string;
   natural_affected_zones?: string[];
+  // post-branch (movable property + payout)
+  movable_property?: string;
+  payout_method?: "sbp" | "card";
+  sbp_phone_choice?: "current" | "other";
+  sbp_phone_other?: string;
+  card_number?: string;
+  // per-room dimensions (RoomsControl)
+  rooms?: RoomDimensions[];
 }
 
 export function mapAnswersToDraft(
@@ -153,14 +163,42 @@ export function mapAnswersToDraft(
     finish_level: (a.finish_level as FinishLevel) || draft.intro?.finish_level,
     event_type: (a.event_type as EventType) || draft.intro?.event_type,
     incident_description: a.incident_description,
+    policy_number_manual: a.policy_number_manual ?? draft.intro?.policy_number_manual,
+    movable_property: a.movable_property ?? draft.intro?.movable_property,
   };
 
+  // Payout — captured at the end of every branch.
+  if (a.payout_method) {
+    const sbpPhone =
+      a.sbp_phone_choice === "other"
+        ? a.sbp_phone_other
+          ? normalizePhoneDigits(a.sbp_phone_other)
+          : undefined
+        : a.payout_method === "sbp"
+          ? draft.intro?.phone ?? (a.phone ? normalizePhoneDigits(a.phone) : undefined)
+          : undefined;
+    const cardLast4 =
+      a.payout_method === "card" && a.card_number
+        ? a.card_number.replace(/\D/g, "").slice(-4)
+        : undefined;
+    draft.payout = {
+      method: a.payout_method,
+      sbp_phone: sbpPhone,
+      card_last4: cardLast4,
+    };
+  }
+
   if (a.event_type === "flood") {
+    // Rooms persist as-is; the calculator computes the surface-area sum
+    // and ranks it as priority 0 (highest) in pickAuthoritativeArea.
+    // affected_area_m2 stays as the legacy declared single number for
+    // older entry paths that don't capture rooms.
     draft.flood = {
       ...draft.flood,
       floor: a.floor ? parseInt(a.floor, 10) : undefined,
       event_date: a.event_date,
       affected_area_m2: a.affected_area_m2 ? parseFloat(a.affected_area_m2) : undefined,
+      rooms: a.rooms ?? draft.flood?.rooms,
       ceiling_height: a.ceiling_height ? parseFloat(a.ceiling_height) : undefined,
       wall_material: a.wall_material as WallMaterial,
       has_uk_act: a.has_uk_act === "yes",

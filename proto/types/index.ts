@@ -374,5 +374,6 @@ export interface DraftState {
     laplacianVariance: number;
     sceneId?: string;
   }>;
+  payout?: PayoutDetails;
   result?: { id: string; report: Report };
 }

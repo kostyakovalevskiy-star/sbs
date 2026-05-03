@@ -19,6 +19,7 @@ import {
   NumericControl,
   PhoneControl,
   PolicyFoundControl,
+  RoomsControl,
   TextControl,
   isComposerStep,
   type SubmitPayload,
@@ -481,6 +482,8 @@ function ActiveControl({
       return <GosuslugiControl step={step} onSubmit={onSubmit} />;
     case "policy_found":
       return <PolicyFoundControl step={step} onSubmit={onSubmit} />;
+    case "rooms":
+      return <RoomsControl step={step} onSubmit={onSubmit} />;
     case "compound":
       return null;
   }

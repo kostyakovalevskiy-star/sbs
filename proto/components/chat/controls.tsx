@@ -767,6 +767,205 @@ export function PolicyFoundControl({ step, onSubmit }: ControlProps) {
   );
 }
 
+// =================== Rooms (per-room dimensions) ===================
+//
+// Captures damaged rooms with explicit length × width × height plus the
+// affected surface set (потолок / стены / пол). Calculator priority: sum
+// of surface areas across rooms beats any visual estimate from photos.
+const SURFACE_LABELS: Array<{ value: "ceiling" | "wall" | "floor"; label: string }> = [
+  { value: "ceiling", label: "Потолок" },
+  { value: "wall", label: "Стены" },
+  { value: "floor", label: "Пол" },
+];
+
+interface RoomDraft {
+  id: string;
+  name: string;
+  length_m: string;
+  width_m: string;
+  height_m: string;
+  affected_surfaces: ("ceiling" | "wall" | "floor")[];
+}
+
+function makeRoomDraft(): RoomDraft {
+  return {
+    id: `r_${Math.random().toString(36).slice(2, 8)}`,
+    name: "",
+    length_m: "",
+    width_m: "",
+    height_m: "2.7",
+    affected_surfaces: ["wall"],
+  };
+}
+
+export function RoomsControl({ step, onSubmit }: ControlProps) {
+  const [rooms, setRooms] = useState<RoomDraft[]>(() => [makeRoomDraft()]);
+  const [error, setError] = useState<string | null>(null);
+  if (step.kind !== "rooms") return null;
+  const min = step.minRooms ?? 1;
+  const max = step.maxRooms ?? 6;
+
+  function patch(idx: number, patch: Partial<RoomDraft>) {
+    setRooms((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+    if (error) setError(null);
+  }
+
+  function toggleSurface(idx: number, s: "ceiling" | "wall" | "floor") {
+    setRooms((prev) =>
+      prev.map((r, i) => {
+        if (i !== idx) return r;
+        const has = r.affected_surfaces.includes(s);
+        return { ...r, affected_surfaces: has ? r.affected_surfaces.filter((x) => x !== s) : [...r.affected_surfaces, s] };
+      })
+    );
+  }
+
+  function addRoom() {
+    if (rooms.length >= max) return;
+    setRooms((prev) => [...prev, makeRoomDraft()]);
+  }
+
+  function removeRoom(idx: number) {
+    if (rooms.length <= min) return;
+    setRooms((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function submit() {
+    const out: Array<{
+      id: string;
+      name: string;
+      length_m: number;
+      width_m: number;
+      height_m: number;
+      affected_surfaces: ("ceiling" | "wall" | "floor")[];
+    }> = [];
+    for (let i = 0; i < rooms.length; i++) {
+      const r = rooms[i];
+      const l = parseFloat(r.length_m);
+      const w = parseFloat(r.width_m);
+      const h = parseFloat(r.height_m);
+      if (!isFinite(l) || l <= 0 || !isFinite(w) || w <= 0 || !isFinite(h) || h <= 0) {
+        setError(`Комната ${i + 1}: укажите длину, ширину и высоту`);
+        return;
+      }
+      if (r.affected_surfaces.length === 0) {
+        setError(`Комната ${i + 1}: выберите хотя бы одну пострадавшую поверхность`);
+        return;
+      }
+      out.push({
+        id: r.id,
+        name: r.name.trim() || `Комната ${i + 1}`,
+        length_m: l,
+        width_m: w,
+        height_m: h,
+        affected_surfaces: r.affected_surfaces,
+      });
+    }
+
+    const display = out
+      .map((r) => `${r.name} ${r.length_m}×${r.width_m}×${r.height_m} м (${r.affected_surfaces.map((s) => SURFACE_LABELS.find((x) => x.value === s)?.label).join("/")})`)
+      .join(", ");
+
+    onSubmit({
+      fieldUpdates: { [step.field]: out },
+      displayText: `${out.length} ${pluralRooms(out.length)}: ${display}`,
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {rooms.map((r, idx) => (
+        <div key={r.id} className="rounded-[14px] border border-chat-line bg-chat-surface p-3.5 space-y-3">
+          <div className="flex items-center gap-2">
+            <input
+              value={r.name}
+              onChange={(e) => patch(idx, { name: e.target.value })}
+              placeholder={`Комната ${idx + 1}: например, кухня`}
+              className="flex-1 h-9 rounded-full border border-chat-line bg-chat-surface px-3.5 text-[14px] text-chat-ink placeholder:text-chat-muted outline-none focus:border-sber-green focus:border-[1.5px]"
+            />
+            {rooms.length > min && (
+              <button
+                type="button"
+                onClick={() => removeRoom(idx)}
+                aria-label="Удалить комнату"
+                className="h-9 w-9 shrink-0 rounded-full bg-chat-surface border border-chat-line text-chat-muted hover:text-chat-danger flex items-center justify-center"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { key: "length_m" as const, label: "Длина, м" },
+              { key: "width_m" as const, label: "Ширина, м" },
+              { key: "height_m" as const, label: "Высота, м" },
+            ].map((f) => (
+              <label key={f.key} className="block">
+                <span className="block text-[11px] uppercase tracking-[0.06em] text-chat-muted mb-1">{f.label}</span>
+                <input
+                  type="number"
+                  step="0.1"
+                  min={0.1}
+                  inputMode="decimal"
+                  value={r[f.key]}
+                  onChange={(e) => patch(idx, { [f.key]: e.target.value })}
+                  placeholder="0,0"
+                  className="w-full h-10 rounded-[10px] border border-chat-line bg-chat-surface px-3 text-[14px] text-chat-ink outline-none focus:border-sber-green focus:border-[1.5px] tabular-nums"
+                />
+              </label>
+            ))}
+          </div>
+          <div>
+            <span className="block text-[11px] uppercase tracking-[0.06em] text-chat-muted mb-1.5">Что пострадало</span>
+            <div className="flex flex-wrap gap-1.5">
+              {SURFACE_LABELS.map((s) => {
+                const on = r.affected_surfaces.includes(s.value);
+                return (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => toggleSurface(idx, s.value)}
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors border",
+                      on
+                        ? "bg-sber-green text-white border-sber-green"
+                        : "bg-chat-surface text-chat-ink border-chat-line hover:border-sber-green/50"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ))}
+      {rooms.length < max && (
+        <button
+          type="button"
+          onClick={addRoom}
+          className="self-start inline-flex items-center gap-1.5 rounded-full bg-chat-surface border border-chat-line px-4 py-2 text-[13px] font-medium text-sber-green hover:border-sber-green"
+        >
+          <Plus className="h-4 w-4" strokeWidth={1.7} /> Добавить комнату
+        </button>
+      )}
+      {error && <p className="text-xs text-chat-danger">{error}</p>}
+      <Button onClick={submit} className="rounded-2xl" size="lg">
+        Продолжить
+      </Button>
+    </div>
+  );
+}
+
+function pluralRooms(n: number): string {
+  // ru pluralization: 1 → комната, 2-4 → комнаты, 5+ → комнат
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return "комната";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "комнаты";
+  return "комнат";
+}
+
 // =================== Address confirm ===================
 export function AddressConfirmControl({
   step,
