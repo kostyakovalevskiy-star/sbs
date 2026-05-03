@@ -224,14 +224,31 @@ export default function ResultPage() {
       </div>
 
       <div className="px-4 py-5 max-w-6xl mx-auto">
-        {/* Expert routing */}
+        {/* Reliability — high when an OCR'd act of competent authority
+            confirms the event; standard for AI-only; low when above the
+            auto-payment threshold and we're routing to expert. */}
+        {report.reliability === "high" && (
+          <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-3xl p-4 mb-5">
+            <Check className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-emerald-800">Высокая надёжность · автовыплата</p>
+              <p className="text-xs text-emerald-700 mt-0.5">
+                {report.reliability_reason ??
+                  "Подтверждено актом компетентного органа — независимая экспертиза не требуется."}
+                {report.claude_output.act_document?.issuing_authority &&
+                  ` Орган: ${report.claude_output.act_document.issuing_authority}.`}
+              </p>
+            </div>
+          </div>
+        )}
         {report.routed_to_expert && (
           <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-3xl p-4 mb-5">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-amber-800">Кейс передан эксперту</p>
               <p className="text-xs text-amber-600 mt-0.5">
-                Сумма превышает порог автоматического урегулирования. Эксперт рассмотрит ваш случай.
+                {report.reliability_reason ??
+                  "Сумма превышает порог автоматического урегулирования. Эксперт рассмотрит ваш случай."}
               </p>
             </div>
           </div>
