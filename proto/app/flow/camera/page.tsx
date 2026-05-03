@@ -162,9 +162,12 @@ function buildScenes(rooms?: { id: string; name: string }[]): Scene[] {
   return list;
 }
 
-const INTRO_DURATION_MS = 2500;
-const INTRO_MOTION_THRESHOLD = 1.2; // m/s² — accel above this = user moving
-const INTRO_SEEN_KEY = "camera_intro_seen_v1";
+// 5 seconds matches the toast hint dwell time the user asked for. Earlier
+// the intro had a "seen-once → 1500ms" shortcut which made the overlay
+// flash by too fast on return visits — pulled out so every scene gets the
+// full 5 seconds (or until the user taps / starts moving the phone).
+const INTRO_DURATION_MS = 5000;
+const INTRO_MOTION_THRESHOLD = 1.5; // m/s² — accel above this = user moving
 
 function hysteresis(
   value: number,
@@ -242,21 +245,12 @@ export default function CameraPage() {
     });
   }, []);
 
-  // Show intro on scene change (skip on first scene if user has seen it before)
+  // Show intro on every scene change; auto-dismiss after INTRO_DURATION_MS
+  // unless the user taps or starts moving the phone first.
   useEffect(() => {
-    const seen = typeof window !== "undefined" && localStorage.getItem(INTRO_SEEN_KEY);
     setShowIntro(true);
     setIntroFading(false);
-
-    const timeout = setTimeout(
-      () => dismissIntro(),
-      seen ? 1500 : INTRO_DURATION_MS
-    );
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(INTRO_SEEN_KEY, "1");
-    }
-
+    const timeout = setTimeout(() => dismissIntro(), INTRO_DURATION_MS);
     return () => clearTimeout(timeout);
   }, [currentSceneIdx, dismissIntro]);
 
