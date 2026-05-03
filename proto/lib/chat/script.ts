@@ -30,6 +30,15 @@ export const INTRO_STEPS: Step[] = [
     question: "Я нашёл ваш действующий полис. Это он?",
   },
   {
+    kind: "text",
+    id: "AM",
+    field: "policy_number_manual",
+    question:
+      "Введите номер вашего полиса. Без полиса оформить страховое событие нельзя — если номера нет под рукой, нажмите «Завершить» вверху и вернитесь позже.",
+    placeholder: "Например: SBS-1234567",
+    minLength: 4,
+  },
+  {
     kind: "address",
     id: "A3",
     field: "address",
@@ -183,6 +192,83 @@ export const FLOOD_STEPS: Step[] = [
       { value: "yes", label: "Да, есть", hint: "Документ на руках", iconName: "check" },
       { value: "no", label: "Нет", hint: "Ещё не оформили", iconName: "x" },
     ],
+  },
+];
+
+// === Block P — Post-branch (always last, common to all branches) ===
+// Captures damaged movable property + payout details before the user is
+// routed to the photo session. Property is optional (skipped when nothing
+// movable was hit); payout is mandatory because the claim can't pay out
+// without a destination.
+export const POST_STEPS: Step[] = [
+  {
+    kind: "text",
+    id: "P0",
+    field: "movable_property",
+    question:
+      "Какое движимое имущество пострадало? Укажите наименование и марку — например: «Холодильник Bosch KGE3», «Диван IKEA Friheten». Если ничего из имущества не пострадало — пропустите.",
+    placeholder: "Холодильник Bosch, телевизор Samsung 55″, ковёр…",
+    multiline: true,
+    minLength: 0,
+    optional: true,
+  },
+  {
+    kind: "choice",
+    id: "Q0",
+    field: "payout_method",
+    question: "Куда отправить выплату?",
+    options: [
+      {
+        value: "sbp",
+        label: "Система быстрых платежей",
+        hint: "Перевод по номеру телефона",
+        iconName: "zap",
+        iconTone: "green",
+      },
+      {
+        value: "card",
+        label: "Реквизиты карты",
+        hint: "По номеру карты",
+        iconName: "rectangle",
+        iconTone: "blue",
+      },
+    ],
+  },
+  {
+    kind: "choice",
+    id: "Q1",
+    field: "sbp_phone_choice",
+    question: "На какой номер отправить перевод?",
+    options: [
+      {
+        value: "current",
+        label: "На указанный ранее номер",
+        hint: "Тот же, по которому связались",
+        iconName: "check",
+        iconTone: "green",
+      },
+      {
+        value: "other",
+        label: "Другой номер",
+        hint: "Введу вручную",
+        iconName: "more",
+        iconTone: "gray",
+      },
+    ],
+  },
+  {
+    kind: "phone",
+    id: "Q1B",
+    field: "sbp_phone_other",
+    question: "Введите номер телефона для СБП.",
+  },
+  {
+    kind: "text",
+    id: "Q2",
+    field: "card_number",
+    question: "Введите номер карты для перевода.",
+    placeholder: "0000 0000 0000 0000",
+    minLength: 13,
   },
 ];
 
@@ -364,8 +450,14 @@ export const STEP_PRECONDITIONS: Record<string, (answers: Record<string, unknown
   A3: (a) => a.policy_found !== true,
   A4: (a) => a.policy_found !== true,
   A6: (a) => a.policy_found !== true,
+  // Manual policy number — only when policy lookup explicitly failed.
+  AM: (a) => a.policy_found === false,
   C4: (a) => a.fire_mchs_called === "with_protocol",
   D4: (a) => a.theft_police_filed === "with_kusp",
+  // Payout fan-out: SBP path asks for phone, card path asks for card number.
+  Q1: (a) => a.payout_method === "sbp",
+  Q1B: (a) => a.payout_method === "sbp" && a.sbp_phone_choice === "other",
+  Q2: (a) => a.payout_method === "card",
 };
 
 export function shouldShowStep(stepId: string, answers: Record<string, unknown>): boolean {

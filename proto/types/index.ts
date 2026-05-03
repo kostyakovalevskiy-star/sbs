@@ -37,15 +37,42 @@ export interface IncidentContext {
   last_renovation_year: number;
   event_type: EventType;
   incident_description?: string;
+  // Captured when the policy auto-lookup failed and the user typed it in.
+  policy_number_manual?: string;
+  // Free-text from the chat: movable property that was damaged.
+  movable_property?: string;
   // flood specific
   floor?: number;
   source_floor?: number;
   event_date?: string;
   affected_area_m2?: number;
+  // Per-room dimensions captured by the chat — used by the calculator and
+  // grouped report. When populated, takes priority over the affected_area
+  // single number (sum of surface areas across rooms).
+  rooms?: RoomDimensions[];
   ceiling_height?: CeilingHeight;
   finish_level?: FinishLevel;
   wall_material?: WallMaterial;
   has_uk_act?: boolean;
+}
+
+export interface RoomDimensions {
+  // Stable id so it survives editing.
+  id: string;
+  // Free-form ("Кухня", "Гостиная", "Коридор") or empty for "Комната 1".
+  name: string;
+  length_m: number;
+  width_m: number;
+  height_m: number;
+  // Which surfaces are damaged in this room — drives surface-area summation.
+  affected_surfaces?: ("ceiling" | "wall" | "floor")[];
+}
+
+export interface PayoutDetails {
+  method?: "sbp" | "card";
+  sbp_phone?: string;
+  // Last 4 only — draft is stored in localStorage.
+  card_last4?: string;
 }
 
 export interface ClaudePhotoAnalysis {

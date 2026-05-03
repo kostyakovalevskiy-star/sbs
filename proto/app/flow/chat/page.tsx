@@ -224,7 +224,7 @@ export default function ChatFlowPage() {
       botMsgs.push({
         role: "bot",
         id: makeMsgId(),
-        text: `Отлично! Подтянул из полиса адрес (${newAnswers.address}), площадь (${newAnswers.apartment_area_m2} м²) и уровень отделки. Уточним последние детали.`,
+        text: `Отлично! Подтянул из полиса адрес (${newAnswers.address}), площадь (${newAnswers.apartment_area_m2} м²). Теперь уточним детали по страховому событию.`,
       });
     }
 

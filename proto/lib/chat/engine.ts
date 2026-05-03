@@ -1,5 +1,5 @@
 import type { ChatState, Step } from "./types";
-import { INTRO_STEPS, getBranchSteps, shouldShowStep, type Branch } from "./script";
+import { INTRO_STEPS, POST_STEPS, getBranchSteps, shouldShowStep, type Branch } from "./script";
 
 interface FlatEntry {
   step: Step;
@@ -30,7 +30,14 @@ export function flattenSteps(steps: Step[]): FlatEntry[] {
 export function getFullScript(branch: Branch | null): FlatEntry[] {
   const intro = flattenSteps(INTRO_STEPS);
   if (!branch) return intro;
-  return [...intro, ...flattenSteps(getBranchSteps(branch))];
+  // POST_STEPS (movable property + payout) run after every branch so any
+  // event type — flood, fire, theft, natural — captures payout details
+  // before handing off to the camera / handoff page.
+  return [
+    ...intro,
+    ...flattenSteps(getBranchSteps(branch)),
+    ...flattenSteps(POST_STEPS),
+  ];
 }
 
 export function getCompoundParent(steps: Step[], childStepId: string): Step | null {
