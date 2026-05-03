@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRub } from "@/lib/utils";
-import type { CaseRecord } from "@/types";
+import type { CaseRecord, Report } from "@/types";
 import { Download, FileText, Home, AlertTriangle, Pencil, Check, Save, ChevronDown, ChevronUp, Info } from "lucide-react";
 
 export default function ResultPage() {
@@ -394,6 +394,10 @@ export default function ResultPage() {
 
           {/* Right column: works + materials with expand/collapse */}
           <div className="space-y-5 pb-8">
+            {/* Per-room / per-surface breakdown — driven by chat-captured rooms */}
+            {report.rooms_breakdown && report.rooms_breakdown.length > 0 && (
+              <RoomsBreakdownPanel breakdown={report.rooms_breakdown} />
+            )}
             {/* Works table */}
             {report.works.length > 0 && (() => {
               const visibleWorks = worksExpanded ? report.works : report.works.slice(0, 3);
@@ -513,5 +517,76 @@ export default function ResultPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+const SURFACE_LABEL: Record<string, string> = {
+  ceiling: "Потолок",
+  wall: "Стены",
+  floor: "Пол",
+  doorway: "Дверной проём",
+  window: "Окно",
+};
+
+function RoomsBreakdownPanel({ breakdown }: { breakdown: NonNullable<Report["rooms_breakdown"]> }) {
+  // Group rows by room — surfaces become inner sections.
+  const byRoom = new Map<string, typeof breakdown>();
+  for (const row of breakdown) {
+    const list = byRoom.get(row.room) ?? [];
+    list.push(row);
+    byRoom.set(row.room, list);
+  }
+
+  return (
+    <div className="space-y-3">
+      <h2 className="text-sm font-semibold text-gray-700">По комнатам и поверхностям</h2>
+      <div className="space-y-3">
+        {Array.from(byRoom.entries()).map(([room, rows]) => {
+          const roomTotal = rows.reduce((s, r) => s + r.subtotal, 0);
+          return (
+            <details key={room} open className="bg-white rounded-3xl overflow-hidden">
+              <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="text-sm font-semibold text-gray-900">{room}</span>
+                <span className="text-sm font-bold text-gray-900">{formatRub(roomTotal)}</span>
+              </summary>
+              <div className="border-t border-gray-100 divide-y divide-gray-100">
+                {rows.map((r, i) => (
+                  <div key={`${r.room}-${r.surface}-${i}`} className="px-4 py-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        {SURFACE_LABEL[r.surface] ?? r.surface} · {r.area_m2} м²
+                      </span>
+                      <span className="text-xs font-semibold text-gray-700">{formatRub(r.subtotal)}</span>
+                    </div>
+                    {r.works.length === 0 ? (
+                      <p className="text-xs text-gray-400 italic">Работы не выделены — учтены в общем списке.</p>
+                    ) : (
+                      <table className="w-full text-xs">
+                        <tbody>
+                          {r.works.map((w, j) => (
+                            <tr key={j}>
+                              <td className="py-1 text-gray-700">{w.name}</td>
+                              <td className="py-1 text-right text-gray-500 whitespace-nowrap">
+                                {w.volume} {w.unit}
+                              </td>
+                              <td className="py-1 text-right text-gray-500 whitespace-nowrap pl-3">
+                                {formatRub(w.unit_price)}
+                              </td>
+                              <td className="py-1 text-right font-medium text-gray-900 whitespace-nowrap pl-3">
+                                {formatRub(w.total)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </div>
   );
 }

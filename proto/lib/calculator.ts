@@ -329,6 +329,7 @@ export function calculate(
       volume: Math.round(volume * 100) / 100,
       unit_price: unitPrice,
       total,
+      surface: ws.surface,
     });
     workSpecsForItems.push(ws);
   }
@@ -395,6 +396,14 @@ export function calculate(
 
   const sigma = calibration.range_sigma;
 
+  // Distribute work items across (room, surface) pairs when the chat
+  // captured per-room dimensions. Each work is split proportional to the
+  // surface area of each room that has the matching surface in its
+  // affected_surfaces list. Works without a surface (or with a surface no
+  // room has marked) skip the breakdown — they remain in the flat works[]
+  // section for the report renderer to show as "Прочее".
+  const roomsBreakdown = buildRoomsBreakdown(workItems, context);
+
   return {
     range: {
       min: Math.round(base * (1 - sigma)),
@@ -407,5 +416,87 @@ export function calculate(
     routed_to_expert: base > calibration.stp_threshold_rub,
     claude_output: claudeOutput,
     area_pick: areaPick,
+    rooms_breakdown: roomsBreakdown.length ? roomsBreakdown : undefined,
   };
+}
+
+function buildRoomsBreakdown(
+  works: WorkItem[],
+  context: IncidentContext
+): import("@/types").RoomBreakdown[] {
+  const rooms = context.rooms;
+  if (!rooms?.length) return [];
+
+  type Bucket = { room: string; surface: import("@/types").Surface; area: number; works: WorkItem[] };
+  const buckets = new Map<string, Bucket>();
+
+  function ensure(room: string, surface: import("@/types").Surface, area: number): Bucket {
+    const k = `${room}::${surface}`;
+    let b = buckets.get(k);
+    if (!b) {
+      b = { room, surface, area, works: [] };
+      buckets.set(k, b);
+    }
+    return b;
+  }
+
+  // For every (room, affected_surface) seed an empty bucket so the breakdown
+  // shows even surfaces with no recommended works (e.g. demolition-only).
+  for (const r of rooms) {
+    const floorCeil = r.length_m * r.width_m;
+    const wallArea = 2 * (r.length_m + r.width_m) * r.height_m;
+    const surfaces = r.affected_surfaces ?? [];
+    for (const s of surfaces) {
+      const area = s === "wall" ? wallArea : floorCeil;
+      ensure(r.name, s, Math.round(area * 10) / 10);
+    }
+  }
+
+  // For each work, find rooms whose affected_surfaces include work.surface,
+  // then split the work proportionally to those rooms' surface areas.
+  for (const w of works) {
+    const surf = w.surface;
+    if (!surf || surf === "doorway" || surf === "window") continue;
+    const eligible: Array<{ room: string; area: number }> = [];
+    for (const r of rooms) {
+      if (!(r.affected_surfaces ?? []).includes(surf as "ceiling" | "wall" | "floor")) continue;
+      const floorCeil = r.length_m * r.width_m;
+      const wallArea = 2 * (r.length_m + r.width_m) * r.height_m;
+      eligible.push({ room: r.name, area: surf === "wall" ? wallArea : floorCeil });
+    }
+    if (eligible.length === 0) continue;
+    const totalArea = eligible.reduce((s, e) => s + e.area, 0);
+    for (const e of eligible) {
+      const share = totalArea > 0 ? e.area / totalArea : 1 / eligible.length;
+      const splitVolume = Math.round(w.volume * share * 100) / 100;
+      const splitTotal = Math.round(w.total * share);
+      const bucket = ensure(e.room, surf as import("@/types").Surface, Math.round(e.area * 10) / 10);
+      bucket.works.push({
+        ...w,
+        volume: splitVolume,
+        total: splitTotal,
+        room: e.room,
+        surface: surf,
+      });
+    }
+  }
+
+  // Sort: rooms in the order entered, surfaces in a stable display order.
+  const surfaceOrder: Record<string, number> = { ceiling: 0, wall: 1, floor: 2 };
+  const out: import("@/types").RoomBreakdown[] = Array.from(buckets.values())
+    .sort((a, b) => {
+      const ra = rooms.findIndex((x) => x.name === a.room);
+      const rb = rooms.findIndex((x) => x.name === b.room);
+      if (ra !== rb) return ra - rb;
+      return (surfaceOrder[a.surface] ?? 9) - (surfaceOrder[b.surface] ?? 9);
+    })
+    .map((b) => ({
+      room: b.room,
+      surface: b.surface,
+      area_m2: b.area,
+      works: b.works,
+      subtotal: b.works.reduce((s, w) => s + w.total, 0),
+    }));
+
+  return out;
 }

@@ -121,6 +121,10 @@ export interface WorkItem {
   volume: number;
   unit_price: number;
   total: number;
+  // Populated when the chat captured per-room dimensions; lets the report
+  // group "комната → поверхность → работа".
+  room?: string;
+  surface?: Surface;
 }
 
 export interface MaterialItem {
@@ -130,6 +134,16 @@ export interface MaterialItem {
   volume: number;
   unit_price: number;
   total: number;
+  room?: string;
+  surface?: Surface;
+}
+
+export interface RoomBreakdown {
+  room: string;
+  surface: Surface;
+  area_m2: number;
+  works: WorkItem[];
+  subtotal: number;
 }
 
 export interface Report {
@@ -148,6 +162,9 @@ export interface Report {
     source: string;
     candidates: Array<AreaEstimate & { priority: number; used: boolean }>;
   };
+  // Populated when the calculator distributed works across rooms/surfaces;
+  // used by the report renderer to display "комната → поверхность → работа".
+  rooms_breakdown?: RoomBreakdown[];
 }
 
 export interface CaseRecord {
