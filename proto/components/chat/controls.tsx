@@ -394,16 +394,16 @@ function ShortcutButton({
 
 // =================== Choice cards (single) ===================
 //
-// Per the Sber chat redesign (§05): each option renders as a green
-// user-style bubble-button right-aligned in the message stream. Click sends
-// the choice and lets the engine produce a static user message + typing
-// indicator below.
+// Single-card list of choices: one white card with vertical option rows
+// (label + hint + chevron). Tap an option → sends the choice and lets the
+// chat engine emit a static user message + typing indicator. Replaces the
+// earlier bubble-button layout per user feedback (выбери в одном окне).
 export function ChoiceControl({ step, onSubmit }: ControlProps) {
   if (step.kind !== "choice") return null;
   const { field, options } = step;
   return (
-    <div className="flex flex-col items-end gap-2">
-      {options.map((opt: ChoiceOption) => (
+    <div className="rounded-[14px] border border-chat-line bg-chat-surface overflow-hidden">
+      {options.map((opt: ChoiceOption, idx) => (
         <button
           key={opt.value}
           onClick={() =>
@@ -413,18 +413,24 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
             })
           }
           className={cn(
-            "group max-w-[85%] rounded-[18px_18px_4px_18px]",
-            "bg-sber-green text-white text-[15px] font-medium leading-[22px]",
-            "px-4 py-[11px] text-right transition-colors",
-            "hover:bg-sber-green-dark active:scale-[0.99]"
+            "group w-full flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors",
+            "hover:bg-sber-green-light/40 active:bg-sber-green-light/60",
+            idx > 0 && "border-t border-chat-line-2"
           )}
         >
-          <span>{opt.label}</span>
-          {opt.hint && (
-            <span className="block text-[12px] font-normal leading-4 text-white/80 mt-0.5">
-              {opt.hint}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="text-[15px] font-semibold leading-[20px] text-chat-ink">
+              {opt.label}
             </span>
-          )}
+            {opt.hint && (
+              <span className="mt-0.5 text-[13px] leading-[18px] text-chat-muted">
+                {opt.hint}
+              </span>
+            )}
+          </div>
+          <span aria-hidden className="text-sber-green text-lg leading-none shrink-0">
+            ›
+          </span>
         </button>
       ))}
     </div>

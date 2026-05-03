@@ -98,6 +98,49 @@ export default function ReviewPage() {
     premium: "Премиум",
   };
 
+  const wallMaterialLabels: Record<string, string> = {
+    panel: "Панельный",
+    brick: "Кирпич",
+    monolith: "Монолит",
+    drywall: "Гипсокартон",
+  };
+
+  const surfaceLabels: Record<string, string> = {
+    ceiling: "потолок",
+    wall: "стены",
+    floor: "пол",
+    doorway: "проём",
+    window: "окно",
+  };
+
+  function areaSummary(f: typeof flood): string | null {
+    if (f.rooms && f.rooms.length > 0) {
+      const total = f.rooms.reduce((s, r) => {
+        const surfaces = r.affected_surfaces ?? [];
+        const fc = r.length_m * r.width_m;
+        const wa = 2 * (r.length_m + r.width_m) * r.height_m;
+        let a = 0;
+        if (surfaces.includes("ceiling")) a += fc;
+        if (surfaces.includes("floor")) a += fc;
+        if (surfaces.includes("wall")) a += wa;
+        return s + a;
+      }, 0);
+      return `${Math.round(total * 10) / 10} м² (по ${f.rooms.length} комнатам)`;
+    }
+    return f.affected_area_m2 ? `${f.affected_area_m2} м²` : null;
+  }
+
+  function formatPhoneDisplay(digits: string): string {
+    const d = digits.replace(/\D/g, "");
+    if (d.length === 11 && d.startsWith("7")) {
+      return `+7 (${d.slice(1, 4)}) ${d.slice(4, 7)}-${d.slice(7, 9)}-${d.slice(9, 11)}`;
+    }
+    if (d.length === 10) {
+      return `+7 (${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 8)}-${d.slice(8, 10)}`;
+    }
+    return digits;
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f6f7]">
       {/* Loading overlay */}
@@ -132,7 +175,8 @@ export default function ReviewPage() {
       <div className="px-4 py-6 max-w-lg mx-auto space-y-6">
         <h1 className="font-display text-2xl font-bold text-gray-900 px-1">Проверьте данные</h1>
 
-        {/* Summary */}
+        {/* Summary — full chat detail so the user can verify everything before
+            submitting. Rooms, movable property, and payout are all surfaced. */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-gray-700">Данные об инциденте</h2>
@@ -143,19 +187,70 @@ export default function ReviewPage() {
               Внести изменения
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            <span className="text-gray-500">Адрес</span>
-            <span className="text-gray-900 break-all">{intro.address}</span>
-            <span className="text-gray-500">Площадь повреждений</span>
-            <span className="text-gray-900">{flood.affected_area_m2} м²</span>
-            <span className="text-gray-500">Отделка</span>
-            <span className="text-gray-900">{finishLabels[intro.finish_level ?? ""] ?? intro.finish_level}</span>
-            <span className="text-gray-500">Дата события</span>
-            <span className="text-gray-900">{flood.event_date}</span>
-          </div>
+          <ReviewGrid
+            rows={[
+              ["Имя", intro.name],
+              ["Телефон", intro.phone ? formatPhoneDisplay(intro.phone) : null],
+              ["Адрес", intro.address],
+              ["Регион", intro.region],
+              ["Площадь квартиры", intro.apartment_area_m2 ? `${intro.apartment_area_m2} м²` : null],
+              ["Отделка", finishLabels[intro.finish_level ?? ""] ?? intro.finish_level ?? null],
+              ["Этаж", flood.floor !== undefined ? String(flood.floor) : null],
+              ["Дата события", flood.event_date],
+              ["Площадь повреждений", areaSummary(flood)],
+              ["Материал стен", wallMaterialLabels[flood.wall_material ?? ""] ?? flood.wall_material ?? null],
+              ["Акт от УК", flood.has_uk_act === undefined ? null : flood.has_uk_act ? "Да" : "Нет"],
+              ["Полис", intro.policy_number_manual ?? null],
+            ]}
+          />
+
+          {/* Rooms — explicit section, one card per room */}
+          {flood.rooms && flood.rooms.length > 0 && (
+            <div className="pt-2 border-t border-gray-200 space-y-2">
+              <span className="block text-xs font-semibold text-gray-700">
+                Пострадавшие комнаты ({flood.rooms.length})
+              </span>
+              <div className="space-y-1.5">
+                {flood.rooms.map((r) => (
+                  <div key={r.id} className="text-sm bg-gray-50 rounded-lg px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-gray-900">{r.name}</span>
+                      <span className="text-xs text-gray-500 tabular-nums">
+                        {r.length_m}×{r.width_m}×{r.height_m} м
+                      </span>
+                    </div>
+                    {r.affected_surfaces && r.affected_surfaces.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Пострадало: {r.affected_surfaces.map((s) => surfaceLabels[s]).join(", ")}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {intro.movable_property && (
+            <div className="pt-2 border-t border-gray-200 space-y-1">
+              <span className="block text-xs font-semibold text-gray-700">Пострадавшее имущество</span>
+              <p className="text-sm text-gray-900 whitespace-pre-wrap">{intro.movable_property}</p>
+            </div>
+          )}
+
+          {draft.payout?.method && (
+            <div className="pt-2 border-t border-gray-200 space-y-1">
+              <span className="block text-xs font-semibold text-gray-700">Способ выплаты</span>
+              <p className="text-sm text-gray-900">
+                {draft.payout.method === "sbp"
+                  ? `СБП${draft.payout.sbp_phone ? ` · +7 ${formatPhoneDisplay(draft.payout.sbp_phone)}` : ""}`
+                  : `Карта · •••• ${draft.payout.card_last4 ?? ""}`}
+              </p>
+            </div>
+          )}
+
           {intro.incident_description && (
             <div className="pt-2 border-t border-gray-200 space-y-1">
-              <span className="block text-xs text-gray-500">Описание клиента</span>
+              <span className="block text-xs font-semibold text-gray-700">Описание клиента</span>
               <p className="text-sm text-gray-900 whitespace-pre-wrap">{intro.incident_description}</p>
             </div>
           )}
@@ -223,5 +318,22 @@ export default function ReviewPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+// Two-column label/value grid; rows with null/empty values are dropped so
+// the user only sees what was actually answered.
+function ReviewGrid({ rows }: { rows: Array<[string, string | null | undefined]> }) {
+  const visible = rows.filter(([, v]) => v !== null && v !== undefined && v !== "");
+  if (visible.length === 0) return null;
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+      {visible.map(([k, v]) => (
+        <span key={k} className="contents">
+          <span className="text-gray-500">{k}</span>
+          <span className="text-gray-900 break-words">{v}</span>
+        </span>
+      ))}
+    </div>
   );
 }

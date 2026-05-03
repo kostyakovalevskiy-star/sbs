@@ -66,6 +66,15 @@ export default function ChatFlowPage() {
     return -1;
   }, [state.messages]);
 
+  // Most recent user reply — drives the "← Назад" affordance.
+  const lastUserMsg = useMemo(() => {
+    for (let i = state.messages.length - 1; i >= 0; i--) {
+      const m = state.messages[i];
+      if (m.role === "user") return m;
+    }
+    return null;
+  }, [state.messages]);
+
   // Hydrate draft on mount and reveal the first bot question after typing delay.
   useEffect(() => {
     const raw = typeof window !== "undefined" ? localStorage.getItem("claim_draft") : null;
@@ -390,6 +399,19 @@ export default function ChatFlowPage() {
           {state.isTyping && (
             <div ref={typingRef}>
               <TypingIndicator showAvatar={typingShowsAvatar} />
+            </div>
+          )}
+          {/* "Назад" affordance — reverts to the most recent user-answered
+              step. Visible whenever there's at least one prior answer. */}
+          {!state.finished && !state.isTyping && lastUserMsg && (
+            <div className="flex justify-start ml-[40px]">
+              <button
+                type="button"
+                onClick={() => handleRevert(lastUserMsg.stepId)}
+                className="inline-flex items-center gap-1 text-[12px] font-medium text-chat-muted hover:text-sber-green transition-colors"
+              >
+                ← Назад
+              </button>
             </div>
           )}
           {/* In-stream controls: choice / multi-choice / date / multiline /

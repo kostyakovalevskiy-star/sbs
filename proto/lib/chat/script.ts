@@ -56,17 +56,6 @@ export const INTRO_STEPS: Step[] = [
     optional: true,
   },
   {
-    kind: "numeric",
-    id: "A5",
-    field: "last_renovation_year",
-    question: "В каком году делали последний ремонт?",
-    placeholder: String(new Date().getFullYear() - 5),
-    min: 1950,
-    max: new Date().getFullYear(),
-    integer: true,
-    optional: true,
-  },
-  {
     kind: "choice",
     id: "A6",
     field: "finish_level",
@@ -159,17 +148,6 @@ export const FLOOD_STEPS: Step[] = [
       "Расскажите о пострадавших комнатах. Для каждой укажите название и размеры (длина × ширина × высота) и какие поверхности пострадали — это нужно, чтобы посчитать площадь ремонта по всей поверхности, а не только по видимому пятну.",
     minRooms: 1,
     maxRooms: 6,
-  },
-  {
-    kind: "choice",
-    id: "B4",
-    field: "ceiling_height",
-    question: "Какая высота потолков?",
-    options: [
-      { value: "2.5", label: "2.5 м", hint: "Хрущёвка, типовая" },
-      { value: "2.7", label: "2.7 м", hint: "Стандарт большинства новостроек" },
-      { value: "3.0", label: "3.0 м", hint: "Высокие потолки, бизнес-класс" },
-    ],
   },
   {
     kind: "choice",
