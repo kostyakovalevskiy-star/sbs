@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Check } from "lucide-react";
+import { ArrowUp, Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn, formatDate, formatPhone, formatRub, normalizePhoneDigits } from "@/lib/utils";
@@ -9,6 +9,17 @@ import { regionFromIso } from "@/lib/chat/regionMap";
 import { randomFio, randomPhoneDigits } from "@/lib/chat/mockUserData";
 import { randomPolicy } from "@/lib/chat/mockPolicy";
 import type { ChoiceOption, Step } from "@/lib/chat/types";
+
+// Whether a step renders inside the sticky-bottom pill composer (per design
+// §06) or inline in the message stream. Multiline text, dates, choices, and
+// the special policy/gosuslugi widgets stay in-stream because they need
+// more vertical space or carry their own button affordances.
+export function isComposerStep(step: Step | null | undefined): boolean {
+  if (!step) return false;
+  if (step.kind === "phone" || step.kind === "numeric") return true;
+  if (step.kind === "text" && !step.multiline) return true;
+  return false;
+}
 
 export interface SubmitPayload {
   fieldUpdates: Record<string, unknown>;
@@ -21,29 +32,96 @@ export interface ControlProps {
   onRevert?: (toStepId: string) => void;
 }
 
-// Soft-fill input look used across chat composer rows / textareas / date pickers.
-// Mirrors the reference design: rounded-2xl, no visible border, light gray fill.
+// Inline-style soft-fill input for in-stream controls (multiline text,
+// numeric pickers used in compound steps, etc.). Pill composer below.
 const CHAT_INPUT_CLASS =
   "h-12 rounded-2xl border-0 bg-gray-100 px-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-sber-green/30 focus-visible:ring-offset-0";
 
-// Round Sber-green send button — used for single-line composer rows.
-function SendButton({
-  onClick,
+// Pill composer wrapper used by sticky-bottom text/phone/numeric controls.
+// Layout: [ + attach? ] [ pill input ... [ ► send ] ].
+function PillField({
+  inputRef,
+  value,
+  onChange,
+  onEnter,
+  onSubmit,
+  placeholder,
+  type = "text",
+  inputMode,
+  pattern,
+  maxLength,
   disabled,
+  ariaLabel,
+  showAttach = false,
+  error,
 }: {
-  onClick: () => void;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+  value: string;
+  onChange: (v: string) => void;
+  onEnter?: () => void;
+  onSubmit: () => void;
+  placeholder?: string;
+  type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  pattern?: string;
+  maxLength?: number;
   disabled?: boolean;
+  ariaLabel?: string;
+  showAttach?: boolean;
+  error?: string | null;
 }) {
+  const sendDisabled = disabled || !value.trim();
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label="Отправить"
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sber-green text-white shadow-sm transition-colors hover:bg-sber-green-dark disabled:cursor-not-allowed disabled:opacity-40"
-    >
-      <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
-    </button>
+    <div className="flex flex-col">
+      <div className="flex items-center gap-2">
+        {showAttach && (
+          <button
+            type="button"
+            disabled
+            aria-label="Прикрепить файл"
+            className="shrink-0 flex h-11 w-11 items-center justify-center rounded-full bg-chat-surface border border-chat-line text-sber-green disabled:opacity-50"
+          >
+            <Plus className="h-[18px] w-[18px]" strokeWidth={1.7} />
+          </button>
+        )}
+        <div
+          className={cn(
+            "relative flex-1 h-11 rounded-full bg-chat-surface border transition-colors",
+            error ? "border-chat-danger" : "border-chat-line focus-within:border-sber-green focus-within:border-[1.5px]"
+          )}
+        >
+          <input
+            ref={inputRef}
+            type={type}
+            inputMode={inputMode}
+            pattern={pattern}
+            maxLength={maxLength}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && onEnter) {
+                e.preventDefault();
+                onEnter();
+              }
+            }}
+            placeholder={placeholder}
+            aria-label={ariaLabel}
+            autoFocus
+            className="w-full h-full bg-transparent rounded-full pl-4 pr-12 text-[15px] text-chat-ink placeholder:text-chat-muted outline-none"
+          />
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={sendDisabled}
+            aria-label="Отправить"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-sber-green text-white transition-colors hover:bg-sber-green-dark disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.92]"
+          >
+            <ArrowUp className="h-[16px] w-[16px]" strokeWidth={1.8} />
+          </button>
+        </div>
+      </div>
+      {error && <p className="mt-1 text-xs text-chat-danger">{error}</p>}
+    </div>
   );
 }
 
@@ -98,25 +176,21 @@ export function TextControl({ step, onSubmit }: ControlProps) {
     );
   }
 
-  // Single-line: composer row with input + send button on the right.
+  // Single-line: pill composer row.
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-end gap-2">
-        <Input
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError(null);
-          }}
-          placeholder={placeholder}
-          className={cn("flex-1", CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
-          autoFocus
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-        />
-        <SendButton onClick={submit} disabled={!value.trim()} />
-      </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
+    <PillField
+      value={value}
+      onChange={(v) => {
+        setValue(v);
+        if (error) setError(null);
+      }}
+      onEnter={submit}
+      onSubmit={submit}
+      placeholder={placeholder ?? "Ваш ответ"}
+      ariaLabel="Сообщение"
+      showAttach
+      error={error}
+    />
   );
 }
 
@@ -142,29 +216,23 @@ export function PhoneControl({ step, onSubmit }: ControlProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-end gap-2">
-        <Input
-          type="tel"
-          inputMode="tel"
-          value={value}
-          onChange={(e) => {
-            setValue(formatPhone(e.target.value));
-            if (error) setError(null);
-          }}
-          placeholder="+7 (999) 123-45-67"
-          maxLength={18}
-          className={cn("flex-1", CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
-          autoFocus
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-        />
-        <SendButton
-          onClick={submit}
-          disabled={normalizePhoneDigits(value).length !== 10}
-        />
-      </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
+    <PillField
+      type="tel"
+      inputMode="tel"
+      value={value}
+      onChange={(v) => {
+        setValue(formatPhone(v));
+        if (error) setError(null);
+      }}
+      onEnter={submit}
+      onSubmit={submit}
+      placeholder="+7 (999) 123-45-67"
+      maxLength={18}
+      disabled={normalizePhoneDigits(value).length !== 10}
+      ariaLabel="Телефон"
+      showAttach
+      error={error}
+    />
   );
 }
 
@@ -209,31 +277,29 @@ export function NumericControl({ step, onSubmit }: ControlProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-end gap-2">
-        <Input
-          type="text"
-          inputMode={integer ? "numeric" : "decimal"}
-          pattern={integer ? "[0-9]*" : "[0-9.,]*"}
-          value={value}
-          onChange={(e) => {
-            const raw = e.target.value.replace(",", ".");
-            const cleaned = integer ? raw.replace(/[^0-9]/g, "") : raw.replace(/[^0-9.]/g, "");
-            setValue(cleaned);
-            if (error) setError(null);
-          }}
-          placeholder={placeholder}
-          className={cn("flex-1 appearance-none", CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
-          autoFocus
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-        />
-        <SendButton onClick={submit} disabled={!value.trim()} />
-      </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      <PillField
+        type="text"
+        inputMode={integer ? "numeric" : "decimal"}
+        pattern={integer ? "[0-9]*" : "[0-9.,]*"}
+        value={value}
+        onChange={(raw) => {
+          const replaced = raw.replace(",", ".");
+          const cleaned = integer ? replaced.replace(/[^0-9]/g, "") : replaced.replace(/[^0-9.]/g, "");
+          setValue(cleaned);
+          if (error) setError(null);
+        }}
+        onEnter={submit}
+        onSubmit={submit}
+        placeholder={placeholder}
+        ariaLabel={suffix ? `Число (${suffix})` : "Число"}
+        showAttach
+        error={error}
+      />
       {optional && (
         <button
           type="button"
           onClick={skip}
-          className="self-start text-[14px] text-gray-500 underline-offset-2 hover:text-sber-green hover:underline"
+          className="self-end px-3 py-1.5 text-[13px] font-medium text-chat-muted rounded-full bg-chat-surface border border-chat-line hover:text-chat-ink"
         >
           Пропустить
         </button>

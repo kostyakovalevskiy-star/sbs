@@ -20,6 +20,7 @@ import {
   PhoneControl,
   PolicyFoundControl,
   TextControl,
+  isComposerStep,
   type SubmitPayload,
 } from "@/components/chat/controls";
 import {
@@ -377,7 +378,10 @@ export default function ChatFlowPage() {
               <TypingIndicator showAvatar={typingShowsAvatar} />
             </div>
           )}
-          {!state.finished && activeStep && !state.isTyping && (
+          {/* In-stream controls: choice / multi-choice / date / multiline /
+              gosuslugi / policy / address — anything that doesn't fit a
+              single-line pill composer. */}
+          {!state.finished && activeStep && !state.isTyping && !isComposerStep(activeStep) && (
             <div className="mt-1">
               <ActiveControl
                 step={activeStep}
@@ -389,6 +393,22 @@ export default function ChatFlowPage() {
           )}
         </div>
       </div>
+
+      {/* Sticky-bottom pill composer — text/phone/numeric only. Hidden when
+          the active control is bubble-button / date / etc. */}
+      {!state.finished && activeStep && !state.isTyping && isComposerStep(activeStep) && (
+        <div
+          className="shrink-0 border-t border-chat-line bg-chat-canvas px-[18px] pt-3"
+          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" }}
+        >
+          <ActiveControl
+            step={activeStep}
+            onSubmit={handleSubmit}
+            onRevert={handleRevert}
+            currentAddress={String(state.answers.address ?? "")}
+          />
+        </div>
+      )}
     </main>
   );
 }
