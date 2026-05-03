@@ -10,6 +10,7 @@ import {
   Building,
   ChefHat,
   Check,
+  ChevronRight,
   Clock,
   Cloud,
   Crown,
@@ -95,30 +96,35 @@ const ICON_MAP: Record<string, LucideIcon> = {
   x: X,
 };
 
-// Per-tone classes — selected vs idle. Tones default to sber-green.
+// Per-tone classes — selected vs idle. Idle uses a soft radial gradient
+// to mimic the reference design's "bubble" illustrations.
 const TONE_CLASSES: Record<
   string,
   { selected: string; idle: string }
 > = {
   green: {
     selected: "bg-sber-green text-white",
-    idle: "bg-sber-green-light/70 text-sber-green",
+    idle: "bg-gradient-to-br from-emerald-100 via-sber-green-light to-emerald-50 text-sber-green",
   },
   blue: {
     selected: "bg-blue-500 text-white",
-    idle: "bg-blue-50 text-blue-500",
+    idle: "bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-50 text-blue-500",
   },
   orange: {
-    selected: "bg-orange-500 text-white",
-    idle: "bg-orange-50 text-orange-500",
+    selected: "bg-sber-orange text-white",
+    idle: "bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-50 text-sber-orange",
   },
   red: {
     selected: "bg-red-500 text-white",
-    idle: "bg-red-50 text-red-500",
+    idle: "bg-gradient-to-br from-rose-100 via-red-50 to-pink-50 text-red-500",
   },
   gray: {
     selected: "bg-gray-500 text-white",
-    idle: "bg-gray-100 text-gray-500",
+    idle: "bg-gradient-to-br from-gray-100 via-gray-50 to-white text-gray-500",
+  },
+  purple: {
+    selected: "bg-violet-500 text-white",
+    idle: "bg-gradient-to-br from-violet-100 via-purple-50 to-indigo-50 text-violet-500",
   },
 };
 
@@ -126,24 +132,36 @@ function ChoiceIcon({
   name,
   selected,
   tone = "green",
+  size = "md",
 }: {
   name?: string;
   selected: boolean;
   tone?: string;
+  size?: "sm" | "md" | "lg";
 }) {
   const Icon = name ? ICON_MAP[name] : undefined;
   const palette = TONE_CLASSES[tone] ?? TONE_CLASSES.green;
+  const dims =
+    size === "lg" ? "h-14 w-14" : size === "sm" ? "h-9 w-9" : "h-11 w-11";
+  const iconDims =
+    size === "lg" ? "h-7 w-7" : size === "sm" ? "h-5 w-5" : "h-5 w-5";
   return (
     <div
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
+        "flex shrink-0 items-center justify-center rounded-full transition-colors",
+        dims,
         selected ? palette.selected : palette.idle
       )}
     >
-      {Icon ? <Icon className="h-5 w-5" strokeWidth={2} /> : null}
+      {Icon ? <Icon className={iconDims} strokeWidth={2} /> : null}
     </div>
   );
 }
+
+// Soft-fill input look used across chat composer rows / textareas / date pickers.
+// Mirrors the reference design: rounded-2xl, no visible border, light gray fill.
+const CHAT_INPUT_CLASS =
+  "h-12 rounded-2xl border-0 bg-gray-100 px-4 text-[15px] text-gray-900 placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-sber-green/30 focus-visible:ring-offset-0";
 
 // Round Sber-green send button — used for single-line composer rows.
 function SendButton({
@@ -186,22 +204,29 @@ export function TextControl({ step, onSubmit }: ControlProps) {
   }
 
   if (multiline) {
+    const maxLen = 500;
     return (
       <div className="flex flex-col gap-2">
-        <textarea
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError(null);
-          }}
-          placeholder={placeholder}
-          rows={4}
-          autoFocus
-          className={cn(
-            "w-full resize-none rounded-2xl border bg-white px-4 py-3 text-[16px] text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-sber-green/30",
-            error ? "border-red-400" : "border-gray-300"
-          )}
-        />
+        <div className="relative">
+          <textarea
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder={placeholder}
+            rows={4}
+            maxLength={maxLen}
+            autoFocus
+            className={cn(
+              "w-full resize-none rounded-2xl border-0 bg-gray-100 px-4 pb-7 pt-3 text-[16px] text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-sber-green/30",
+              error ? "ring-2 ring-red-300" : ""
+            )}
+          />
+          <span className="pointer-events-none absolute bottom-2.5 left-4 text-xs text-gray-400">
+            {value.length} / {maxLen}
+          </span>
+        </div>
         {error && <p className="text-xs text-red-500">{error}</p>}
         <Button onClick={submit} className="rounded-2xl" size="lg">
           Продолжить
@@ -221,7 +246,7 @@ export function TextControl({ step, onSubmit }: ControlProps) {
             if (error) setError(null);
           }}
           placeholder={placeholder}
-          className={cn("flex-1 text-base", error ? "border-red-400" : "")}
+          className={cn("flex-1", CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
@@ -266,7 +291,7 @@ export function PhoneControl({ step, onSubmit }: ControlProps) {
           }}
           placeholder="+7 (999) 123-45-67"
           maxLength={18}
-          className={cn("flex-1 text-base", error ? "border-red-400" : "")}
+          className={cn("flex-1", CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
@@ -334,7 +359,7 @@ export function NumericControl({ step, onSubmit }: ControlProps) {
             if (error) setError(null);
           }}
           placeholder={placeholder}
-          className={cn("flex-1 appearance-none text-base", error ? "border-red-400" : "")}
+          className={cn("flex-1 appearance-none", CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
@@ -406,7 +431,7 @@ export function DateControl({ step, onSubmit }: ControlProps) {
           setValue(e.target.value);
           if (error) setError(null);
         }}
-        className={cn("text-base", error ? "border-red-400" : "")}
+        className={cn(CHAT_INPUT_CLASS, error ? "ring-2 ring-red-300" : "")}
       />
       {error && <p className="text-xs text-red-500">{error}</p>}
       <Button
@@ -443,7 +468,7 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
   if (step.kind !== "choice") return null;
   const { field, options } = step;
   return (
-    <div className="grid auto-rows-fr grid-cols-2 gap-2.5">
+    <div className="flex flex-col gap-2.5">
       {options.map((opt: ChoiceOption) => (
         <button
           key={opt.value}
@@ -453,10 +478,10 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
               displayText: opt.label,
             })
           }
-          className="group flex flex-col items-start gap-2.5 rounded-2xl border border-gray-200 bg-white px-3.5 py-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-sber-green hover:shadow-md active:translate-y-0 active:scale-[0.98]"
+          className="group flex items-center gap-3.5 rounded-2xl border border-gray-100 bg-white px-3.5 py-3 text-left shadow-sm transition-all hover:border-sber-green/40 hover:shadow-md active:scale-[0.99]"
         >
           <ChoiceIcon name={opt.iconName} selected={false} tone={opt.iconTone} />
-          <div className="flex flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <span className="text-[15px] font-semibold leading-tight text-gray-900">
               {opt.label}
             </span>
@@ -466,6 +491,7 @@ export function ChoiceControl({ step, onSubmit }: ControlProps) {
               </span>
             )}
           </div>
+          <ChevronRight className="h-5 w-5 shrink-0 text-sber-green" strokeWidth={2.25} />
         </button>
       ))}
     </div>
@@ -505,7 +531,7 @@ export function MultiChoiceControl({ step, onSubmit }: ControlProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="grid auto-rows-fr grid-cols-2 gap-2.5">
+      <div className="flex flex-col gap-2.5">
         {options.map((opt: ChoiceOption) => {
           const isSel = selected.has(opt.value);
           return (
@@ -513,19 +539,16 @@ export function MultiChoiceControl({ step, onSubmit }: ControlProps) {
               key={opt.value}
               onClick={() => toggle(opt.value)}
               className={cn(
-                "group relative flex flex-col items-start gap-2.5 rounded-2xl border px-3.5 py-3.5 text-left shadow-sm transition-all active:scale-[0.98]",
+                "group flex items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-all active:scale-[0.99]",
                 isSel
-                  ? "border-sber-green bg-sber-green-light shadow-md"
-                  : "border-gray-200 bg-white hover:-translate-y-0.5 hover:border-sber-green hover:shadow-md"
+                  ? "border-sber-green bg-sber-green-light/40 shadow-md"
+                  : "border-gray-100 bg-white hover:border-sber-green/40 hover:shadow-md"
               )}
             >
-              {isSel && (
-                <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-sber-green text-white shadow-sm">
-                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                </span>
+              {opt.iconName && (
+                <ChoiceIcon name={opt.iconName} selected={isSel} tone={opt.iconTone} />
               )}
-              <ChoiceIcon name={opt.iconName} selected={isSel} tone={opt.iconTone} />
-              <div className="flex flex-1 flex-col">
+              <div className="flex min-w-0 flex-1 flex-col">
                 <span
                   className={cn(
                     "text-[15px] font-semibold leading-tight",
@@ -540,6 +563,16 @@ export function MultiChoiceControl({ step, onSubmit }: ControlProps) {
                   </span>
                 )}
               </div>
+              <span
+                className={cn(
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                  isSel
+                    ? "border-sber-green bg-sber-green text-white"
+                    : "border-gray-300 bg-white"
+                )}
+              >
+                {isSel && <Check className="h-3.5 w-3.5" strokeWidth={3.5} />}
+              </span>
             </button>
           );
         })}

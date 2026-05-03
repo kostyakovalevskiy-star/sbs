@@ -15,6 +15,8 @@ const config: Config = {
           green: "#21A038",
           "green-dark": "#1a8030",
           "green-light": "#e8f5ea",
+          orange: "#FF6B47",
+          "orange-light": "#fff1ec",
         },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
